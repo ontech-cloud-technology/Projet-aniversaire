@@ -252,6 +252,52 @@
         let currentUserId = null;
         let currentUserBirthday = null;
 
+        // Configuration de l'API Email
+        const EMAIL_API_URL = process.env.EMAIL_API_URL || 'http://localhost:3001/api';
+
+        /**
+         * Envoie une notification par email lorsqu'un message est reçu
+         * @param {string} email - Email du destinataire
+         * @param {string} recipientName - Nom du destinataire
+         * @param {string} senderName - Nom de l'expéditeur
+         * @param {string} message - Contenu du message
+         * @param {boolean} isPublic - Si le message est public
+         * @param {string} birthdayMessage - Message d'anniversaire optionnel
+         * @returns {Promise<boolean>} Succès ou échec
+         */
+        async function sendMessageNotification(email, recipientName, senderName, message, isPublic, birthdayMessage = '') {
+            try {
+                const response = await fetch(`${EMAIL_API_URL}/send-message-notification`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        recipientName: recipientName,
+                        senderName: senderName,
+                        message: message,
+                        isPublic: isPublic,
+                        notificationsUrl: window.location.origin + '/eleve.html#notifications',
+                        birthdayMessage: birthdayMessage || ''
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Notification email envoyée à', email);
+                    return true;
+                } else {
+                    console.error('❌ Erreur envoi notification:', result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'envoi de la notification:', error);
+                // Ne pas bloquer l'envoi du message si la notification échoue
+                return false;
+            }
+        }
+
         // Vérifier l'authentification
         async function checkAuth() {
             loadingScreen.style.display = 'flex';
@@ -634,6 +680,8 @@
             }
 
             const recipientId = recipientUsers.docs[0].id;
+            const recipientData = recipientUsers.docs[0].data();
+            const recipientEmail = recipientData.email;
             const senderData = await firebase.firestore().collection('users').doc(currentUserId).get();
             const senderName = senderData.data()?.fullName || 'Anonyme';
 
@@ -649,6 +697,28 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     read: false
                 });
+
+                // Envoyer une notification par email
+                // Adapter le message selon le contexte (anniversaire ou message général)
+                let birthdayMessage = '';
+                if (celebration && celebration.birthday) {
+                    const days = daysUntilBirthday(celebration.birthday);
+                    if (days !== null && days >= 0 && days <= 7) {
+                        birthdayMessage = days === 0 ? "C'est ton anniversaire aujourd'hui ! 🎉" : 
+                                         days === 1 ? "C'est ton anniversaire demain ! 🎂" : 
+                                         `Ton anniversaire est dans ${days} jours !`;
+                    }
+                }
+                
+                // Envoyer la notification par email (fonctionne pour tous les rôles)
+                await sendMessageNotification(
+                    recipientEmail,
+                    recipientName,
+                    senderName,
+                    messageText,
+                    isPublic,
+                    birthdayMessage || 'Tu as reçu un nouveau message !'
+                );
 
                 // Réinitialiser le formulaire
                 document.getElementById(`message_${celebrationId}`).value = '';

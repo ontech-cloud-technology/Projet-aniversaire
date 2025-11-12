@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue sur {{COMPANY_NAME}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6f61 0%, #f9c74f 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px 30px;
+            color: #333333;
+        }
+        .welcome-icon {
+            text-align: center;
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 4px solid #ff6f61;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+        .credentials-box {
+            background: #1a0f30;
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .credentials-box h3 {
+            color: #f9c74f;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .credential-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .credential-item:last-child {
+            border-bottom: none;
+        }
+        .credential-label {
+            color: #9ca3af;
+            font-weight: 600;
+        }
+        .credential-value {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .steps {
+            margin: 30px 0;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #ff6f61;
+        }
+        .step-number {
+            background: linear-gradient(135deg, #ff6f61 0%, #f9c74f 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .step-content h4 {
+            color: #1a0f30;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        .step-content p {
+            color: #666;
+            font-size: 14px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .warning-box strong {
+            color: #856404;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6f61 0%, #f9c74f 100%);
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 111, 97, 0.4);
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background: #1a0f30;
+            color: #9ca3af;
+            padding: 30px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #f9c74f;
+            text-decoration: none;
+        }
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6f61, transparent);
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="welcome-icon">🎉</div>
+            <h1>Bienvenue sur {{COMPANY_NAME}} !</h1>
+            <p>Ton compte a été créé avec succès</p>
+        </div>
+        
+        <div class="content">
+            <p style="font-size: 18px; color: #1a0f30; margin-bottom: 20px;">
+                Salut <strong>{{FULL_NAME}}</strong> ! 👋
+            </p>
+            
+            <p style="color: #666; margin-bottom: 25px;">
+                Nous sommes ravis de t'accueillir sur la plateforme <strong>{{COMPANY_NAME}}</strong> ! 
+                Tu vas pouvoir découvrir les anniversaires de tes camarades, partager des messages et bien plus encore.
+            </p>
+
+            <div class="info-box">
+                <p style="color: #1a0f30; font-weight: 600; margin-bottom: 10px;">
+                    📋 Informations importantes
+                </p>
+                <p style="color: #666; font-size: 14px;">
+                    Garde ces informations en sécurité. Tu en auras besoin pour te connecter.
+                </p>
+            </div>
+
+            <div class="credentials-box">
+                <h3>🔐 Tes identifiants de connexion</h3>
+                <div class="credential-item">
+                    <span class="credential-label">Email :</span>
+                    <span class="credential-value">{{EMAIL}}</span>
+                </div>
+                <div class="credential-item">
+                    <span class="credential-label">Mot de passe temporaire :</span>
+                    <span class="credential-value">{{TEMPORARY_PASSWORD}}</span>
+                </div>
+                <div class="credential-item">
+                    <span class="credential-label">Rôle :</span>
+                    <span class="credential-value">{{ROLE}}</span>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <p><strong>⚠️ Important :</strong> Tu devras changer ce mot de passe temporaire lors de ta première connexion pour des raisons de sécurité.</p>
+            </div>
+
+            <div class="divider"></div>
+
+            <h2 style="color: #1a0f30; margin-bottom: 20px; font-size: 24px;">📝 Comment te connecter ?</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Va sur la page de connexion</h4>
+                        <p>Ouvre ton navigateur et va sur la page de connexion de {{COMPANY_NAME}}</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Entre tes identifiants</h4>
+                        <p>Utilise l'email et le mot de passe temporaire fournis ci-dessus</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Change ton mot de passe</h4>
+                        <p>Tu seras automatiquement redirigé pour définir un nouveau mot de passe sécurisé</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Complète ton profil</h4>
+                        <p>Remplis les 20 questions sur toi pour que tes camarades te connaissent mieux !</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{LOGIN_URL}}" class="button">Se connecter maintenant</a>
+            </div>
+
+            <div class="info-box" style="background: #e7f3ff; border-left-color: #2196F3;">
+                <p style="color: #1a0f30; font-weight: 600; margin-bottom: 10px;">
+                    💡 Astuce
+                </p>
+                <p style="color: #666; font-size: 14px;">
+                    Une fois connecté, tu pourras voir tous les anniversaires de la classe, envoyer des messages 
+                    pour les anniversaires à venir, et découvrir les profils de tes camarades !
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{COMPANY_NAME}}</strong></p>
+            <p style="margin-top: 10px;">
+                Si tu as des questions, n'hésite pas à contacter ton professeur ou l'administrateur.
+            </p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                Cet email a été envoyé automatiquement. Ne réponds pas à cet email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

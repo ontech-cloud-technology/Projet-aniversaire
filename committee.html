@@ -508,6 +508,47 @@
             return unsubscribe;
         }
 
+
+        // Configuration de l'API Email
+        const EMAIL_API_URL = process.env.EMAIL_API_URL || 'http://localhost:3001/api';
+
+        /**
+         * Envoie un email de bienvenue lors de la création d'un compte
+         * @param {string} email - Email du destinataire
+         * @param {string} fullName - Nom complet
+         * @param {string} tempPassword - Mot de passe temporaire
+         * @returns {Promise<boolean>} Succès ou échec
+         */
+        async function sendWelcomeEmail(email, fullName, tempPassword) {
+            try {
+                const response = await fetch(`${EMAIL_API_URL}/send-welcome-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        fullName: fullName,
+                        tempPassword: tempPassword,
+                        loginUrl: window.location.origin + '/login.html'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Email de bienvenue envoyé à', email);
+                    return true;
+                } else {
+                    console.error('❌ Erreur envoi email:', result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
+                // Ne pas bloquer la création du compte si l'email échoue
+                return false;
+            }
+        }
+
         // --- Début du Script Principal ---
 
         const celebrationListBody = document.getElementById('celebrationListBody');
@@ -669,7 +710,13 @@
                             createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         
-                        msgElement.textContent = `✅ Personne et compte utilisateur créés avec succès ! Email: ${email}`;
+                        // Envoyer l'email de bienvenue
+                        const emailSent = await sendWelcomeEmail(email, data.fullName, tempPassword);
+                        if (emailSent) {
+                            msgElement.textContent = `✅ Personne et compte utilisateur créés avec succès ! Email de bienvenue envoyé à ${email}`;
+                        } else {
+                            msgElement.textContent = `✅ Personne et compte utilisateur créés avec succès ! Email: ${email} (⚠️ Email non envoyé)`;
+                        }
                     } catch (authError) {
                         // Si l'utilisateur existe déjà, ce n'est pas grave
                         if (authError.code === 'auth/email-already-in-use') {
