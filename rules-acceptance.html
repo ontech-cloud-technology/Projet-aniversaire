@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Règles et Conditions — Fête Express</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg: radial-gradient(circle at top left, #1a0f30, #0a041c);
+      --glass: rgba(255, 255, 255, 0.04);
+      --accent: linear-gradient(90deg, #ff6f61, #f9c74f);
+      --primary: #ff6f61;
+      --secondary: #f9c74f;
+      --radius: 16px;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      --muted: #c8c8d4;
+      --error-color: #f87171;
+      --success-color: #10b981;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'Manrope', sans-serif;
+      color: #f1f5f9;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-weight: 800;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      background: var(--accent);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.1em;
+    }
+
+    .rules-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .rules-section {
+      margin-bottom: 30px;
+    }
+
+    .rules-section h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rules-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .rules-section li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .rules-section li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--success-color);
+      font-weight: bold;
+    }
+
+    .consequences {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .consequences h2 {
+      color: var(--error-color);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .consequence-item {
+      margin: 15px 0;
+      padding-left: 30px;
+      position: relative;
+    }
+
+    .consequence-item:before {
+      content: "⚠";
+      position: absolute;
+      left: 0;
+      font-size: 1.2em;
+    }
+
+    .reputation-info {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .reputation-info h2 {
+      color: var(--success-color);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .acceptance-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      bottom: 20px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 25px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .checkbox-container:hover {
+      border-color: var(--primary);
+      background: rgba(255, 111, 97, 0.05);
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .checkbox-container label {
+      flex: 1;
+      cursor: pointer;
+      line-height: 1.6;
+      font-size: 1.05em;
+    }
+
+    .accept-button {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #1a0f30;
+      font-weight: 800;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .accept-button:enabled {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .accept-button:hover:enabled {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 111, 97, 0.4);
+    }
+
+    .accept-button:active:enabled {
+      transform: translateY(0);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+    }
+
+    .error-message {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error-color);
+      color: var(--error-color);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📋 Règles et Conditions d'Utilisation</h1>
+      <p class="subtitle">Fête Express — Système de Gestion des Anniversaires</p>
+    </div>
+
+    <div class="rules-card">
+      <div class="rules-section">
+        <h2><i data-lucide="shield-check"></i> Respect et Courtoisie</h2>
+        <ul>
+          <li>Utilisez un langage respectueux et approprié dans tous vos messages</li>
+          <li>Traitez tous les membres de la communauté avec dignité et respect</li>
+          <li>Évitez tout contenu offensant, discriminatoire ou inapproprié</li>
+          <li>Respectez la vie privée des autres utilisateurs</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h2><i data-lucide="message-square"></i> Messages et Communication</h2>
+        <ul>
+          <li>Les messages doivent être positifs et bienveillants</li>
+          <li>Un seul message par personne et par anniversaire</li>
+          <li>Les messages publics sont visibles par tous les membres</li>
+          <li>Les messages privés restent confidentiels</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h2><i data-lucide="users"></i> Participation et Engagement</h2>
+        <ul>
+          <li>Participez activement aux célébrations d'anniversaires</li>
+          <li>Respectez le système de progression et de récompenses</li>
+          <li>Participez aux votes d'activités de manière responsable</li>
+          <li>Respectez les décisions prises collectivement</li>
+        </ul>
+      </div>
+
+      <div class="rules-section">
+        <h2><i data-lucide="lock"></i> Confidentialité et Sécurité</h2>
+        <ul>
+          <li>Ne partagez pas vos identifiants de connexion</li>
+          <li>Protégez vos informations personnelles</li>
+          <li>Signalez tout comportement suspect aux administrateurs</li>
+          <li>Respectez la confidentialité des informations partagées</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="consequences">
+      <h2><i data-lucide="alert-triangle"></i> Conséquences en Cas de Non-Respect</h2>
+      <div class="consequence-item">
+        <strong>Perte de Réputation :</strong> L'utilisation de mots interdits ou de comportements inappropriés réduit automatiquement votre réputation dans le système.
+      </div>
+      <div class="consequence-item">
+        <strong>Blocage Temporaire :</strong> Si votre réputation devient trop faible, vous pourrez être temporairement empêché d'envoyer des messages.
+      </div>
+      <div class="consequence-item">
+        <strong>Statut Spectateur :</strong> En cas de violations répétées, vous pourrez être retiré du système actif et devenir un simple spectateur, sans participation aux activités ni à la progression.
+      </div>
+      <div class="consequence-item">
+        <strong>Sanctions Administratives :</strong> Les administrateurs se réservent le droit de prendre des mesures supplémentaires en cas de comportement grave ou répété.
+      </div>
+    </div>
+
+    <div class="reputation-info">
+      <h2><i data-lucide="award"></i> Système de Réputation</h2>
+      <p>Chaque utilisateur commence avec une réputation de <strong>100 points</strong>. Cette réputation peut augmenter ou diminuer selon votre comportement :</p>
+      <ul style="margin-top: 15px; padding-left: 20px;">
+        <li style="padding-left: 0; margin: 10px 0;">✅ <strong>Comportement positif :</strong> Maintien ou augmentation de la réputation</li>
+        <li style="padding-left: 0; margin: 10px 0;">❌ <strong>Mots interdits :</strong> Réduction automatique de la réputation</li>
+        <li style="padding-left: 0; margin: 10px 0;">⚠️ <strong>Réputation < 50 :</strong> Risque de blocage des messages</li>
+        <li style="padding-left: 0; margin: 10px 0;">🚫 <strong>Réputation < 20 :</strong> Risque de devenir spectateur</li>
+      </ul>
+    </div>
+
+    <div class="acceptance-section">
+      <div class="checkbox-container">
+        <input type="checkbox" id="acceptRules" />
+        <label for="acceptRules">
+          <strong>Je comprends et j'accepte les règles et conditions d'utilisation de Fête Express.</strong> 
+          Je m'engage à respecter ces règles et je comprends les conséquences en cas de non-respect, 
+          notamment la perte de réputation, le blocage temporaire ou le statut de spectateur.
+        </label>
+      </div>
+      
+      <button id="acceptButton" class="accept-button" disabled>
+        J'accepte et je continue
+      </button>
+      
+      <div id="loading" class="loading">
+        <p>Enregistrement en cours...</p>
+      </div>
+      
+      <div id="errorMessage" class="error-message"></div>
+    </div>
+  </div>
+
+  <script src="firebase.js"></script>
+  <script>
+
+    const acceptCheckbox = document.getElementById('acceptRules');
+    const acceptButton = document.getElementById('acceptButton');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('errorMessage');
+
+    // Activer le bouton quand la case est cochée
+    acceptCheckbox.addEventListener('change', () => {
+      acceptButton.disabled = !acceptCheckbox.checked;
+    });
+
+    // Gérer l'acceptation
+    acceptButton.addEventListener('click', async () => {
+      if (!acceptCheckbox.checked) return;
+
+      acceptButton.disabled = true;
+      loadingDiv.style.display = 'block';
+      errorDiv.style.display = 'none';
+
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          throw new Error('Utilisateur non connecté');
+        }
+
+        // Mettre à jour l'utilisateur dans Firestore
+        await firebase.firestore().collection('users').doc(user.uid).update({
+          rulesAccepted: true,
+          rulesAcceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          reputation: 100, // Initialiser la réputation à 100
+          status: 'active' // Statut actif par défaut
+        });
+
+        // Rediriger selon le rôle et l'état du profil
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
+        const role = userData.role;
+
+        let redirectUrl = 'eleve.html';
+        
+        if (role === 'admin' || role === 'professeur' || role === 'teacher') {
+          redirectUrl = 'admin.html';
+        } else if (role === 'comite') {
+          redirectUrl = 'committee.html';
+        } else if (role === 'eleve') {
+          // Vérifier si le mot de passe doit être changé
+          if (userData.needsPasswordChange) {
+            redirectUrl = 'change-password.html';
+          } else if (!userData.profileCompleted) {
+            redirectUrl = 'profile-setup.html';
+          } else {
+            redirectUrl = 'eleve.html';
+          }
+        }
+
+        // Petit délai pour l'animation
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 500);
+
+      } catch (error) {
+        console.error('Erreur:', error);
+        errorDiv.textContent = 'Erreur lors de l\'enregistrement. Veuillez réessayer.';
+        errorDiv.style.display = 'block';
+        acceptButton.disabled = false;
+        loadingDiv.style.display = 'none';
+      }
+    });
+
+    // Vérifier si l'utilisateur est connecté
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        // Vérifier si les règles ont déjà été acceptées
+        firebase.firestore().collection('users').doc(user.uid).get().then((doc) => {
+          if (doc.exists && doc.data().rulesAccepted) {
+            // Rediriger vers la page appropriée
+            const userData = doc.data();
+            const role = userData.role;
+            
+            let redirectUrl = 'eleve.html';
+            if (role === 'admin' || role === 'professeur' || role === 'teacher') {
+              redirectUrl = 'admin.html';
+            } else if (role === 'comite') {
+              redirectUrl = 'committee.html';
+            } else if (role === 'eleve') {
+              if (userData.needsPasswordChange) {
+                redirectUrl = 'change-password.html';
+              } else if (!userData.profileCompleted) {
+                redirectUrl = 'profile-setup.html';
+              } else {
+                redirectUrl = 'eleve.html';
+              }
+            }
+            
+            window.location.href = redirectUrl;
+          }
+        });
+      }
+    });
+
+    // Initialiser les icônes Lucide
+    lucide.createIcons();
+  </script>
+</body>
+</html>
+

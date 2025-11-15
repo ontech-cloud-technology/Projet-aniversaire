@@ -48,15 +48,15 @@ app.post("/api/send-welcome-email", async (req, res) => {
     const password = tempPassword || temporaryPassword;
 
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
+    return res.status(400).json({
+      success: false,
         error: "Paramètres manquants: email et mot de passe temporaire requis"
-      });
-    }
+    });
+  }
 
-    const result = await emailService.sendWelcomeEmail({
-      email,
-      fullName: fullName || email,
+    const result = await emailService.sendWelcomeEmail({ 
+      email, 
+      fullName: fullName || email, 
       temporaryPassword: password,
       role: role || 'eleve',
       loginUrl: loginUrl || `${req.protocol}://${req.get('host')}/login.html`
@@ -78,12 +78,12 @@ app.post("/api/send-message-notification", async (req, res) => {
   try {
     const { email, recipientName, senderName, message, isPublic, notificationsUrl, birthdayMessage } = req.body;
 
-    if (!email || !recipientName || !senderName || !message) {
-      return res.status(400).json({
-        success: false,
+  if (!email || !recipientName || !senderName || !message) {
+    return res.status(400).json({
+      success: false,
         error: "Paramètres manquants: email, recipientName, senderName, message requis"
-      });
-    }
+    });
+  }
 
     const result = await emailService.sendMessageNotification({
       email,

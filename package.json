@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node server.js",
     "build": "echo 'Build complete'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version:patch": "./create-tag.sh patch",
+    "version:minor": "./create-tag.sh minor",
+    "version:major": "./create-tag.sh major",
+    "version": "cat VERSION"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

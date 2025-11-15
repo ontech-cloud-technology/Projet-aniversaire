@@ -4,7 +4,8 @@
  */
 
 /**
- * Récupère tous les élèves (utilisateurs avec role='eleve')
+ * Récupère tous les élèves (utilisateurs avec role='eleve' et status='active')
+ * Exclut les spectateurs et les utilisateurs bloqués
  */
 async function getAllStudents() {
     try {
@@ -12,10 +13,16 @@ async function getAllStudents() {
             .where('role', '==', 'eleve')
             .get();
         
-        return studentsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        // Filtrer pour exclure les spectateurs et les utilisateurs bloqués
+        return studentsSnapshot.docs
+            .map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+            .filter(student => {
+                const status = student.status || 'active';
+                return status === 'active';
+            });
     } catch (error) {
         console.error('Erreur lors de la récupération des élèves:', error);
         return [];

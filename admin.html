@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard — 203 Celebration Hub</title>
+    <title>Admin Dashboard — Fête Express</title>
     <!-- Chargement de Tailwind CSS pour un style moderne et responsive -->
     <!-- NOTE: CDN utilisé pour le développement. Pour la production, installer Tailwind via npm -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -193,7 +193,7 @@
     <nav id="sidenav">
         <div class="px-6 mb-8 text-2xl font-extrabold header-gradient">203 Hub</div>
         
-        <!-- CORRECTION NAVIGATION: Les HREFs sont directs pour naviguer -->
+        <!-- Sections de navigation -->
         <a href="calendrier.html" class="nav-item">
             <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
             Calendrier des Fêtes
@@ -214,10 +214,14 @@
             <i data-lucide="trending-up" class="w-5 h-5 mr-3"></i>
             Suivi des Fêtes
         </a>
-        <a onclick="signOutAndRedirect()" class="nav-item mt-auto text-red-400 hover:text-white">
+        
+        <!-- Séparateur et déconnexion -->
+        <div class="border-t border-gray-700 my-2"></div>
+        <a onclick="signOutAndRedirect()" class="nav-item text-red-400 hover:text-white hover:bg-red-900 hover:bg-opacity-20">
             <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
             Déconnexion
         </a>
+        
         <p class="text-xs px-6 py-2 text-gray-500 mt-2">Connecté: <span id="welcomeName" class="text-gray-400"></span></p>
     </nav>
     
@@ -253,6 +257,14 @@
                 <i data-lucide="vote" class="w-4 h-4 inline-block mr-2"></i>
                 Activités & Votes
             </button>
+            <button onclick="changeSection('profiles')" id="tab-profiles" class="px-4 py-2 text-gray-400 hover:text-white border-b-2 border-transparent transition section-tab whitespace-nowrap">
+                <i data-lucide="user-circle" class="w-4 h-4 inline-block mr-2"></i>
+                Profils des Élèves
+            </button>
+            <button onclick="changeSection('reputation')" id="tab-reputation" class="px-4 py-2 text-gray-400 hover:text-white border-b-2 border-transparent transition section-tab whitespace-nowrap">
+                <i data-lucide="award" class="w-4 h-4 inline-block mr-2"></i>
+                Réputation & Statuts
+            </button>
             <button onclick="changeSection('settings')" id="tab-settings" class="px-4 py-2 text-gray-400 hover:text-white border-b-2 border-transparent transition section-tab whitespace-nowrap">
                 <i data-lucide="palette" class="w-4 h-4 inline-block mr-2"></i>
                 Thèmes (TODO)
@@ -272,6 +284,14 @@
                 </button>
             </div>
             
+            <!-- Barre de recherche -->
+            <div class="mb-4">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                    <input type="text" id="userSearchInput" placeholder="Rechercher par nom, numéro de fiche ou numéro de classe..." class="w-full pl-10 pr-4 py-3 rounded-lg bg-bg-dark border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary transition">
+                </div>
+            </div>
+
             <!-- FILTRES PAR RÔLE -->
             <div class="flex flex-wrap gap-2 mb-6 items-center" id="roleFilterTabs">
                 <button data-role="all" class="filter-btn active-filter px-4 py-2 rounded-lg bg-primary text-bg-dark text-sm hover:bg-opacity-90 transition">Tous</button>
@@ -491,9 +511,196 @@
             </div>
         </section>
 
+        <!-- Section 4: Profils des Élèves -->
+        <section id="section-profiles" class="card p-6 rounded-xl hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-2xl font-bold flex items-center">
+                    <i data-lucide="user-circle" class="w-6 h-6 mr-2"></i>
+                    Profils des Élèves
+                </h2>
+                <div class="mt-4 md:mt-0 flex items-center space-x-4">
+                    <div class="flex items-center space-x-3 bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg px-4 py-2">
+                        <label class="text-sm font-semibold">Visibilité des profils</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleProfileVisibility" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span id="profileVisibilityStatus" class="text-sm text-gray-400">Désactivé</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-sm text-gray-400 mb-4">
+                    Cliquez sur un élève pour voir ses informations complètes. Les informations privées sont visibles uniquement pour les administrateurs.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-700">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-bg-dark">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nom</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Profil Complété</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="profilesTableBody" class="divide-y divide-gray-800">
+                        <tr><td colspan="4" class="text-center py-4 text-gray-500">Chargement des profils...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section Réputation & Statuts -->
+        <section id="section-reputation" class="card p-6 rounded-xl hidden">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i data-lucide="award" class="w-6 h-6 mr-2"></i>
+                Gestion de la Réputation et des Statuts
+            </h2>
+            
+            <div class="mb-6 p-4 bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg">
+                <h3 class="font-bold mb-2 flex items-center">
+                    <i data-lucide="info" class="w-5 h-5 mr-2"></i>
+                    Informations sur le système
+                </h3>
+                <ul class="text-sm space-y-1 text-gray-300">
+                    <li>• <strong>Réputation :</strong> Chaque utilisateur commence avec 100 points</li>
+                    <li>• <strong>Réputation &lt; 50 :</strong> Blocage automatique de l'envoi de messages</li>
+                    <li>• <strong>Réputation &lt; 20 :</strong> Risque de devenir spectateur</li>
+                    <li>• <strong>Statut "Bloqué" :</strong> L'utilisateur ne peut plus envoyer de messages</li>
+                    <li>• <strong>Statut "Spectateur" :</strong> L'utilisateur est exclu de la progression et des votes</li>
+                </ul>
+            </div>
+
+            <!-- Barre de recherche -->
+            <div class="mb-6">
+                <input 
+                    type="text" 
+                    id="reputationSearchInput" 
+                    placeholder="Rechercher par nom, email ou numéro de fiche..." 
+                    class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition"
+                />
+            </div>
+
+            <!-- Tableau des utilisateurs avec réputation -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="px-4 py-3 font-semibold">Nom</th>
+                            <th class="px-4 py-3 font-semibold">Email</th>
+                            <th class="px-4 py-3 font-semibold">Réputation</th>
+                            <th class="px-4 py-3 font-semibold">Statut</th>
+                            <th class="px-4 py-3 font-semibold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reputationTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500">Chargement...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <section id="section-settings" class="card p-6 rounded-xl hidden">...</section>
 
     </main>
+
+    <!-- Modale de Modification de Réputation -->
+    <div id="reputationModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i data-lucide="award" class="w-6 h-6 mr-2"></i>
+                Modifier la Réputation et le Statut
+            </h3>
+            <form id="reputationForm">
+                <input type="hidden" id="repUserId">
+                
+                <div class="mb-4 p-4 bg-gray-800 rounded-lg">
+                    <p class="text-sm text-gray-400 mb-1">Nom</p>
+                    <p class="font-semibold" id="repUserName"></p>
+                </div>
+                
+                <div class="mb-4 p-4 bg-gray-800 rounded-lg">
+                    <p class="text-sm text-gray-400 mb-1">Email</p>
+                    <p class="font-semibold text-sm" id="repUserEmail"></p>
+                </div>
+                
+                <div class="mb-4 p-4 bg-gray-800 rounded-lg">
+                    <p class="text-sm text-gray-400 mb-1">Réputation actuelle</p>
+                    <p class="font-semibold text-xl" id="repCurrentReputation"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="repNewReputation" class="block text-sm font-medium mb-2">Nouvelle Réputation (0-100)</label>
+                    <input 
+                        type="number" 
+                        id="repNewReputation" 
+                        min="0" 
+                        max="100" 
+                        required
+                        class="w-full p-3 rounded-lg bg-bg-dark border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary text-white"
+                    />
+                    <p class="text-xs text-gray-400 mt-1">La réputation détermine les permissions de l'utilisateur</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="repStatus" class="block text-sm font-medium mb-2">Statut</label>
+                    <select 
+                        id="repStatus" 
+                        class="w-full p-3 rounded-lg bg-bg-dark border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary text-white"
+                    >
+                        <option value="active">Actif</option>
+                        <option value="blocked">Bloqué (ne peut pas envoyer de messages)</option>
+                        <option value="spectator">Spectateur (exclu de la progression et des votes)</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">
+                        <strong>Actif:</strong> Utilisateur normal<br>
+                        <strong>Bloqué:</strong> Ne peut pas envoyer de messages<br>
+                        <strong>Spectateur:</strong> Exclu de toutes les activités
+                    </p>
+                </div>
+                
+                <div class="flex justify-end space-x-4 pt-4 border-t border-gray-700">
+                    <button type="button" onclick="closeModal('reputationModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded btn-primary">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modale des Messages Bloqués -->
+    <div id="blockedMessagesModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2 text-red-400"></i>
+                Messages Bloqués
+            </h3>
+            
+            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-400 mb-1">Utilisateur</p>
+                <p class="font-semibold text-lg" id="blockedMessagesUserName"></p>
+                <p class="text-sm text-gray-400" id="blockedMessagesUserEmail"></p>
+                <div class="mt-3 pt-3 border-t border-gray-700">
+                    <p class="text-sm">
+                        <span class="text-gray-400">Total de messages bloqués:</span>
+                        <span class="font-semibold text-red-400 ml-2" id="blockedMessagesCount">0</span>
+                    </p>
+                </div>
+            </div>
+
+            <div id="blockedMessagesList" class="space-y-4">
+                <p class="text-gray-500 text-center py-8">Chargement...</p>
+            </div>
+
+            <div class="flex justify-end mt-6 pt-4 border-t border-gray-700">
+                <button onclick="closeModal('blockedMessagesModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Fermer</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modale d'Édition d'Utilisateur -->
     <div id="editUserModal" class="modal-overlay">
@@ -761,8 +968,10 @@
         const ioMsg = document.getElementById('ioMsg');
 
         let allUsers = []; 
+        let allCelebrations = []; // Pour la recherche par fileNumber et classNumber
         let currentFilterRole = 'all';
         let hideElevesInAllView = false; // Option pour masquer les élèves dans la vue "Tous"
+        let currentSearchTerm = ''; // Terme de recherche
         let unsubscribeCelebrations = null; 
         let currentUserId = null; // Pour le logging 
 
@@ -770,6 +979,8 @@
             'users': document.getElementById('section-users'),
             'celebrations': document.getElementById('section-celebrations'),
             'activities': document.getElementById('section-activities'),
+            'profiles': document.getElementById('section-profiles'),
+            'reputation': document.getElementById('section-reputation'),
             'settings': document.getElementById('section-settings'),
         };
         
@@ -794,6 +1005,13 @@
             }
 
             const userData = await getUserRole(user.uid);
+            if (!userData) {
+                console.error('Erreur: Impossible de récupérer les données utilisateur');
+                alert('Erreur lors de la vérification des autorisations. Veuillez réessayer.');
+                window.location.href = 'login.html';
+                return;
+            }
+            
             const role = userData.role;
             
             welcomeName.textContent = `${userData.name || userData.email || 'Admin'} (${role === 'professeur' || role === 'teacher' ? 'Professeur' : role})`;
@@ -821,8 +1039,13 @@
             fetchUsers();
             changeSection('users'); // Afficher la section par défaut
 
-            // Logger la connexion
-            await logActivity(currentUserId, 'login', { description: 'Connexion à la page admin' });
+            // Logger la connexion (ne pas bloquer si ça échoue)
+            try {
+                await logActivity(currentUserId, 'login', { description: 'Connexion à la page admin' });
+            } catch (logError) {
+                console.error('Erreur lors du logging:', logError);
+                // Ne pas bloquer l'accès si le logging échoue
+            }
             
             // Stocker l'heure de connexion pour calculer la durée de session
             sessionStorage.setItem('loginTime', Date.now());
@@ -855,6 +1078,11 @@
             } else if (sectionId === 'activities') {
                 loadActivities();
                 loadVoteSettings();
+            } else if (sectionId === 'profiles') {
+                loadProfiles();
+                loadProfileVisibilitySetting();
+            } else if (sectionId === 'reputation') {
+                loadReputationData();
             }
         }
 
@@ -1160,6 +1388,19 @@
                     const roleOrder = ['admin', 'professeur', 'comite', 'eleve'];
                     return roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
                 });
+
+                // Charger aussi les célébrations pour la recherche
+                try {
+                    const celebrationsSnapshot = await firebase.firestore().collection('celebrations').get();
+                    allCelebrations = celebrationsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.error("Erreur lors du chargement des célébrations:", error);
+                    allCelebrations = [];
+                }
+
                 renderUserTable(allUsers);
             } catch (error) {
                 console.error("Erreur lors de la récupération des utilisateurs:", error);
@@ -1227,24 +1468,58 @@
         /** Génère les lignes du tableau des utilisateurs en appliquant le filtre. */
         function renderUserTable(users) {
             let filteredUsers = users.filter(user => {
-                // Si on filtre par rôle spécifique, appliquer le filtre normal
+                // Filtre par rôle
                 if (currentFilterRole !== 'all') {
-                    return user.role === currentFilterRole;
+                    if (user.role !== currentFilterRole) return false;
+                } else if (currentFilterRole === 'all' && hideElevesInAllView) {
+                    if (user.role === 'eleve') return false;
                 }
-                // Si on est en mode "Tous" et que l'option "Masquer les élèves" est activée
-                if (currentFilterRole === 'all' && hideElevesInAllView) {
-                    return user.role !== 'eleve';
+
+                // Filtre par recherche
+                if (currentSearchTerm.trim()) {
+                    const searchTerm = currentSearchTerm.toLowerCase().trim();
+                    const fullName = (user.fullName || '').toLowerCase();
+                    const email = (user.email || '').toLowerCase();
+                    
+                    // Extraire le fileNumber de l'email (avant @)
+                    const fileNumberFromEmail = email.split('@')[0];
+                    
+                    // Chercher dans les célébrations pour fileNumber et classNumber
+                    let matchesCelebration = false;
+                    if (user.email) {
+                        const fileNumber = user.email.split('@')[0];
+                        const celebration = allCelebrations.find(c => c.fileNumber === fileNumber);
+                        if (celebration) {
+                            const fileNumberMatch = (celebration.fileNumber || '').toLowerCase().includes(searchTerm);
+                            const classNumberMatch = (celebration.classNumber || '').toLowerCase().includes(searchTerm);
+                            matchesCelebration = fileNumberMatch || classNumberMatch;
+                        }
+                    }
+                    
+                    // Vérifier si ça correspond
+                    const nameMatch = fullName.includes(searchTerm);
+                    const emailMatch = email.includes(searchTerm);
+                    const fileNumberMatch = fileNumberFromEmail.includes(searchTerm);
+                    
+                    if (!nameMatch && !emailMatch && !fileNumberMatch && !matchesCelebration) {
+                        return false;
+                    }
                 }
-                // Sinon, afficher tous les utilisateurs
+
                 return true;
             });
 
             userTableBody.innerHTML = '';
             
             if (filteredUsers.length === 0) {
-                const message = currentFilterRole === 'all' && hideElevesInAllView 
-                    ? 'Aucun utilisateur trouvé (les élèves sont masqués).' 
-                    : 'Aucun utilisateur trouvé pour ce rôle.';
+                let message = '';
+                if (currentSearchTerm.trim()) {
+                    message = 'Aucun utilisateur trouvé pour cette recherche.';
+                } else if (currentFilterRole === 'all' && hideElevesInAllView) {
+                    message = 'Aucun utilisateur trouvé (les élèves sont masqués).';
+                } else {
+                    message = 'Aucun utilisateur trouvé pour ce rôle.';
+                }
                 userTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-500">${message}</td></tr>`;
                 return;
             }
@@ -1283,6 +1558,8 @@
             });
             lucide.createIcons();
         }
+
+        // Écouteur pour la barre de recherche (sera initialisé dans DOMContentLoaded)
 
         // Écouteur pour la checkbox "Masquer les élèves"
         const hideElevesToggle = document.getElementById('hideElevesToggle');
@@ -1342,10 +1619,52 @@
             errorElement.classList.add('hidden');
 
             try {
+                // Récupérer l'utilisateur pour obtenir son email
+                const user = allUsers.find(u => u.id === userId);
+                if (user && user.email) {
+                    // Extraire le fileNumber de l'email
+                    const fileNumber = user.email.split('@')[0];
+                    
+                    // Chercher et supprimer la célébration associée
+                    try {
+                        const celebrationsSnapshot = await firebase.firestore()
+                            .collection('celebrations')
+                            .where('fileNumber', '==', fileNumber)
+                            .get();
+                        
+                        if (!celebrationsSnapshot.empty) {
+                            const batch = firebase.firestore().batch();
+                            celebrationsSnapshot.docs.forEach(doc => {
+                                batch.delete(doc.ref);
+                            });
+                            await batch.commit();
+                            console.log(`✅ Célébration(s) supprimée(s) pour le fileNumber: ${fileNumber}`);
+                        }
+                    } catch (celebError) {
+                        console.error("Erreur lors de la suppression de la célébration:", celebError);
+                        // Ne pas bloquer la suppression de l'utilisateur si la célébration échoue
+                    }
+                }
+
                 await deleteUserDocument(userId);
                 
                 closeModal('deleteConfirmModal');
                 fetchUsers(); // Recharger les utilisateurs
+                
+                // Recharger aussi les célébrations si la section est visible
+                if (unsubscribeCelebrations) {
+                    // Le listener en temps réel mettra à jour automatiquement
+                } else if (sections['celebrations'] && !sections['celebrations'].classList.contains('hidden')) {
+                    // Recharger manuellement si nécessaire
+                    const celebrationsSnapshot = await firebase.firestore().collection('celebrations').get();
+                    const celebrations = celebrationsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    if (typeof renderCelebrationList === 'function') {
+                        renderCelebrationList(celebrations);
+                    }
+                }
 
             } catch (error) {
                 console.error("Erreur de suppression:", error);
@@ -1600,7 +1919,7 @@
         
         // --- Fonctions Import/Export ---
         
-        let allCelebrations = []; // Stocker toutes les célébrations pour l'export
+        // allCelebrations est déjà déclaré plus haut pour la recherche
         
         /** Déclenche le sélecteur de fichier pour l'import */
         window.triggerFileInput = function() {
@@ -1683,6 +2002,23 @@
         
         /** Exporte toutes les célébrations en PDF moderne */
         window.exportToPDF = async function() {
+            // Charger les célébrations si elles ne sont pas déjà chargées
+            if (allCelebrations.length === 0) {
+                try {
+                    const celebrationsSnapshot = await firebase.firestore().collection('celebrations').get();
+                    allCelebrations = celebrationsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.error("Erreur lors du chargement des célébrations:", error);
+                    ioMsg.textContent = "❌ Erreur lors du chargement des données";
+                    ioMsg.classList.remove('hidden', 'text-green-400', 'text-blue-400');
+                    ioMsg.classList.add('text-red-400');
+                    return;
+                }
+            }
+            
             if (allCelebrations.length === 0) {
                 ioMsg.textContent = "❌ Aucune donnée à exporter";
                 ioMsg.classList.remove('hidden', 'text-green-400', 'text-blue-400');
@@ -1721,7 +2057,7 @@
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(24);
                 doc.setFont('helvetica', 'bold');
-                doc.text('203 Celebration Hub', margin, 20);
+                doc.text('Fête Express', margin, 20);
                 
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
@@ -1800,7 +2136,7 @@
                     doc.setFontSize(8);
                     doc.setTextColor(150, 150, 150);
                     doc.text(`Page ${i} / ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-                    doc.text('203 Celebration Hub - Gestion des Anniversaires', margin, pageHeight - 10);
+                    doc.text('Fête Express - Gestion des Anniversaires', margin, pageHeight - 10);
                 }
                 
                 // Sauvegarder le PDF
@@ -1818,10 +2154,407 @@
             }
         }
 
+        // --- Gestion des Profils des Élèves ---
+
+        // Charger les profils des élèves
+        async function loadProfiles() {
+            const profilesTableBody = document.getElementById('profilesTableBody');
+            profilesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Chargement...</td></tr>';
+
+            try {
+                const users = await getAllUsers();
+                const students = users.filter(u => u.role === 'eleve');
+
+                if (students.length === 0) {
+                    profilesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Aucun élève trouvé</td></tr>';
+                    return;
+                }
+
+                profilesTableBody.innerHTML = students.map(student => {
+                    const hasProfile = student.profileCompleted || false;
+                    const studentId = student.id || student.uid; // Utiliser id (document ID) ou uid en fallback
+                    return `
+                        <tr class="hover:bg-gray-800 transition">
+                            <td class="px-4 py-3 text-sm">${student.fullName || 'N/A'}</td>
+                            <td class="px-4 py-3 text-sm text-gray-400">${student.email || 'N/A'}</td>
+                            <td class="px-4 py-3 text-sm">
+                                ${hasProfile 
+                                    ? '<span class="px-2 py-1 rounded bg-green-500 bg-opacity-30 text-green-300">Complété</span>' 
+                                    : '<span class="px-2 py-1 rounded bg-gray-500 bg-opacity-30 text-gray-300">Non complété</span>'}
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                ${hasProfile 
+                                    ? `<button onclick="viewStudentProfile('${studentId}')" class="px-3 py-1 rounded bg-primary hover:bg-opacity-90 text-bg-dark text-sm transition">
+                                        <i data-lucide="eye" class="w-4 h-4 inline-block"></i> Voir
+                                       </button>`
+                                    : '<span class="text-gray-500 text-sm">-</span>'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur lors du chargement des profils:', error);
+                profilesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-400">Erreur lors du chargement</td></tr>';
+            }
+        }
+
+        // Voir le profil d'un élève
+        function viewStudentProfile(studentId) {
+            window.location.href = `student-profile.html?id=${studentId}`;
+        }
+
+        // Charger le paramètre de visibilité des profils
+        async function loadProfileVisibilitySetting() {
+            try {
+                const settingsDoc = await firebase.firestore().collection('settings').doc('profileVisibility').get();
+                const enabled = settingsDoc.exists && settingsDoc.data().enabled || false;
+                
+                const toggle = document.getElementById('toggleProfileVisibility');
+                const status = document.getElementById('profileVisibilityStatus');
+                
+                toggle.checked = enabled;
+                status.textContent = enabled ? 'Activé' : 'Désactivé';
+                status.className = enabled ? 'text-sm text-green-400' : 'text-sm text-gray-400';
+            } catch (error) {
+                console.error('Erreur lors du chargement du paramètre de visibilité:', error);
+            }
+        }
+
+        // Toggle la visibilité des profils
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('toggleProfileVisibility');
+            if (toggle) {
+                toggle.addEventListener('change', async (e) => {
+                    const enabled = e.target.checked;
+                    const status = document.getElementById('profileVisibilityStatus');
+                    
+                    try {
+                        await firebase.firestore().collection('settings').doc('profileVisibility').set({
+                            enabled: enabled,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                        
+                        status.textContent = enabled ? 'Activé' : 'Désactivé';
+                        status.className = enabled ? 'text-sm text-green-400' : 'text-sm text-gray-400';
+                        
+                        console.log(`✅ Visibilité des profils ${enabled ? 'activée' : 'désactivée'}`);
+                    } catch (error) {
+                        console.error('Erreur lors de la mise à jour de la visibilité:', error);
+                        alert('Erreur lors de la mise à jour');
+                        e.target.checked = !enabled; // Revert
+                    }
+                });
+            }
+
+            // Gestion de la recherche de réputation
+            const reputationSearchInput = document.getElementById('reputationSearchInput');
+            if (reputationSearchInput) {
+                reputationSearchInput.addEventListener('input', (e) => {
+                    filterReputationTable(e.target.value);
+                });
+            }
+        });
+
+        // --- Gestion de la Réputation & Statuts ---
+
+        let allReputationUsers = [];
+        let reputationSearchTerm = '';
+
+        // Charger les données de réputation
+        async function loadReputationData() {
+            const reputationTableBody = document.getElementById('reputationTableBody');
+            reputationTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">Chargement...</td></tr>';
+
+            try {
+                const users = await getAllUsers();
+                allReputationUsers = users.map(user => ({
+                    id: user.id,
+                    fullName: user.fullName || 'N/A',
+                    email: user.email || user.id,
+                    reputation: user.reputation !== undefined ? user.reputation : 100,
+                    status: user.status || 'active',
+                    role: user.role || 'eleve'
+                }));
+
+                // Trier par réputation (plus basse en premier)
+                allReputationUsers.sort((a, b) => a.reputation - b.reputation);
+
+                renderReputationTable(allReputationUsers);
+            } catch (error) {
+                console.error('Erreur lors du chargement de la réputation:', error);
+                reputationTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-400">Erreur lors du chargement</td></tr>';
+            }
+        }
+
+        // Filtrer le tableau de réputation
+        function filterReputationTable(searchTerm) {
+            reputationSearchTerm = searchTerm.toLowerCase().trim();
+            renderReputationTable(allReputationUsers);
+        }
+
+        // Afficher le tableau de réputation
+        async function renderReputationTable(users) {
+            const reputationTableBody = document.getElementById('reputationTableBody');
+            reputationTableBody.innerHTML = '';
+
+            // Filtrer selon le terme de recherche
+            let filteredUsers = users;
+            if (reputationSearchTerm) {
+                filteredUsers = users.filter(user => {
+                    const fullName = (user.fullName || '').toLowerCase();
+                    const email = (user.email || '').toLowerCase();
+                    const fileNumber = email.split('@')[0];
+                    return fullName.includes(reputationSearchTerm) || 
+                           email.includes(reputationSearchTerm) || 
+                           fileNumber.includes(reputationSearchTerm);
+                });
+            }
+
+            if (filteredUsers.length === 0) {
+                reputationTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">Aucun utilisateur trouvé</td></tr>';
+                return;
+            }
+
+            // Vérifier pour chaque utilisateur s'il a des messages bloqués
+            for (const user of filteredUsers) {
+                // Vérifier si l'utilisateur a des messages bloqués
+                let hasBlockedMessages = false;
+                try {
+                    const blockedMessagesSnapshot = await firebase.firestore()
+                        .collection('blockedMessages')
+                        .where('userId', '==', user.id)
+                        .limit(1)
+                        .get();
+                    hasBlockedMessages = !blockedMessagesSnapshot.empty;
+                } catch (error) {
+                    console.error('Erreur lors de la vérification des messages bloqués:', error);
+                }
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-800 transition';
+
+                // Couleur de la réputation
+                let repColor = 'text-green-400';
+                let repBg = 'bg-green-900 bg-opacity-30';
+                if (user.reputation < 20) {
+                    repColor = 'text-red-400';
+                    repBg = 'bg-red-900 bg-opacity-30';
+                } else if (user.reputation < 50) {
+                    repColor = 'text-yellow-400';
+                    repBg = 'bg-yellow-900 bg-opacity-30';
+                }
+
+                // Badge de statut
+                let statusBadge = '';
+                let statusColor = 'bg-green-600';
+                if (user.status === 'blocked') {
+                    statusBadge = 'Bloqué';
+                    statusColor = 'bg-red-600';
+                } else if (user.status === 'spectator') {
+                    statusBadge = 'Spectateur';
+                    statusColor = 'bg-gray-600';
+                } else {
+                    statusBadge = 'Actif';
+                    statusColor = 'bg-green-600';
+                }
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${user.fullName}</td>
+                    <td class="px-4 py-3 text-sm text-gray-400">${user.email}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold ${repColor} ${repBg}">
+                            ${user.reputation}/100
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold text-white ${statusColor}">
+                            ${statusBadge}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="openReputationModal('${user.id}')" class="px-3 py-1 rounded-lg bg-primary hover:bg-opacity-90 text-white text-sm transition">
+                                <i data-lucide="edit" class="w-4 h-4 inline-block mr-1"></i>
+                                Modifier
+                            </button>
+                            ${hasBlockedMessages ? `
+                                <button onclick="viewBlockedMessages('${user.id}')" class="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs transition" title="Voir les messages bloqués">
+                                    <i data-lucide="alert-triangle" class="w-3 h-3 inline-block mr-1"></i>
+                                    Bloqués
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                `;
+                reputationTableBody.appendChild(row);
+            }
+
+            lucide.createIcons();
+        }
+
+        // Ouvrir la modale de modification de réputation
+        window.openReputationModal = function(userId) {
+            const user = allReputationUsers.find(u => u.id === userId);
+            if (!user) {
+                alert('Utilisateur non trouvé');
+                return;
+            }
+
+            document.getElementById('repUserId').value = user.id;
+            document.getElementById('repUserName').textContent = user.fullName;
+            document.getElementById('repUserEmail').textContent = user.email;
+            document.getElementById('repCurrentReputation').textContent = user.reputation;
+            document.getElementById('repNewReputation').value = user.reputation;
+            document.getElementById('repStatus').value = user.status;
+
+            openModal('reputationModal');
+        };
+
+        // Voir les messages bloqués d'un utilisateur
+        window.viewBlockedMessages = async function(userId) {
+            const user = allReputationUsers.find(u => u.id === userId);
+            if (!user) {
+                alert('Utilisateur non trouvé');
+                return;
+            }
+
+            // Charger les messages bloqués
+            try {
+                // Récupérer tous les messages bloqués et filtrer côté client pour éviter l'index composite
+                const blockedMessagesSnapshot = await firebase.firestore()
+                    .collection('blockedMessages')
+                    .where('userId', '==', userId)
+                    .get();
+
+                let blockedMessages = blockedMessagesSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Trier par date côté client (plus récent en premier)
+                blockedMessages.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.toDate().getTime() : 0;
+                    const dateB = b.createdAt ? b.createdAt.toDate().getTime() : 0;
+                    return dateB - dateA;
+                });
+
+                // Afficher dans la modale
+                document.getElementById('blockedMessagesUserName').textContent = user.fullName;
+                document.getElementById('blockedMessagesUserEmail').textContent = user.email;
+                document.getElementById('blockedMessagesCount').textContent = blockedMessages.length;
+
+                const blockedMessagesList = document.getElementById('blockedMessagesList');
+                blockedMessagesList.innerHTML = '';
+
+                if (blockedMessages.length === 0) {
+                    blockedMessagesList.innerHTML = `
+                        <div class="text-center py-8 text-gray-400">
+                            <i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-2 text-green-400"></i>
+                            <p>Aucun message bloqué pour cet utilisateur.</p>
+                        </div>
+                    `;
+                } else {
+                    blockedMessages.forEach((msg, index) => {
+                        const msgDate = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleString('fr-FR') : 'Date inconnue';
+                        const msgCard = document.createElement('div');
+                        msgCard.className = 'bg-red-900 bg-opacity-20 border border-red-500 rounded-lg p-4 mb-4';
+                        msgCard.innerHTML = `
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <p class="text-sm text-gray-400">Message #${index + 1}</p>
+                                    <p class="text-xs text-gray-500">${msgDate}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-400">Réputation</p>
+                                    <p class="text-sm font-semibold text-red-400">${msg.reputationBefore} → ${msg.reputationAfter}</p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <p class="text-xs text-gray-400 mb-1">Destinataire</p>
+                                <p class="text-sm font-medium">${msg.recipientName || 'N/A'}</p>
+                            </div>
+                            <div class="mb-3">
+                                <p class="text-xs text-gray-400 mb-1">Message bloqué</p>
+                                <div class="bg-gray-900 rounded p-3 border border-red-500">
+                                    <p class="text-sm text-red-300 whitespace-pre-wrap">${msg.message || 'Aucun contenu'}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <div>
+                                    <span class="text-gray-400">Mot interdit détecté:</span>
+                                    <span class="text-red-400 font-semibold ml-1">${msg.blockedWord || 'N/A'}</span>
+                                </div>
+                            </div>
+                        `;
+                        blockedMessagesList.appendChild(msgCard);
+                    });
+                }
+
+                lucide.createIcons();
+                openModal('blockedMessagesModal');
+            } catch (error) {
+                console.error('Erreur lors du chargement des messages bloqués:', error);
+                alert('Erreur lors du chargement des messages bloqués: ' + error.message);
+            }
+        };
+
+        // Sauvegarder les modifications de réputation
+        document.getElementById('reputationForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const userId = form.repUserId.value;
+            const newReputation = parseInt(form.repNewReputation.value);
+            const newStatus = form.repStatus.value;
+
+            if (newReputation < 0 || newReputation > 100) {
+                alert('La réputation doit être entre 0 et 100');
+                return;
+            }
+
+            const saveBtn = form.querySelector('button[type="submit"]');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Sauvegarde...';
+
+            try {
+                await firebase.firestore().collection('users').doc(userId).update({
+                    reputation: newReputation,
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                closeModal('reputationModal');
+                loadReputationData();
+
+                // Logger l'action
+                await logActivity(currentUserId, 'update', {
+                    modifiedData: { userId, reputation: newReputation, status: newStatus },
+                    description: `Modification de la réputation et du statut de l'utilisateur`
+                });
+
+                alert('✅ Réputation et statut mis à jour avec succès');
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour:', error);
+                alert('Erreur lors de la mise à jour: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Sauvegarder';
+            }
+        });
+
         // Démarrage de l'application
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             checkAdminAuth();
+            
+            // Initialiser la barre de recherche
+            const searchInput = document.getElementById('userSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchTerm = e.target.value;
+                    renderUserTable(allUsers);
+                });
+            }
         });
 
     </script>

@@ -101,7 +101,7 @@ C'est un défi d'équipe : il faut que TOUT LE MONDE participe pour réussir !
 
 ### 1. Se connecter
 - Allez sur le site
-- Connectez-vous avec votre email et votre mot de passe
+- Connectez-vous avec votre email et votre mot de passe temporaire : login123
 - Si c'est votre première fois, vous devrez changer votre mot de passe temporaire
 
 ### 2. Les différentes sections
@@ -110,7 +110,7 @@ C'est un défi d'équipe : il faut que TOUT LE MONDE participe pour réussir !
 
 **📅 Calendrier** : Voir tous les anniversaires de l'année sur un calendrier
 
-**🔔 Notifications** : 
+**🔔 Messages** : 
 - Voir les anniversaires à venir (pour envoyer des messages)
 - Voir les messages que vous avez reçus
 
@@ -149,7 +149,7 @@ C'est un défi d'équipe : il faut que TOUT LE MONDE participe pour réussir !
 R : Non, c'est pour ça qu'il faut bien réfléchir avant d'envoyer !
 
 **Q : Est-ce que je peux voir qui m'a envoyé un message secret ?**
-R : Oui, vous verrez tous vos messages dans la section Notifications, même les secrets.
+R : Oui, vous verrez tous vos messages dans la section Messages, même les secrets.
 
 **Q : Que se passe-t-il si on n'atteint pas 9 personnes consécutives ?**
 R : On continue d'essayer ! C'est un défi continu, pas une course.

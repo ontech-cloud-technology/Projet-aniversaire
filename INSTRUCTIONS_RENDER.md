@@ -65,3 +65,4 @@ curl https://email-api-cs1c.onrender.com/api/health
 
 Les services gratuits Render se mettent en veille après 15 minutes d'inactivité. Le premier appel peut prendre 30-60 secondes pour "réveiller" le service.
 
+

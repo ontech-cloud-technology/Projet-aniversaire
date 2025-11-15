@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Infos sur Moi — 203 Celebration Hub</title>
+    <title>Infos sur Moi — Fête Express</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -529,18 +529,32 @@
             const user = firebase.auth().currentUser;
             if (!user) return;
             
-            const userData = await getUserRole(user.uid);
-            if (userData.role !== 'admin') {
-                alert('Accès refusé. Cette fonctionnalité est réservée aux administrateurs.');
-                return;
-            }
-            
             if (confirm('Êtes-vous sûr de vouloir skip cette étape ?')) {
-                // Mettre à jour le flag profileCompleted
-                await firebase.firestore().collection('users').doc(user.uid).update({
-                    profileCompleted: true
-                });
-                window.location.href = 'admin.html';
+                try {
+                    // Mettre à jour le flag profileCompleted
+                    await firebase.firestore().collection('users').doc(user.uid).update({
+                        profileCompleted: true
+                    });
+                    
+                    // Récupérer le rôle pour déterminer la redirection
+                    const userData = await getUserRole(user.uid);
+                    const role = userData.role;
+                    
+                    // Déterminer la page de redirection selon le rôle
+                    let redirectUrl = 'eleve.html'; // Par défaut
+                    if (role === 'admin' || role === 'professeur' || role === 'teacher') {
+                        redirectUrl = 'admin.html';
+                    } else if (role === 'comite') {
+                        redirectUrl = 'committee.html';
+                    } else {
+                        redirectUrl = 'eleve.html';
+                    }
+                    
+                    window.location.href = redirectUrl;
+                } catch (error) {
+                    console.error('Erreur lors du skip:', error);
+                    alert('Erreur lors du skip. Veuillez réessayer.');
+                }
             }
         }
         

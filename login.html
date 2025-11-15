@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Connexion — 203 Celebration Hub</title>
+  <title>Connexion — Fête Express</title>
   <!-- Utilisation de Manrope comme demandé pour le style moderne -->
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
   
@@ -222,7 +222,7 @@
 
 <body>
   <div class="card">
-    <h1>203 Celebration Hub 🎉</h1>
+    <h1>Fête Express 🎉</h1>
     <p class="lead">Connectez-vous pour voir le calendrier des fêtes de la classe.</p>
 
     <form id="loginForm">
@@ -279,7 +279,19 @@
         console.log('Rôle extrait:', role);
         console.log('Nom extrait:', name);
 
-        // 4. Vérifier si l'utilisateur doit changer son mot de passe
+        // 4. Vérifier si l'utilisateur a accepté les règles
+        if (userData.rulesAccepted !== true) {
+            welcomeTitle.textContent = `Bienvenue, ${name} !`;
+            welcomeSub.textContent = "Veuillez accepter les règles d'utilisation...";
+            overlay.classList.add("show");
+            
+            setTimeout(() => {
+                window.location.href = 'rules-acceptance.html';
+            }, 2000);
+            return;
+        }
+
+        // 5. Vérifier si l'utilisateur doit changer son mot de passe
         if (userData.needsPasswordChange === true) {
             // Stocker les infos pour la page de changement de mot de passe
             sessionStorage.setItem('tempUserId', uid);

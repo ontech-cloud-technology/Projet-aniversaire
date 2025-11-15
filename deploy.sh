@@ -86,3 +86,4 @@ echo "📚 Documentation complète: DEPLOIEMENT.md"
 echo "⚡ Guide rapide Render: DEPLOIEMENT_RENDER.md"
 echo "============================================================"
 
+

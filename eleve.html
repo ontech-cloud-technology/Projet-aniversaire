@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calendrier — 203 Celebration Hub</title>
+    <title>Calendrier — Fête Express</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -86,6 +86,31 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             border-color: var(--primary);
         }
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-content {
+            background-color: var(--bg-light);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
         /* Style pour les boutons d'envoi */
         .send-button {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -135,7 +160,7 @@
                     </button>
                     <button onclick="showView('notifications')" id="btnNotifications" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 relative">
                         <i data-lucide="bell" class="w-5 h-5"></i>
-                        <span>Notifications</span>
+                        <span>Messages</span>
                         <span id="notificationBadge" class="hidden ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
                     </button>
                     <button onclick="window.location.href='progression.html'" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
@@ -145,6 +170,10 @@
                     <button onclick="showView('vote')" id="btnVote" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
                         <i data-lucide="vote" class="w-5 h-5"></i>
                         <span>Vote Activités</span>
+                    </button>
+                    <button onclick="showView('profiles')" id="btnProfiles" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 hidden">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                        <span>Profils</span>
                     </button>
                 </nav>
             </div>
@@ -200,11 +229,11 @@
                 </div>
             </section>
 
-            <!-- Vue Notifications -->
+            <!-- Vue Messages -->
             <section id="viewNotifications" class="card p-6 rounded-xl hidden">
                 <h2 class="text-2xl font-bold mb-4 flex items-center">
                     <i data-lucide="bell" class="w-6 h-6 mr-2"></i>
-                    Mes Notifications
+                    Mes Messages
                 </h2>
                 
                 <!-- Section pour envoyer des messages (si anniversaire dans 1 semaine ou moins) -->
@@ -228,7 +257,7 @@
                     <p class="text-sm">
                         <strong>Ton anniversaire approche !</strong> Quand ton anniversaire est dans 1 semaine ou moins, 
                         tes camarades peuvent t'envoyer des messages secrets ou publics pour te souhaiter un joyeux anniversaire. 
-                        Tu recevras ces messages ici dans tes notifications. Les messages secrets restent privés, 
+                        Tu recevras ces messages ici dans tes messages. Les messages secrets restent privés, 
                         tandis que les messages publics peuvent être vus par tous. 🎉
                     </p>
                 </div>
@@ -252,8 +281,86 @@
                     <p class="text-gray-500 text-center py-8">Chargement...</p>
                 </div>
             </section>
+
+            <!-- Vue Profils -->
+            <section id="viewProfiles" class="card p-6 rounded-xl hidden">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i data-lucide="users" class="w-6 h-6 mr-2"></i>
+                    Profils
+                </h2>
+                
+                <!-- Boutons d'action -->
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <button onclick="openEditProfileModal()" class="flex items-center px-6 py-3 rounded-lg bg-primary hover:bg-opacity-90 text-white transition">
+                        <i data-lucide="edit" class="w-5 h-5 mr-2"></i>
+                        Modifier mon profil
+                    </button>
+                    <button onclick="openVisibilityModal()" class="flex items-center px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition">
+                        <i data-lucide="eye" class="w-5 h-5 mr-2"></i>
+                        Modifier la visibilité de mes informations
+                    </button>
+                </div>
+
+                <!-- Section Profils des Autres Élèves -->
+                <div id="otherProfilesSection">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i data-lucide="users" class="w-5 h-5 mr-2"></i>
+                        Profils des Autres Élèves
+                    </h3>
+                    <div id="profilesContent">
+                        <p class="text-gray-500 text-center py-8">Chargement...</p>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
+
+    <!-- Modale Modifier le Profil -->
+    <div id="editProfileModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold flex items-center">
+                    <i data-lucide="edit" class="w-6 h-6 mr-2"></i>
+                    Modifier mon profil
+                </h3>
+                <button onclick="closeModal('editProfileModal')" class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <p class="text-gray-400 mb-6 text-sm">
+                Pour modifier tes informations, tu dois remplir à nouveau le formulaire complet.
+            </p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeModal('editProfileModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">
+                    Annuler
+                </button>
+                <button onclick="window.location.href='profile-setup.html'" class="px-4 py-2 rounded bg-primary hover:bg-opacity-90 text-white transition">
+                    Aller au formulaire
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Modifier la Visibilité -->
+    <div id="visibilityModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold flex items-center">
+                    <i data-lucide="eye" class="w-6 h-6 mr-2"></i>
+                    Modifier la visibilité de mes informations
+                </h3>
+                <button onclick="closeModal('visibilityModal')" class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <p class="text-gray-400 mb-6 text-sm">
+                Choisis quelles informations tu veux rendre visibles aux autres élèves. Les informations privées ne seront visibles que par les administrateurs.
+            </p>
+            <div id="visibilityModalContent">
+                <p class="text-gray-500 text-center py-8">Chargement...</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Inclusion du fichier firebase.js -->
     <script src="firebase.js"></script>
@@ -368,6 +475,15 @@
             // Afficher le bouton admin si l'utilisateur est admin
             if (userData.role === 'admin') {
                 adminBtn.classList.remove('hidden');
+            }
+
+            // Vérifier si la visibilité des profils est activée
+            const settingsDoc = await firebase.firestore().collection('settings').doc('profileVisibility').get();
+            const profileVisibilityEnabled = settingsDoc.exists && settingsDoc.data().enabled || false;
+            
+            if (profileVisibilityEnabled) {
+                const btnProfiles = document.getElementById('btnProfiles');
+                if (btnProfiles) btnProfiles.classList.remove('hidden');
             }
 
             loadingScreen.style.display = 'none';
@@ -539,22 +655,26 @@
             const viewCalendrier = document.getElementById('viewCalendrier');
             const viewNotifications = document.getElementById('viewNotifications');
             const viewVote = document.getElementById('viewVote');
+            const viewProfiles = document.getElementById('viewProfiles');
             const btnListe = document.getElementById('btnListe');
             const btnCalendrier = document.getElementById('btnCalendrier');
             const btnNotifications = document.getElementById('btnNotifications');
             const btnVote = document.getElementById('btnVote');
+            const btnProfiles = document.getElementById('btnProfiles');
 
             // Cacher toutes les vues
             viewListe.classList.add('hidden');
             viewCalendrier.classList.add('hidden');
             if (viewVote) viewVote.classList.add('hidden');
             viewNotifications.classList.add('hidden');
+            if (viewProfiles) viewProfiles.classList.add('hidden');
             
             // Retirer l'état actif de tous les boutons
             btnListe.classList.remove('active');
             btnCalendrier.classList.remove('active');
             btnNotifications.classList.remove('active');
             if (btnVote) btnVote.classList.remove('active');
+            if (btnProfiles) btnProfiles.classList.remove('active');
 
             if (view === 'liste') {
                 viewListe.classList.remove('hidden');
@@ -569,13 +689,18 @@
             } else if (view === 'notifications') {
                 viewNotifications.classList.remove('hidden');
                 btnNotifications.classList.add('active');
-                pageTitle.textContent = 'Mes Notifications';
+                pageTitle.textContent = 'Mes Messages';
                 loadNotificationsView();
             } else if (view === 'vote' && viewVote) {
                 viewVote.classList.remove('hidden');
                 if (btnVote) btnVote.classList.add('active');
                 pageTitle.textContent = 'Vote pour les Activités';
                 loadVoteView();
+            } else if (view === 'profiles' && viewProfiles) {
+                viewProfiles.classList.remove('hidden');
+                if (btnProfiles) btnProfiles.classList.add('active');
+                pageTitle.textContent = 'Profils';
+                loadProfilesView();
             }
             
             lucide.createIcons();
@@ -675,7 +800,15 @@
                     </div>
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-gray-300">Ton message</label>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium text-gray-300">Ton message</label>
+                                ${!messageAlreadySent ? `
+                                    <button onclick="generateBirthdayMessage('${person.id}')" class="flex items-center px-3 py-1.5 rounded-lg bg-secondary hover:bg-opacity-90 text-bg-dark text-xs font-semibold transition">
+                                        <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>
+                                        Générer un message
+                                    </button>
+                                ` : ''}
+                            </div>
                             <textarea id="message_${person.id}" ${messageAlreadySent ? 'disabled' : ''} class="w-full p-3 rounded-lg text-white text-sm resize-none ${textareaDisabled}" placeholder="${textareaPlaceholder}" rows="3"></textarea>
                         </div>
                         <div class="flex items-center justify-between">
@@ -711,7 +844,25 @@
                 return;
             }
 
-            // Récupérer l'ID utilisateur du destinataire
+            // Vérifier le statut et la réputation de l'utilisateur
+            const userDoc = await firebase.firestore().collection('users').doc(currentUserId).get();
+            const userData = userDoc.data();
+            const userStatus = userData.status || 'active';
+            const userReputation = userData.reputation || 100;
+
+            // Vérifier si l'utilisateur est bloqué ou spectateur
+            if (userStatus === 'blocked' || userStatus === 'spectator') {
+                alert(`⚠️ Vous ne pouvez pas envoyer de messages. Statut: ${userStatus === 'blocked' ? 'Bloqué' : 'Spectateur'}`);
+                return;
+            }
+
+            // Vérifier si la réputation est trop basse
+            if (userReputation < 50) {
+                alert(`⚠️ Votre réputation est trop faible (${userReputation}/100) pour envoyer des messages. Veuillez améliorer votre comportement.`);
+                return;
+            }
+
+            // Récupérer l'ID utilisateur du destinataire (nécessaire pour l'enregistrement des messages bloqués)
             const celebration = allCelebrations.find(c => c.id === celebrationId);
             if (!celebration || !celebration.fileNumber) {
                 alert('Erreur : impossible de trouver le destinataire');
@@ -730,10 +881,65 @@
             }
 
             const recipientId = recipientUsers.docs[0].id;
-            const recipientData = recipientUsers.docs[0].data();
-            const recipientEmail = recipientData.email;
             const senderData = await firebase.firestore().collection('users').doc(currentUserId).get();
             const senderName = senderData.data()?.fullName || 'Anonyme';
+
+            // Valider le message (vérifier les mots interdits)
+            const validation = validateMessage(messageText);
+            if (!validation.valid) {
+                // Décrémenter la réputation
+                const newReputation = Math.max(0, userReputation - 5);
+                await firebase.firestore().collection('users').doc(currentUserId).update({
+                    reputation: newReputation
+                });
+
+                // Enregistrer le message bloqué dans Firestore
+                try {
+                    await firebase.firestore().collection('blockedMessages').add({
+                        userId: currentUserId,
+                        userName: senderName,
+                        message: messageText,
+                        recipientId: recipientId,
+                        recipientName: recipientName,
+                        celebrationId: celebrationId,
+                        reputationBefore: userReputation,
+                        reputationAfter: newReputation,
+                        blockedWord: validation.word || 'inconnu',
+                        reason: validation.reason,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Erreur lors de l\'enregistrement du message bloqué:', error);
+                }
+
+                // Si la réputation tombe en dessous de 50, bloquer les messages
+                if (newReputation < 50) {
+                    await firebase.firestore().collection('users').doc(currentUserId).update({
+                        status: 'blocked'
+                    });
+                    alert(`⚠️ ${validation.reason}\n\nVotre réputation a été réduite à ${newReputation}/100. Vous ne pouvez plus envoyer de messages jusqu'à ce que votre réputation s'améliore.`);
+                } else {
+                    alert(`⚠️ ${validation.reason}\n\nVotre réputation a été réduite à ${newReputation}/100. Veuillez modifier votre message avant de l'envoyer.`);
+                }
+                
+                // Mettre en évidence le textarea avec une bordure rouge
+                const textarea = document.getElementById(`message_${celebrationId}`);
+                textarea.style.borderColor = '#ef4444';
+                textarea.style.borderWidth = '2px';
+                textarea.focus();
+                
+                // Retirer la bordure rouge après 3 secondes
+                setTimeout(() => {
+                    textarea.style.borderColor = '';
+                    textarea.style.borderWidth = '';
+                }, 3000);
+                
+                return;
+            }
+
+            // Les informations du destinataire et de l'expéditeur sont déjà récupérées plus haut
+            const recipientData = recipientUsers.docs[0].data();
+            const recipientEmail = recipientData.email;
 
             // Vérifier si l'utilisateur a déjà envoyé un message à cette personne
             const existingMessage = await firebase.firestore().collection('messages')
@@ -948,6 +1154,489 @@
             }
         }
 
+        // Charger la vue des profils (autres élèves)
+        async function loadProfilesView() {
+            const profilesContent = document.getElementById('profilesContent');
+            const otherProfilesSection = document.getElementById('otherProfilesSection');
+            const profilesSeparator = document.getElementById('profilesSeparator');
+            
+            profilesContent.innerHTML = '<p class="text-gray-500 text-center py-8">Chargement...</p>';
+
+            try {
+                // Vérifier si la visibilité est activée
+                const settingsDoc = await firebase.firestore().collection('settings').doc('profileVisibility').get();
+                const enabled = settingsDoc.exists && settingsDoc.data().enabled || false;
+
+                if (!enabled) {
+                    profilesContent.innerHTML = `
+                        <div class="text-center py-8">
+                            <i data-lucide="lock" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                            <p class="text-gray-400">La visibilité des profils n'est pas activée pour le moment.</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Charger tous les élèves
+                const users = await getAllUsers();
+                const students = users.filter(u => u.role === 'eleve' && (u.id !== currentUserId && u.uid !== currentUserId));
+
+                if (students.length === 0) {
+                    profilesContent.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun autre élève trouvé.</p>';
+                    return;
+                }
+
+                // Filtrer seulement ceux qui ont complété leur profil
+                const studentsWithProfiles = students.filter(s => s.profileCompleted);
+
+                if (studentsWithProfiles.length === 0) {
+                    profilesContent.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun élève n\'a encore complété son profil.</p>';
+                    return;
+                }
+
+                // Afficher la liste
+                let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+                studentsWithProfiles.forEach(student => {
+                    const studentId = student.id || student.uid; // Utiliser id (document ID) ou uid en fallback
+                    html += `
+                        <div class="card p-4 rounded-xl hover:shadow-lg transition cursor-pointer" onclick="viewStudentProfile('${studentId}')">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
+                                    ${(student.fullName || '?')[0].toUpperCase()}
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-lg">${student.fullName || 'N/A'}</h3>
+                                    <p class="text-sm text-gray-400">${student.email || ''}</p>
+                                </div>
+                            </div>
+                            <button class="w-full mt-3 px-4 py-2 rounded-lg bg-primary hover:bg-opacity-90 text-white transition">
+                                Voir le profil
+                            </button>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                profilesContent.innerHTML = html;
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur lors du chargement des profils:', error);
+                profilesContent.innerHTML = '<p class="text-red-400 text-center py-8">Erreur lors du chargement des profils.</p>';
+            }
+        }
+
+        // Voir le profil d'un élève
+        function viewStudentProfile(studentId) {
+            window.location.href = `student-profile.html?id=${studentId}`;
+        }
+
+        // Liste des mots interdits (filtre de contenu) - Plus de 200 mots
+        const forbiddenWords = [
+            // Mots vulgaires classiques
+            'merde', 'putain', 'con', 'connard', 'conne', 'connasse', 'connasses', 'salope', 'salopes', 'salopard',
+            'enculé', 'enculer', 'enculée', 'enculées', 'enculés', 'bite', 'chier', 'chié', 'chiant', 'chiasse',
+            'bordel', 'foutre', 'fout', 'foutue', 'foutu', 'foutus', 'foutues', 'pute', 'putes', 'pédé',
+            'pédale', 'pédales', 'tapette', 'tapettes', 'tarlouze', 'tarlouzes', 'pédophile', 'pédophiles',
+            'nique', 'niquer', 'niquez', 'niquent', 'niqué', 'niquée', 'niqués', 'niquées', 'niques',
+            'salaud', 'salauds', 'salaude', 'salaudes', 'crétin', 'crétine', 'crétins', 'crétines',
+            'idiot', 'idiote', 'idiots', 'idiotes', 'débile', 'débiles', 'débilité', 'imbécile', 'imbéciles',
+            'abruti', 'abrutie', 'abrutis', 'abruties',
+            
+            // Mots offensants et expressions
+            'fdp', 'pd', 'tg', 'tagueule', 'ta gueule', 'ferme ta gueule', 'ferme-la', 'ferme la',
+            'va te faire', 'va te faire foutre', 'va te faire enculer', 'va te faire voir', 'va chier',
+            'va niquer', 'va te faire niquer', 'casse-toi', 'cassez-vous', 'dégage', 'dégagez', 'dégageons',
+            'dégagé', 'dégagée', 'dégagés', 'dégagées', 'barre-toi', 'barrez-vous', 'fous le camp',
+            'fous-moi le camp', 'foutez le camp', 'foutez-moi le camp',
+            
+            // Insultes et termes dégradants
+            'sous-merde', 'sous-merdes', 'fils de pute', 'fils de putes', 'fille de pute', 'filles de pute',
+            'filsdepute', 'filsdeputes', 'fillesdepute', 'fillesdeputes', 'garce', 'garces', 'ordure',
+            'ordures', 'racaille', 'railles', 'voyou', 'voyous', 'voyoute', 'voyoutes', 'bandit', 'bandits',
+            'bandite', 'bandites', 'criminel', 'criminelle', 'criminels', 'criminelles', 'voleur', 'voleuse',
+            'voleurs', 'voleuses',
+            
+            // Mots modernes/slang offensants
+            'ptn', 'nique ta mère', 'nique sa mère', 'niquez vos mères', 'nique ta race', 'nique sa race',
+            'niquez vos races', 'nique ta famille', 'nique sa famille', 'niquez vos familles', 'nique ton père',
+            'nique son père', 'niquez vos pères',
+            
+            // Termes grossiers
+            'baiser', 'baisé', 'baisée', 'baisés', 'baisées', 'baise', 'baises', 'baisez', 'baisent',
+            'baiser', 'cul', 'culs', 'fion', 'fions', 'chatte', 'chattes', 'bite', 'bites', 'zizi',
+            'zizis', 'zob', 'zobs', 'queue', 'queues', 'couilles', 'couille', 'couilles', 'testicules',
+            'testicule', 'testicules', 'seins', 'sein', 'seins', 'nichons', 'nichon', 'nichons', 'tétons',
+            'téton', 'tétons', 'tétasses', 'tétasse', 'tétasses',
+            
+            // Insultes racistes et discriminatoires
+            'nègre', 'négre', 'négresse', 'négres', 'négresses', 'youpin', 'youpine', 'youpins', 'youpines',
+            'bougnoule', 'bougnoules', 'bicot', 'bicots', 'bicotte', 'bicottes', 'raton', 'ratons', 'ratonne',
+            'ratonnes', 'sale arabe', 'sale noir', 'sale juif', 'sale musulman', 'sale chinois', 'sale asiatique',
+            'bougnoul', 'bougnouls', 'bougnoule', 'bougnoules', 'bamboula', 'bamboulas', 'bicot', 'bicots',
+            
+            // Termes homophobes
+            'gouine', 'gouines', 'pédéraste', 'pédérastes', 'sodomite', 'sodomites', 'tapette', 'tapettes',
+            'tarlouze', 'tarlouzes', 'pédale', 'pédales', 'pédé', 'pédés',
+            
+            // Termes sexistes
+            'pétasse', 'pétasses', 'chienne', 'chiennes', 'garce', 'garces', 'connasse', 'connasses',
+            'salope', 'salopes', 'pute', 'putes', 'pouffiasse', 'pouffiasses', 'pouffe', 'pouffes',
+            'pouffiasse', 'pouffiasses', 'garce', 'garces',
+            
+            // Mots vulgaires supplémentaires
+            'branlette', 'branlettes', 'branler', 'branlé', 'branlée', 'branlés', 'branlées', 'branle',
+            'branles', 'branlez', 'branlent', 'masturber', 'masturbé', 'masturbée', 'masturbés', 'masturbées',
+            'masturbe', 'masturbes', 'masturbez', 'masturbent', 'se branler', 'se masturber', 'branlette',
+            'branlettes', 'pomper', 'pompé', 'pompée', 'pompés', 'pompées', 'pompe', 'pompes', 'pompez',
+            'pompent', 'sucer', 'sucé', 'sucée', 'sucés', 'sucées', 'suce', 'suces', 'sucez', 'sucent',
+            
+            // Termes offensants supplémentaires
+            'taré', 'tarée', 'tarés', 'tarées', 'cinglé', 'cinglée', 'cinglés', 'cinglées', 'dingue',
+            'dingues', 'dingo', 'dingos', 'fou', 'fous', 'folle', 'folles', 'déjanté', 'déjantée', 'déjantés',
+            'déjantées', 'malade', 'malades', 'malade mental', 'malades mentaux', 'malade mentale',
+            'malades mentales', 'débile mental', 'débiles mentaux', 'débile mentale', 'débiles mentales',
+            
+            // Mots offensants modernes (slang)
+            'kikoo', 'kikou', 'tg', 'tagueule', 'ta gueule', 'fdp', 'pd', 'ptn', 'ptdr', 'mdr', 'lol',
+            'nique', 'niquer', 'niquez', 'niquent', 'niqué', 'niquée', 'niqués', 'niquées', 'niques',
+            'nique ta mère', 'nique sa mère', 'niquez vos mères', 'nique ta race', 'nique sa race',
+            'niquez vos races', 'nique ta famille', 'nique sa famille', 'niquez vos familles',
+            
+            // Termes violents
+            'tuer', 'tué', 'tuée', 'tués', 'tuées', 'tue', 'tues', 'tuez', 'tuent', 'assassiner',
+            'assassiné', 'assassinée', 'assassinés', 'assassinées', 'assassine', 'assassines', 'assassinez',
+            'assassinent', 'massacrer', 'massacré', 'massacrée', 'massacrés', 'massacrées', 'massacre',
+            'massacres', 'massacrez', 'massacrent', 'égorger', 'égorgé', 'égorgée', 'égorgés', 'égorgées',
+            'égorge', 'égorges', 'égorgez', 'égorgent', 'poignarder', 'poignardé', 'poignardée', 'poignardés',
+            'poignardées', 'poignarde', 'poignardes', 'poignardez', 'poignardent',
+            
+            // Mots offensants additionnels
+            'minable', 'minables', 'nul', 'nulle', 'nuls', 'nulles', 'pourri', 'pourrie', 'pourris',
+            'pourries', 'dégueulasse', 'dégueulasses', 'dégueulasse', 'dégoutant', 'dégoutante', 'dégoutants',
+            'dégoutantes', 'dégoûtant', 'dégoûtante', 'dégoûtants', 'dégoûtantes', 'infect', 'infecte',
+            'infects', 'infectes', 'immonde', 'immondes', 'ignoble', 'ignobles', 'vile', 'viles', 'bas',
+            'basse', 'basses', 'basses', 'méprisable', 'méprisables', 'honteux', 'honteuse', 'honteux',
+            'honteuses', 'lâche', 'lâches', 'lâche', 'lâches', 'traître', 'traîtres', 'traîtresse',
+            'traîtresses', 'sale', 'sales', 'sale', 'sales', 'crasseux', 'crasseuse', 'crasseux', 'crasseuses',
+            
+            // Termes dégradants supplémentaires
+            'sous-merde', 'sous-merdes', 'sous-race', 'sous-races', 'sous-homme', 'sous-hommes', 'sous-femme',
+            'sous-femmes', 'sous-être', 'sous-êtres', 'sous-humain', 'sous-humains', 'sous-humaine',
+            'sous-humaines', 'sous-développé', 'sous-développés', 'sous-développée', 'sous-développées',
+            
+            // Mots offensants finaux
+            'merdeux', 'merdeuse', 'merdeux', 'merdeuses', 'merdique', 'merdiques', 'merdique', 'merdiques',
+            'chié', 'chiée', 'chiés', 'chiées', 'chiant', 'chiante', 'chiants', 'chiantes', 'chiasse',
+            'chiasses', 'chiasse', 'chiasses', 'bordélique', 'bordéliques', 'bordélique', 'bordéliques',
+            'foutraque', 'foutraques', 'foutraque', 'foutraques', 'foutriquet', 'foutriquets', 'foutriquet',
+            'foutriquets', 'foutriquet', 'foutriquets', 'foutriquet', 'foutriquets'
+        ];
+
+        // Fonction de validation des messages (vérification des mots interdits)
+        function validateMessage(message) {
+            if (!message || typeof message !== 'string') {
+                return { valid: false, reason: 'Le message est vide ou invalide.' };
+            }
+
+            // Normaliser le message (minuscules, sans accents pour certains caractères)
+            const normalizedMessage = message.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Enlever les accents
+                .replace(/[^\w\s]/g, ' '); // Remplacer la ponctuation par des espaces
+
+            // Vérifier chaque mot interdit
+            for (const word of forbiddenWords) {
+                const normalizedWord = word.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+                
+                // Vérifier si le mot interdit est présent (mot complet, pas juste une partie)
+                const regex = new RegExp(`\\b${normalizedWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                if (regex.test(normalizedMessage)) {
+                    return { 
+                        valid: false, 
+                        reason: `Votre message contient un mot inapproprié. Veuillez modifier votre message pour qu'il soit respectueux.`,
+                        word: word
+                    };
+                }
+            }
+
+            return { valid: true };
+        }
+
+        // Messages de bonne fête aléatoires
+        const birthdayMessages = [
+            "🎉 Joyeux anniversaire ! Que cette nouvelle année t'apporte plein de bonheur et de réussite !",
+            "🎂 Bon anniversaire ! Profite bien de ta journée spéciale !",
+            "🎈 Joyeux anniversaire ! Que tous tes rêves se réalisent !",
+            "🎁 Bonne fête ! Passe une superbe journée remplie de joie !",
+            "🌟 Joyeux anniversaire ! Que cette année soit la meilleure de toutes !",
+            "🎊 Bon anniversaire ! Que la chance te sourie toute l'année !",
+            "🎉 Joyeux anniversaire ! Profite de chaque moment de cette journée spéciale !",
+            "🎂 Bonne fête ! Que cette nouvelle année soit remplie de moments magiques !",
+            "🎈 Joyeux anniversaire ! Que tous tes souhaits se réalisent !",
+            "🎁 Bon anniversaire ! Passe une journée inoubliable !",
+            "🌟 Joyeux anniversaire ! Que cette année t'apporte plein de bonheur !",
+            "🎊 Bonne fête ! Que tous tes projets se réalisent !",
+            "🎉 Joyeux anniversaire ! Que cette journée soit remplie de surprises !",
+            "🎂 Bon anniversaire ! Profite bien de ta journée spéciale avec tes proches !",
+            "🎈 Joyeux anniversaire ! Que cette nouvelle année soit exceptionnelle !",
+            "🎁 Bonne fête ! Que tous tes rêves deviennent réalité !",
+            "🌟 Joyeux anniversaire ! Que cette année soit la plus belle !",
+            "🎊 Bon anniversaire ! Passe une journée magique !",
+            "🎉 Joyeux anniversaire ! Que cette journée soit remplie de joie et de rires !",
+            "🎂 Bonne fête ! Que cette nouvelle année t'apporte plein de succès !"
+        ];
+
+        // Générer un message de bonne fête aléatoire
+        window.generateBirthdayMessage = function(celebrationId) {
+            const messageTextarea = document.getElementById(`message_${celebrationId}`);
+            if (!messageTextarea) return;
+
+            // Sélectionner un message aléatoire
+            const randomMessage = birthdayMessages[Math.floor(Math.random() * birthdayMessages.length)];
+            
+            // Remplir le textarea avec le message généré
+            messageTextarea.value = randomMessage;
+            
+            // Focus sur le textarea pour que l'utilisateur puisse modifier si besoin
+            messageTextarea.focus();
+            
+            // Animation visuelle pour indiquer que le message a été généré
+            messageTextarea.style.transition = 'all 0.3s ease';
+            messageTextarea.style.borderColor = 'var(--secondary)';
+            setTimeout(() => {
+                messageTextarea.style.borderColor = '';
+            }, 1000);
+        }
+
+        // Mapping des questions (identique à student-profile.html)
+        const questionLabels = {
+            crushSecret: 'Crush secret',
+            meilleurAmi: 'Meilleur ami(e)',
+            animalPrefere: 'Animal préféré',
+            platPrefere: 'Plat préféré',
+            sportPrefere: 'Sport préféré',
+            musiquePreferee: 'Groupe/artiste de musique préféré',
+            filmPrefere: 'Film préféré',
+            livrePrefere: 'Livre préféré',
+            passeTemps: 'Passe-temps favori',
+            qualiteAdmiree: 'Qualité admirée',
+            faitRire: 'Ce qui fait rire',
+            superpouvoir: 'Superpouvoir souhaité',
+            endroitEcole: 'Endroit préféré à l\'école',
+            momentJournee: 'Moment préféré de la journée',
+            metierReve: 'Métier de rêve',
+            emojiPrefere: 'Emoji préféré',
+            couleurPreferee: 'Couleur préférée',
+            snackPrefere: 'Snack préféré',
+            motivation: 'Ce qui motive',
+            reveFou: 'Rêve fou'
+        };
+
+        // Fonction de décryptage (pour afficher le crush secret)
+        function decryptCrushSecret(encryptedText, userId) {
+            if (!encryptedText || encryptedText.trim() === '') return '';
+            
+            try {
+                const decoded = atob(encryptedText);
+                const parts = decoded.split('|');
+                if (parts.length !== 2) return encryptedText;
+                
+                const encrypted = parts[0];
+                const key = parseInt(parts[1]);
+                
+                let decrypted = '';
+                for (let i = 0; i < encrypted.length; i++) {
+                    const code = encrypted.charCodeAt(i);
+                    
+                    if (code >= 65 && code <= 90) {
+                        let newCode = code - 65 - key;
+                        if (newCode < 0) newCode += 26;
+                        decrypted += String.fromCharCode(newCode + 65);
+                    } else if (code >= 97 && code <= 122) {
+                        let newCode = code - 97 - key;
+                        if (newCode < 0) newCode += 26;
+                        decrypted += String.fromCharCode(newCode + 97);
+                    } else {
+                        decrypted += encrypted[i];
+                    }
+                }
+                
+                return decrypted;
+            } catch (error) {
+                console.error('Erreur lors du décryptage:', error);
+                return encryptedText;
+            }
+        }
+
+
+        // Fonctions pour ouvrir/fermer les modales
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                lucide.createIcons();
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // Ouvrir la modale de modification de profil
+        window.openEditProfileModal = function() {
+            openModal('editProfileModal');
+        }
+
+        // Ouvrir la modale de visibilité
+        window.openVisibilityModal = async function() {
+            openModal('visibilityModal');
+            await loadVisibilityModalContent();
+        }
+
+        // Charger le contenu de la modale de visibilité
+        async function loadVisibilityModalContent() {
+            const visibilityModalContent = document.getElementById('visibilityModalContent');
+            visibilityModalContent.innerHTML = '<p class="text-gray-500 text-center py-8">Chargement...</p>';
+
+            try {
+                if (!currentUserId) {
+                    visibilityModalContent.innerHTML = '<p class="text-red-400 text-center py-8">Erreur : utilisateur non connecté</p>';
+                    return;
+                }
+
+                // Charger les données du profil
+                const userDoc = await firebase.firestore().collection('users').doc(currentUserId).get();
+                
+                if (!userDoc.exists) {
+                    visibilityModalContent.innerHTML = '<p class="text-red-400 text-center py-8">Profil non trouvé</p>';
+                    return;
+                }
+
+                const userData = userDoc.data();
+
+                // Vérifier si le profil est complété
+                if (!userData.profileCompleted || !userData.profileInfo) {
+                    visibilityModalContent.innerHTML = `
+                        <div class="text-center py-8">
+                            <i data-lucide="user-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                            <p class="text-gray-400 mb-4">Tu n'as pas encore rempli ton profil.</p>
+                            <button onclick="window.location.href='profile-setup.html'" class="px-6 py-3 rounded-lg bg-primary hover:bg-opacity-90 text-white transition">
+                                Remplir mon profil
+                            </button>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                // Afficher les informations avec toggles
+                let html = '<div class="space-y-4">';
+                const profileData = userData.profileInfo;
+
+                Object.keys(questionLabels).forEach(key => {
+                    if (profileData[key]) {
+                        const info = profileData[key];
+                        let answer = info.answer || '';
+                        const isPublic = info.isPublic || false;
+                        const isEncrypted = info.encrypted || false;
+
+                        // Décrypter le crush secret pour l'affichage
+                        if (key === 'crushSecret' && isEncrypted && answer) {
+                            answer = decryptCrushSecret(answer, currentUserId);
+                        }
+
+                        // Afficher seulement si il y a une réponse
+                        if (!answer || answer.trim() === '') {
+                            return;
+                        }
+
+                        const label = questionLabels[key];
+                        const uniqueId = `modal_toggle_${key}`;
+
+                        html += `
+                            <div class="card p-4 rounded-xl">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-semibold text-primary mb-1">${label}</h3>
+                                        <p class="text-gray-300 text-sm">${answer}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-end space-x-3 pt-3 border-t border-gray-700">
+                                    <span class="text-sm text-gray-400">Privé</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="${uniqueId}" ${isPublic ? 'checked' : ''} class="sr-only peer" onchange="updateProfileVisibility('${key}', this.checked)">
+                                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                    <span class="text-sm text-gray-400">Public</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += '</div>';
+
+                if (html === '<div class="space-y-4"></div>') {
+                    visibilityModalContent.innerHTML = '<p class="text-gray-500 text-center py-8">Aucune information à afficher</p>';
+                } else {
+                    visibilityModalContent.innerHTML = html;
+                }
+
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+                visibilityModalContent.innerHTML = '<p class="text-red-400 text-center py-8">Erreur lors du chargement du profil.</p>';
+            }
+        }
+
+        // Mettre à jour la visibilité d'une information (accessible globalement)
+        window.updateProfileVisibility = async function(key, isPublic) {
+            try {
+                if (!currentUserId) {
+                    alert('Erreur : utilisateur non connecté');
+                    return;
+                }
+
+                // Mettre à jour uniquement le flag isPublic pour cette clé
+                const userRef = firebase.firestore().collection('users').doc(currentUserId);
+                const userDoc = await userRef.get();
+                
+                if (!userDoc.exists || !userDoc.data().profileInfo) {
+                    alert('Erreur : profil non trouvé');
+                    return;
+                }
+
+                const profileInfo = userDoc.data().profileInfo;
+                if (profileInfo[key]) {
+                    profileInfo[key].isPublic = isPublic;
+                    
+                    await userRef.update({
+                        'profileInfo': profileInfo
+                    });
+
+                    console.log(`✅ Visibilité de "${questionLabels[key]}" mise à jour : ${isPublic ? 'Public' : 'Privé'}`);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour de la visibilité:', error);
+                alert('Erreur lors de la mise à jour. Veuillez réessayer.');
+                // Recharger la modale pour restaurer l'état précédent
+                loadVisibilityModalContent();
+            }
+        }
+
+        // Fermer les modales en cliquant sur l'overlay
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
         // Marquer un message comme lu
         async function markAsRead(messageId) {
             try {
@@ -983,6 +1672,24 @@
             
             if (!currentUserId) {
                 voteContent.innerHTML = '<p class="text-red-400 text-center py-8">Vous devez être connecté pour voter.</p>';
+                return;
+            }
+
+            // Vérifier le statut de l'utilisateur
+            const userDoc = await firebase.firestore().collection('users').doc(currentUserId).get();
+            const userData = userDoc.data();
+            const userStatus = userData.status || 'active';
+
+            // Exclure les spectateurs et les utilisateurs bloqués
+            if (userStatus === 'spectator' || userStatus === 'blocked') {
+                voteContent.innerHTML = `
+                    <div class="bg-red-900 bg-opacity-30 border border-red-500 rounded-lg p-4 text-center">
+                        <i data-lucide="ban" class="w-8 h-8 mx-auto mb-2 text-red-400"></i>
+                        <p class="text-red-400 font-bold">Accès refusé</p>
+                        <p class="text-gray-400 text-sm mt-2">Votre statut (${userStatus === 'spectator' ? 'Spectateur' : 'Bloqué'}) ne vous permet pas de participer aux votes.</p>
+                    </div>
+                `;
+                lucide.createIcons();
                 return;
             }
             

@@ -271,3 +271,4 @@ Pour ce projet, **Firebase Cloud Functions** est la meilleure option car :
 - ✅ Pas de serveur à gérer
 - ✅ Intégration native
 
+

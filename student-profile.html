@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infos sur l'Élève — Fête Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #ff6f61;
+            --secondary: #f9c74f;
+            --bg-dark: #1a0f30;
+            --bg-light: #2c1a4b;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .header-gradient {
+            background-image: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: var(--bg-light);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .info-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <button onclick="window.history.back()" class="absolute top-4 left-4 text-gray-400 hover:text-white transition">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </button>
+            <h1 class="text-4xl font-extrabold mb-2">
+                Infos sur <span class="header-gradient" id="studentName">l'Élève</span>
+            </h1>
+            <p class="text-gray-400 text-sm" id="studentEmail"></p>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-12">
+            <i data-lucide="loader" class="w-12 h-12 mx-auto animate-spin text-primary"></i>
+            <p class="mt-4 text-gray-400">Chargement des informations...</p>
+        </div>
+
+        <!-- Profile Content -->
+        <div id="profileContent" class="hidden">
+            <!-- No Profile Message -->
+            <div id="noProfile" class="card p-8 rounded-xl text-center hidden">
+                <i data-lucide="user-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">Profil non complété</h2>
+                <p class="text-gray-400">Cet élève n'a pas encore rempli son formulaire d'informations.</p>
+            </div>
+
+            <!-- Profile Info -->
+            <div id="profileInfo" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Inclusion du fichier firebase.js -->
+    <script src="firebase.js"></script>
+
+    <script>
+        // Mapping des questions
+        const questionLabels = {
+            crushSecret: 'Crush secret',
+            meilleurAmi: 'Meilleur ami(e)',
+            animalPrefere: 'Animal préféré',
+            platPrefere: 'Plat préféré',
+            sportPrefere: 'Sport préféré',
+            musiquePreferee: 'Groupe/artiste de musique préféré',
+            filmPrefere: 'Film préféré',
+            livrePrefere: 'Livre préféré',
+            passeTemps: 'Passe-temps favori',
+            qualiteAdmiree: 'Qualité admirée',
+            faitRire: 'Ce qui fait rire',
+            superpouvoir: 'Superpouvoir souhaité',
+            endroitEcole: 'Endroit préféré à l\'école',
+            momentJournee: 'Moment préféré de la journée',
+            metierReve: 'Métier de rêve',
+            emojiPrefere: 'Emoji préféré',
+            couleurPreferee: 'Couleur préférée',
+            snackPrefere: 'Snack préféré',
+            motivation: 'Ce qui motive',
+            reveFou: 'Rêve fou'
+        };
+
+        // Fonction de décryptage
+        function decryptCrushSecret(encryptedText, userId) {
+            if (!encryptedText || encryptedText.trim() === '') return '';
+            
+            try {
+                const decoded = atob(encryptedText);
+                const parts = decoded.split('|');
+                if (parts.length !== 2) return encryptedText;
+                
+                const encrypted = parts[0];
+                const key = parseInt(parts[1]);
+                
+                let decrypted = '';
+                for (let i = 0; i < encrypted.length; i++) {
+                    const code = encrypted.charCodeAt(i);
+                    
+                    if (code >= 65 && code <= 90) {
+                        let newCode = code - 65 - key;
+                        if (newCode < 0) newCode += 26;
+                        decrypted += String.fromCharCode(newCode + 65);
+                    } else if (code >= 97 && code <= 122) {
+                        let newCode = code - 97 - key;
+                        if (newCode < 0) newCode += 26;
+                        decrypted += String.fromCharCode(newCode + 97);
+                    } else {
+                        decrypted += encrypted[i];
+                    }
+                }
+                
+                return decrypted;
+            } catch (error) {
+                console.error('Erreur lors du décryptage:', error);
+                return encryptedText;
+            }
+        }
+
+        // Vérifier l'authentification et le rôle
+        async function checkAuth() {
+            const user = await new Promise(resolve => {
+                const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                    unsubscribe();
+                    resolve(u);
+                });
+            });
+
+            if (!user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+
+            const userData = await getUserRole(user.uid);
+            return { user, userData };
+        }
+
+        // Charger le profil
+        async function loadProfile() {
+            const loading = document.getElementById('loading');
+            const profileContent = document.getElementById('profileContent');
+            const noProfile = document.getElementById('noProfile');
+            const profileInfo = document.getElementById('profileInfo');
+
+            try {
+                // Récupérer l'ID de l'élève depuis l'URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const studentId = urlParams.get('id');
+
+                if (!studentId) {
+                    alert('ID de l\'élève manquant');
+                    window.history.back();
+                    return;
+                }
+
+                // Vérifier l'authentification
+                const authResult = await checkAuth();
+                if (!authResult) return;
+
+                const { user, userData } = authResult;
+                const isAdmin = userData.role === 'admin' || userData.role === 'professeur' || userData.role === 'teacher';
+
+                // Vérifier si la visibilité des profils est activée (pour les non-admins)
+                if (!isAdmin) {
+                    const settingsDoc = await firebase.firestore().collection('settings').doc('profileVisibility').get();
+                    if (!settingsDoc.exists || !settingsDoc.data().enabled) {
+                        alert('La visibilité des profils n\'est pas activée pour le moment.');
+                        window.history.back();
+                        return;
+                    }
+                }
+
+                // Charger les données de l'élève
+                console.log('Recherche de l\'élève avec ID:', studentId);
+                const studentDoc = await firebase.firestore().collection('users').doc(studentId).get();
+                
+                if (!studentDoc.exists) {
+                    console.error('Document non trouvé pour ID:', studentId);
+                    alert('Élève non trouvé. ID: ' + studentId);
+                    // Rediriger vers admin.html si admin, sinon eleve.html
+                    if (isAdmin) {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'eleve.html';
+                    }
+                    return;
+                }
+
+                const studentData = studentDoc.data();
+                
+                // Afficher le nom et l'email
+                document.getElementById('studentName').textContent = studentData.fullName || 'Élève';
+                document.getElementById('studentEmail').textContent = studentData.email || '';
+
+                // Vérifier si le profil est complété
+                if (!studentData.profileCompleted || !studentData.profileInfo) {
+                    loading.classList.add('hidden');
+                    profileContent.classList.remove('hidden');
+                    noProfile.classList.remove('hidden');
+                    return;
+                }
+
+                // Afficher les informations
+                profileInfo.innerHTML = '';
+                const profileData = studentData.profileInfo;
+
+                Object.keys(questionLabels).forEach(key => {
+                    if (profileData[key]) {
+                        const info = profileData[key];
+                        let answer = info.answer || '';
+                        const isPublic = info.isPublic || false;
+                        const isEncrypted = info.encrypted || false;
+
+                        // Si c'est le crush secret et qu'il est encrypté, le décrypter
+                        if (key === 'crushSecret' && isEncrypted && answer) {
+                            answer = decryptCrushSecret(answer, studentId);
+                        }
+
+                        // Pour les non-admins, n'afficher que les infos publiques
+                        if (!isAdmin && !isPublic) {
+                            return; // Skip cette info
+                        }
+
+                        // Afficher seulement si il y a une réponse
+                        if (!answer || answer.trim() === '') {
+                            return;
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = 'card p-6 rounded-xl info-card';
+                        
+                        const label = questionLabels[key];
+                        const isPrivate = !isPublic && isAdmin;
+                        
+                        card.innerHTML = `
+                            <div class="flex items-start justify-between mb-2">
+                                <h3 class="text-lg font-semibold text-primary">${label}</h3>
+                                ${isPrivate ? '<span class="text-xs bg-red-500 bg-opacity-30 text-red-300 px-2 py-1 rounded">Privé</span>' : ''}
+                                ${isPublic ? '<span class="text-xs bg-green-500 bg-opacity-30 text-green-300 px-2 py-1 rounded">Public</span>' : ''}
+                            </div>
+                            <p class="text-gray-300">${answer}</p>
+                        `;
+                        
+                        profileInfo.appendChild(card);
+                    }
+                });
+
+                if (profileInfo.children.length === 0) {
+                    loading.classList.add('hidden');
+                    profileContent.classList.remove('hidden');
+                    noProfile.classList.remove('hidden');
+                } else {
+                    loading.classList.add('hidden');
+                    profileContent.classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+                alert('Erreur lors du chargement du profil');
+                window.history.back();
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadProfile();
+        });
+    </script>
+</body>
+</html>
+

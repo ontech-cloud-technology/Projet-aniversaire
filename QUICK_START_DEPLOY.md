@@ -62,3 +62,4 @@ const EMAIL_API_URL = 'https://us-central1-projet-aniversaire.cloudfunctions.net
 
 Voir `DEPLOIEMENT.md` pour les détails complets.
 
+
