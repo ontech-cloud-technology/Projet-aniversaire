@@ -25,6 +25,7 @@ Thumbs.db
 presentation-slides/*.png
 presentation-slides/*.jpg
 presentation-slides/*.jpeg
+presentation-slides/*.pptx
 !presentation-slides/.gitkeep
 
 
