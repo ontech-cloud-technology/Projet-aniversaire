@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Connexion — Fête Express</title>
-  <!-- Utilisation de Manrope comme demandé pour le style moderne -->
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
   
   <!-- Intégration des dépendances Firebase CDN pour les scripts de base -->
@@ -12,35 +11,53 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   
-  <!-- Le style CSS est intégré ici pour la page de connexion -->
   <style>
-    /* VARIABLES ET STYLE DE BASE (Adapté de votre style) */
+    /* VARIABLES ET STYLE DE BASE */
     :root {
-      --bg: radial-gradient(circle at top left, #1a0f30, #0a041c); /* Violet-foncé */
+      --bg: radial-gradient(circle at top left, #1a0f30, #0a041c);
       --glass: rgba(255, 255, 255, 0.04);
-      --accent: linear-gradient(90deg, #ff6f61, #f9c74f); /* Corail à Or (festif) */
+      --accent: linear-gradient(90deg, #ff6f61, #f9c74f);
+      --primary: #ff6f61;
+      --secondary: #f9c74f;
       --radius: 16px;
       --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      --muted: #c8c8d4; /* Texte moins fort */
+      --muted: #c8c8d4;
       --error-color: #f87171;
     }
 
-    html, body {
-      height: 100%;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
       background: var(--bg);
       font-family: 'Manrope', sans-serif;
       color: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
 
-    .card {
-      width: 95%;
-      max-width: 420px;
-      padding: 32px;
+    /* Container principal plein écran */
+    .login-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 20px;
+    }
+
+    /* Carte de connexion centrée */
+    .login-card {
+      width: 100%;
+      max-width: 480px;
+      padding: 48px 40px;
       border-radius: var(--radius);
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.05);
@@ -48,6 +65,7 @@
       box-shadow: var(--shadow);
       position: relative;
       animation: fadeIn 0.8s ease-out;
+      z-index: 10;
     }
 
     @keyframes fadeIn {
@@ -55,114 +73,125 @@
       to {opacity: 1; transform: translateY(0);}
     }
 
+    /* Header */
+    .login-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
     h1 {
       font-weight: 800;
-      font-size: 1.8em;
-      margin: 0;
+      font-size: 2.5em;
+      margin: 0 0 12px 0;
       background: var(--accent);
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
     }
 
     .lead {
-      font-size: 14px;
+      font-size: 16px;
       color: var(--muted);
-      margin-bottom: 20px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Formulaire */
+    .login-form {
+      width: 100%;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 8px;
     }
 
     input {
       width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
+      padding: 16px 18px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
       color: #fff;
-      font-size: 14px;
-      margin-bottom: 16px;
-      transition: all 0.2s ease;
+      font-size: 16px;
+      font-family: 'Manrope', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
     }
 
     input:focus {
-      border-color: #ff6f61; /* Corail */
-      box-shadow: 0 0 12px rgba(255, 111, 97, 0.4);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.1);
       outline: none;
+      background: rgba(255,255,255,0.07);
     }
 
     button {
       width: 100%;
       border: none;
       background: var(--accent);
-      padding: 12px 0;
-      border-radius: 10px;
-      color: #1a0f30; /* Couleur très foncée du bg pour un bon contraste */
+      padding: 16px 0;
+      border-radius: 12px;
+      color: #1a0f30;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 16px;
+      font-family: 'Manrope', sans-serif;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.3s ease;
+      margin-top: 8px;
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(255, 111, 97, 0.4);
+      box-shadow: 0 10px 30px rgba(255, 111, 97, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
     }
 
     #error {
       color: var(--error-color);
-      font-size: 13px;
-      margin-top: 10px;
+      font-size: 14px;
+      margin-top: 16px;
       text-align: center;
       display: none;
+      padding: 12px;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 8px;
     }
 
-    /* Footer */
-    .site-footer {
-        background: linear-gradient(135deg, #1a0f30, #2c1a4b);
-        color: #9ca3af;
-        padding: 2rem 0 1rem;
-        margin-top: auto;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .site-footer a {
-        color: #9ca3af;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .site-footer a:hover {
-        color: #ffffff;
-    }
-
-    .footer-links {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 1rem;
-        font-size: 0.875rem;
-    }
-
-    .footer-copyright {
-        text-align: center;
-        font-size: 0.875rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* OVERLAY & ANIMATIONS */
+    /* OVERLAY & ANIMATIONS - Prend toute la page */
     #overlay {
       position: fixed;
       inset: 0;
-      background: rgba(10,4,28,0.8);
-      backdrop-filter: blur(8px);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 4, 28, 0.95);
+      backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.6s ease;
-      z-index: 100;
+      z-index: 1000;
     }
 
     #overlay.show {
@@ -173,10 +202,12 @@
     .welcome {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
-      padding: 40px;
+      padding: 48px 40px;
       border-radius: var(--radius);
       text-align: center;
       animation: pop 0.6s cubic-bezier(.3, .7, .4, 1);
+      max-width: 500px;
+      width: 90%;
     }
 
     @keyframes pop {
@@ -186,59 +217,162 @@
 
     .welcome h2 {
       margin: 0;
-      font-size: 22px;
+      font-size: 28px;
+      font-weight: 800;
       color: #fff;
+      background: var(--accent);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
     }
 
     .welcome p {
       color: var(--muted);
-      margin-top: 6px;
-      font-size: 14px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.6;
     }
 
     .loading {
       display: flex;
       justify-content: center;
-      gap: 8px;
-      margin-top: 20px;
+      gap: 10px;
+      margin-top: 32px;
     }
 
     .dot {
-      width: 10px; height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: var(--accent);
       animation: float 1.4s infinite ease-in-out;
     }
 
-    .dot:nth-child(2){ animation-delay: 0.2s; }
-    .dot:nth-child(3){ animation-delay: 0.4s; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Effets de fond décoratifs */
+    .bg-decoration {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 111, 97, 0.1), transparent);
+      filter: blur(60px);
+    }
+
+    .bg-circle-1 {
+      width: 400px;
+      height: 400px;
+      top: -100px;
+      right: -100px;
+      animation: float-bg 20s infinite ease-in-out;
+    }
+
+    .bg-circle-2 {
+      width: 300px;
+      height: 300px;
+      bottom: -50px;
+      left: -50px;
+      background: radial-gradient(circle, rgba(249, 199, 79, 0.1), transparent);
+      animation: float-bg 15s infinite ease-in-out reverse;
+    }
+
+    @keyframes float-bg {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .login-card {
+        padding: 32px 24px;
+        max-width: 100%;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .lead {
+        font-size: 14px;
+      }
+
+      input, button {
+        padding: 14px 16px;
+        font-size: 15px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <div class="card">
-    <h1>Fête Express 🎉</h1>
-    <p class="lead">Connectez-vous pour voir le calendrier des fêtes de la classe.</p>
-
-    <form id="loginForm">
-      <input id="email" type="email" placeholder="Adresse e-mail" required />
-      <input id="password" type="password" placeholder="Mot de passe" required />
-      <button type="submit">Se connecter</button>
-      <div id="error"></div>
-    </form>
+  <!-- Décorations de fond -->
+  <div class="bg-decoration">
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
   </div>
 
+  <!-- Container principal -->
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>Fête Express 🎉</h1>
+        <p class="lead">Connectez-vous pour accéder au calendrier des fêtes de la classe</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <input 
+            id="email" 
+            type="email" 
+            placeholder="votre.email@cslaval.qc.ca" 
+            required 
+            autocomplete="email"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input 
+            id="password" 
+            type="password" 
+            placeholder="Votre mot de passe" 
+            required 
+            autocomplete="current-password"
+          />
+        </div>
+        
+        <button type="submit">Se connecter</button>
+        <div id="error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Overlay de vérification (prend toute la page) -->
   <div id="overlay">
     <div class="welcome">
       <h2 id="welcomeTitle">Bienvenue</h2>
       <p id="welcomeSub">Vérification des rôles et préparation du calendrier…</p>
       <div class="loading">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
       </div>
     </div>
   </div>
@@ -353,7 +487,5 @@
       }
     });
   </script>
-
-
 </body>
 </html>
