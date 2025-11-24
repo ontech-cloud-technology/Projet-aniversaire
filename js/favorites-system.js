@@ -107,3 +107,5 @@ class FavoritesSystem {
 // Exposer globalement
 window.FavoritesSystem = FavoritesSystem;
 
+
+

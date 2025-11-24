@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Logs d'Activité — 203 Celebration Hub</title>
+    <title>Logs d'Activité — Fêtes Express</title>
     <!-- Chargement de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -114,30 +114,59 @@
         .role-eleve { color: #fde047; }
 
         #sidenav {
-            width: 250px;
-            min-width: 250px;
-            background-color: #24143a;
+            width: 280px;
+            min-width: 280px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 24px 0;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 10;
         }
+
         .nav-item {
             display: flex;
             align-items: center;
             padding: 12px 24px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
             text-decoration: none;
-            color: var(--text-color);
+            color: var(--text-secondary);
+            border-radius: 12px;
+            margin: 4px 12px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
         .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--text-color);
+            transform: translateX(4px);
         }
+
         .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid var(--primary);
-            padding-left: 20px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-item.active::before {
+            transform: scaleY(1);
         }
 
         @media (max-width: 768px) {
@@ -157,8 +186,21 @@
 <body>
     <!-- Menu Latéral de Navigation -->
     <nav id="sidenav">
-        <div class="px-6 mb-8 text-2xl font-extrabold header-gradient">203 Hub</div>
+        <div class="px-6 py-6 mb-4 border-b border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <i data-lucide="shield" class="w-7 h-7 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black">
+                        <span class="header-gradient">Fêtes Express</span>
+                    </h2>
+                    <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
+                </div>
+            </div>
+        </div>
         
+        <!-- Sections de navigation -->
         <a href="calendrier.html" class="nav-item">
             <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
             Calendrier des Fêtes
@@ -171,11 +213,37 @@
             <i data-lucide="activity" class="w-5 h-5 mr-3"></i>
             Logs d'Activité
         </a>
-        <a onclick="signOutAndRedirect()" class="nav-item mt-auto text-red-400 hover:text-white">
+        <a href="send-email.html" class="nav-item">
+            <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
+            Envoyer un Email
+        </a>
+        <a href="fetes-tracking.html" class="nav-item">
+            <i data-lucide="trending-up" class="w-5 h-5 mr-3"></i>
+            Suivi des Fêtes
+        </a>
+        <a href="presentation-admin.html" class="nav-item">
+            <i data-lucide="presentation" class="w-5 h-5 mr-3"></i>
+            Présentation
+        </a>
+        
+        <!-- Séparateur et déconnexion -->
+        <div class="border-t border-gray-700 my-2"></div>
+        <a onclick="signOutAndRedirect()" class="nav-item text-red-400 hover:text-white hover:bg-red-900 hover:bg-opacity-20">
             <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
             Déconnexion
         </a>
-        <p class="text-xs px-6 py-2 text-gray-500 mt-2">Connecté: <span id="welcomeName" class="text-gray-400"></span></p>
+        
+        <div class="px-6 py-4 mt-4 border-t border-gray-700">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500">Connecté</p>
+                    <p id="welcomeName" class="text-sm font-semibold text-white truncate"></p>
+                </div>
+            </div>
+        </div>
     </nav>
     
     <!-- Écran de chargement -->
@@ -311,14 +379,124 @@
         let currentPage = 1;
         const logsPerPage = 50;
 
+        // Codes d'actions (décompression)
+        const ACTION_CODES_REVERSE = {
+            'pl': 'page_load',
+            'pu': 'page_unload',
+            'clk': 'button_click',
+            'fs': 'form_submit',
+            'fc': 'form_change',
+            'kp': 'key_press',
+            'scr': 'scroll',
+            'wf': 'window_focus',
+            'wb': 'window_blur',
+            'wr': 'window_resize',
+            'err': 'javascript_error',
+            'upr': 'unhandled_promise_rejection',
+            'su': 'session_update',
+            'lg': 'login',
+            'lo': 'logout',
+            'cr': 'create',
+            'up': 'update',
+            'del': 'delete'
+        };
+
+        // Mapping des champs courts vers longs (décompression)
+        const FIELD_MAP_REVERSE = {
+            'd': 'description',
+            'el': 'elementClicked',
+            'tag': 'tagName',
+            'id': 'id',
+            'cls': 'className',
+            'txt': 'textContent',
+            'href': 'href',
+            'type': 'buttonType',
+            'fid': 'formId',
+            'act': 'formAction',
+            'fd': 'formData',
+            'name': 'elementName',
+            'val': 'newValue',
+            'key': 'key',
+            'kc': 'keyCode',
+            'ctrl': 'ctrlKey',
+            'shift': 'shiftKey',
+            'alt': 'altKey',
+            'y': 'scrollY',
+            'x': 'scrollX',
+            'h': 'documentHeight',
+            'vh': 'viewportHeight',
+            'p': 'page',
+            'ref': 'referrer',
+            'dur': 'sessionDuration',
+            'clk': 'clickCount',
+            'scr': 'scrollCount',
+            'sz': 'newSize',
+            'msg': 'errorMessage',
+            'file': 'errorFile',
+            'line': 'errorLine',
+            'reason': 'errorReason',
+            'top': 'timeOnPage',
+            'em': 'email',
+            'r': 'role',
+            'mod': 'modifiers',
+            'md': 'modifiedData',
+            'loc': 'location',
+            'ua': 'userAgent',
+            'lang': 'language',
+            'res': 'screenResolution',
+            'dev': 'deviceType',
+            'uid': 'userId',
+            'a': 'action',
+            't': 'timestamp'
+        };
+
+        /**
+         * Décompresse un log pour l'affichage
+         */
+        function decompressLog(log) {
+            const decompressed = { ...log };
+            
+            // Décompresser l'action
+            if (log.a && ACTION_CODES_REVERSE[log.a]) {
+                decompressed.action = ACTION_CODES_REVERSE[log.a];
+            } else if (log.a) {
+                decompressed.action = log.a;
+            }
+            
+            // Décompresser les champs
+            for (const [shortKey, longKey] of Object.entries(FIELD_MAP_REVERSE)) {
+                if (log[shortKey] !== undefined) {
+                    decompressed[longKey] = log[shortKey];
+                    if (shortKey !== longKey) {
+                        delete decompressed[shortKey];
+                    }
+                }
+            }
+            
+            // Mapper les anciens champs pour compatibilité
+            if (log.uid && !decompressed.userId) decompressed.userId = log.uid;
+            if (log.a && !decompressed.action) decompressed.action = log.a;
+            if (log.t && !decompressed.timestamp) decompressed.timestamp = log.t;
+            if (log.p && !decompressed.page) decompressed.page = log.p;
+            
+            // Décompresser deviceType
+            if (log.dev === 'm') decompressed.deviceType = 'mobile';
+            else if (log.dev === 'd') decompressed.deviceType = 'desktop';
+            
+            return decompressed;
+        }
+
         // Fonctions Firebase pour les logs
         async function getActivityLogs() {
             try {
                 const snapshot = await db.collection('activity_logs').orderBy('timestamp', 'desc').get();
-                return snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+                return snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...decompressLog(data)
+                    };
+                });
             } catch (error) {
                 console.error('Erreur lors de la récupération des logs:', error);
                 return [];
@@ -376,14 +554,19 @@
 
             logsToShow.forEach(log => {
                 const row = document.createElement('tr');
+                const userId = log.userId || log.uid || 'N/A';
+                const action = log.action || log.a || 'unknown';
+                const timestamp = log.timestamp || log.t;
+                const userAgent = log.userAgent || log.ua || 'N/A';
+                
                 row.innerHTML = `
-                    <td class="px-4 py-3 text-sm">${getUserName(log.userId)}</td>
+                    <td class="px-4 py-3 text-sm">${getUserName(userId)}</td>
                     <td class="px-4 py-3 text-sm">
-                        <span class="px-2 py-1 rounded text-xs ${getActionClass(log.action)}">${getActionLabel(log.action)}</span>
+                        <span class="px-2 py-1 rounded text-xs ${getActionClass(action)}">${getActionLabel(action)}</span>
                     </td>
-                    <td class="px-4 py-3 text-sm">${new Date(log.timestamp?.toDate()).toLocaleString('fr-FR')}</td>
+                    <td class="px-4 py-3 text-sm">${timestamp?.toDate ? new Date(timestamp.toDate()).toLocaleString('fr-FR') : 'N/A'}</td>
                     <td class="px-4 py-3 text-sm hidden md:table-cell">${log.ip || 'N/A'}</td>
-                    <td class="px-4 py-3 text-sm hidden lg:table-cell">${log.userAgent || 'N/A'}</td>
+                    <td class="px-4 py-3 text-sm hidden lg:table-cell">${userAgent.substring(0, 50)}${userAgent.length > 50 ? '...' : ''}</td>
                     <td class="px-4 py-3 text-center">
                         <button onclick="showDetails('${log.id}')" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs">
                             Voir
@@ -437,37 +620,44 @@
             const log = allLogs.find(l => l.id === logId);
             if (!log) return;
 
+            // Décompresser le log pour l'affichage
+            const decompressed = decompressLog(log);
+            const userId = decompressed.userId || log.uid || 'N/A';
+            const action = decompressed.action || log.a || 'unknown';
+            const timestamp = decompressed.timestamp || log.t;
+
             const detailsContent = document.getElementById('detailsContent');
             detailsContent.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><strong>Utilisateur:</strong> ${getUserName(log.userId)}</div>
-                    <div><strong>UID:</strong> ${log.userId || 'N/A'}</div>
-                    <div><strong>Action:</strong> ${getActionLabel(log.action)}</div>
-                    <div><strong>Timestamp:</strong> ${new Date(log.timestamp?.toDate()).toLocaleString('fr-FR')}</div>
-                    <div><strong>IP:</strong> ${log.ip || 'N/A'}</div>
-                    <div><strong>Navigateur:</strong> ${log.userAgent || 'N/A'}</div>
-                    <div><strong>Appareil:</strong> ${log.deviceType || 'N/A'}</div>
+                    <div><strong>Utilisateur:</strong> ${getUserName(userId)}</div>
+                    <div><strong>UID:</strong> ${userId}</div>
+                    <div><strong>Action:</strong> ${getActionLabel(action)}</div>
+                    <div><strong>Timestamp:</strong> ${timestamp?.toDate ? new Date(timestamp.toDate()).toLocaleString('fr-FR') : 'N/A'}</div>
+                    <div><strong>IP:</strong> ${log.ip || decompressed.ip || 'N/A'}</div>
+                    <div><strong>Navigateur:</strong> ${decompressed.userAgent || log.ua || 'N/A'}</div>
+                    <div><strong>Appareil:</strong> ${decompressed.deviceType || (log.dev === 'm' ? 'mobile' : log.dev === 'd' ? 'desktop' : 'N/A')}</div>
                     <div><strong>Système d'exploitation:</strong> ${log.os || 'N/A'}</div>
-                    <div><strong>Localisation:</strong> ${log.location || 'N/A'}</div>
-                    <div><strong>Page:</strong> ${log.page || 'N/A'}</div>
-                    <div><strong>Élément cliqué:</strong> ${log.elementClicked || 'N/A'}</div>
-                    <div><strong>Données modifiées:</strong> ${log.modifiedData ? JSON.stringify(log.modifiedData, null, 2) : 'N/A'}</div>
-                    <div><strong>Durée de session:</strong> ${log.sessionDuration ? formatDuration(log.sessionDuration) : 'N/A'}</div>
-                    <div><strong>Référent:</strong> ${log.referrer || 'N/A'}</div>
-                    <div><strong>Langue:</strong> ${log.language || 'N/A'}</div>
+                    <div><strong>Localisation:</strong> ${decompressed.location || log.loc || 'N/A'}</div>
+                    <div><strong>Page:</strong> ${decompressed.page || log.p || 'N/A'}</div>
+                    <div><strong>Élément cliqué:</strong> ${decompressed.elementClicked || log.el || 'N/A'}</div>
+                    <div><strong>Données modifiées:</strong> ${decompressed.modifiedData || log.md ? (typeof (decompressed.modifiedData || log.md) === 'string' ? decompressed.modifiedData || log.md : JSON.stringify(decompressed.modifiedData || log.md, null, 2)) : 'N/A'}</div>
+                    <div><strong>Durée de session:</strong> ${decompressed.sessionDuration || log.dur ? formatDuration(decompressed.sessionDuration || log.dur) : 'N/A'}</div>
+                    <div><strong>Référent:</strong> ${decompressed.referrer || log.ref || 'N/A'}</div>
+                    <div><strong>Langue:</strong> ${decompressed.language || log.lang || 'N/A'}</div>
                     <div><strong>Timezone:</strong> ${log.timezone || 'N/A'}</div>
-                    <div><strong>Résolution écran:</strong> ${log.screenResolution || 'N/A'}</div>
-                    <div><strong>Cookies activés:</strong> ${log.cookiesEnabled ? 'Oui' : 'Non'}</div>
-                    <div><strong>JavaScript activé:</strong> ${log.jsEnabled ? 'Oui' : 'Non'}</div>
+                    <div><strong>Résolution écran:</strong> ${decompressed.screenResolution || log.res || 'N/A'}</div>
+                    <div><strong>Cookies activés:</strong> ${log.cookiesEnabled !== undefined ? (log.cookiesEnabled ? 'Oui' : 'Non') : 'N/A'}</div>
+                    <div><strong>JavaScript activé:</strong> ${log.jsEnabled !== undefined ? (log.jsEnabled ? 'Oui' : 'Non') : 'N/A'}</div>
                     <div><strong>Plugins:</strong> ${log.plugins || 'N/A'}</div>
-                    <div><strong>Touchscreen:</strong> ${log.touchScreen ? 'Oui' : 'Non'}</div>
-                    <div><strong>Batterie:</strong> ${log.batteryLevel || 'N/A'}</div>
-                    <div><strong>Connexion:</strong> ${log.connectionSpeed || 'N/A'}</div>
-                    <div><strong>Downlink:</strong> ${log.connectionDownlink || 'N/A'}</div>
-                    <div><strong>RTT:</strong> ${log.connectionRtt ? `${log.connectionRtt}ms` : 'N/A'}</div>
-                    <div><strong>Charge batterie:</strong> ${log.batteryCharging !== undefined ? (log.batteryCharging ? 'Oui' : 'Non') : 'N/A'}</div>
+                    <div><strong>Touchscreen:</strong> ${log.touchScreen !== undefined ? (log.touchScreen ? 'Oui' : 'Non') : 'N/A'}</div>
+                    <div><strong>Batterie:</strong> ${log.bat !== undefined ? `${log.bat}%` : log.batteryLevel || 'N/A'}</div>
+                    <div><strong>Connexion:</strong> ${log.conn || log.connectionSpeed || 'N/A'}</div>
+                    <div><strong>Downlink:</strong> ${log.down || log.connectionDownlink || 'N/A'}</div>
+                    <div><strong>RTT:</strong> ${log.rtt ? `${log.rtt}ms` : (log.connectionRtt ? `${log.connectionRtt}ms` : 'N/A')}</div>
+                    <div><strong>Charge batterie:</strong> ${log.batChg !== undefined ? (log.batChg ? 'Oui' : 'Non') : (log.batteryCharging !== undefined ? (log.batteryCharging ? 'Oui' : 'Non') : 'N/A')}</div>
                 </div>
-                <div class="mt-4"><strong>Description:</strong> ${log.description || 'N/A'}</div>
+                <div class="mt-4"><strong>Description:</strong> ${decompressed.description || log.d || 'N/A'}</div>
+                ${Object.keys(log).length > 0 ? `<div class="mt-4"><strong>Données brutes:</strong> <pre class="text-xs bg-gray-800 p-2 rounded overflow-auto max-h-40">${JSON.stringify(log, null, 2)}</pre></div>` : ''}
             `;
             openModal('detailsModal');
         }
@@ -479,10 +669,18 @@
             const endDate = filterDateEnd.value ? new Date(filterDateEnd.value) : null;
 
             filteredLogs = allLogs.filter(log => {
-                if (userFilter && log.userId !== userFilter) return false;
-                if (actionFilter && log.action !== actionFilter) return false;
-                if (startDate && log.timestamp?.toDate() < startDate) return false;
-                if (endDate && log.timestamp?.toDate() > endDate) return false;
+                const userId = log.userId || log.uid;
+                const action = log.action || log.a;
+                const timestamp = log.timestamp || log.t;
+                
+                if (userFilter && userId !== userFilter) return false;
+                if (actionFilter) {
+                    // Décompresser l'action pour la comparaison
+                    const decompressedAction = ACTION_CODES_REVERSE[action] || action;
+                    if (decompressedAction !== actionFilter) return false;
+                }
+                if (startDate && timestamp?.toDate && timestamp.toDate() < startDate) return false;
+                if (endDate && timestamp?.toDate && timestamp.toDate() > endDate) return false;
                 return true;
             });
 
@@ -550,16 +748,17 @@
                 return;
             }
 
+            // Vérifier que l'email est exactement admin@ontech.com
+            if (user.email !== 'admin@ontech.com') {
+                // Rediriger sans alerte pour ne pas révéler l'existence de la page
+                window.location.href = 'eleve.html';
+                return;
+            }
+
             const userData = await getUserRole(user.uid);
             const role = userData.role;
             
             welcomeName.textContent = `${userData.name || userData.email || 'Admin'} (${role})`;
-
-            if (role !== 'admin') {
-                alert(`Accès refusé. Rôle actuel: ${role}.`);
-                window.location.href = 'eleve.html';
-                return;
-            }
 
             loadingScreen.style.display = 'none';
             logsContent.classList.remove('hidden');

@@ -506,18 +506,17 @@
             <div class="mb-6">
                 <div class="flex items-center space-x-3 mb-6">
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        <i data-lucide="menu" class="w-5 h-5 text-white"></i>
+                        <i data-lucide="gift" class="w-5 h-5 text-white"></i>
                     </div>
+                    <div>
                     <h2 class="text-xl font-black">
-                        <span class="header-gradient">Navigation</span>
+                            <span class="header-gradient">Fêtes Express</span>
                     </h2>
+                        <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
+                    </div>
                 </div>
                 <nav class="space-y-2">
-                    <button onclick="showView('liste')" id="btnListe" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
-                        <i data-lucide="list" class="w-5 h-5"></i>
-                        <span>Liste</span>
-                    </button>
-                    <button onclick="showView('calendrier')" id="btnCalendrier" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                    <button onclick="showView('calendrier')" id="btnCalendrier" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                         <span>Calendrier</span>
                     </button>
@@ -533,14 +532,6 @@
                     <button onclick="showView('settings')" id="btnSettings" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
                         <i data-lucide="settings" class="w-5 h-5"></i>
                         <span>Paramètres</span>
-                    </button>
-                    <button onclick="showView('stats')" id="btnStats" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
-                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-                        <span>Statistiques & Classements</span>
-                    </button>
-                    <button onclick="showView('favorites')" id="btnFavorites" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
-                        <i data-lucide="heart" class="w-5 h-5"></i>
-                        <span>Mes Favoris</span>
                     </button>
                 </nav>
             </div>
@@ -579,7 +570,7 @@
                     </div>
                     <div>
                         <h1 class="text-3xl md:text-4xl font-black">
-                            <span class="header-gradient" id="pageTitle">Liste des Anniversaires</span>
+                            <span class="header-gradient" id="pageTitle">Calendrier des Anniversaires</span>
                         </h1>
                         <p class="text-sm text-gray-400 mt-1">Fête Express — Classe 203</p>
                     </div>
@@ -589,21 +580,8 @@
             <!-- Annonces -->
             <div id="announcementsBanner" class="mb-6 space-y-3"></div>
 
-            <!-- Vue Liste -->
-            <section id="viewListe" class="card p-6 rounded-xl">
-                <h2 class="text-2xl font-bold mb-4 flex items-center">
-                    <i data-lucide="list" class="w-6 h-6 mr-2"></i>
-                    Prochains Anniversaires
-                </h2>
-                <p class="text-sm text-gray-400 mb-6">Liste des anniversaires à venir dans la classe 203</p>
-                
-                <div id="celebrationsList" class="space-y-4">
-                    <p class="text-gray-500 text-center py-8">Chargement des anniversaires...</p>
-                </div>
-            </section>
-
             <!-- Vue Calendrier -->
-            <section id="viewCalendrier" class="card p-6 rounded-xl hidden">
+            <section id="viewCalendrier" class="card p-6 rounded-xl">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold flex items-center">
                         <i data-lucide="calendar" class="w-6 h-6 mr-2"></i>
@@ -614,10 +592,30 @@
                         Exporter
                     </button>
                 </div>
-                <p class="text-sm text-gray-400 mb-6">Tous les anniversaires de l'année</p>
                 
-                <div id="calendarContainer" class="calendar-grid">
-                    <p class="text-gray-500 text-center py-8 col-span-full">Chargement du calendrier...</p>
+                <!-- Contrôles de vue du calendrier -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="changeCalendarView('month')" id="btnViewMonth" class="px-4 py-2 rounded-lg bg-primary bg-opacity-20 text-primary font-semibold border-2 border-primary transition">
+                            <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                            Mois
+                        </button>
+                        <button onclick="changeCalendarView('week')" id="btnViewWeek" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary hover:bg-opacity-10 transition">
+                            <i data-lucide="calendar-days" class="w-4 h-4 inline mr-2"></i>
+                            Semaine
+                        </button>
+                        <button onclick="changeCalendarView('year')" id="btnViewYear" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary hover:bg-opacity-10 transition">
+                            <i data-lucide="calendar-range" class="w-4 h-4 inline mr-2"></i>
+                            Année
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-4" id="calendarNavigation">
+                        <!-- Navigation sera ajoutée dynamiquement -->
+                    </div>
+                </div>
+                
+                <div id="calendarContainer">
+                    <p class="text-gray-500 text-center py-8">Chargement du calendrier...</p>
                 </div>
             </section>
 
@@ -718,70 +716,6 @@
                 </div>
             </section>
 
-            <!-- Vue Statistiques & Classements -->
-            <section id="viewStats" class="card p-6 rounded-xl hidden">
-                <h2 class="text-2xl font-bold mb-6 flex items-center">
-                    <i data-lucide="bar-chart-3" class="w-6 h-6 mr-2"></i>
-                    Statistiques & Classements
-                </h2>
-                
-                <!-- Onglets -->
-                <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-700">
-                    <button onclick="showStatsTab('personal')" id="statsTabPersonal" class="px-4 py-2 rounded-t-lg bg-primary bg-opacity-20 text-primary font-semibold border-b-2 border-primary">
-                        Mes Statistiques
-                    </button>
-                    <button onclick="showStatsTab('leaderboard')" id="statsTabLeaderboard" class="px-4 py-2 rounded-t-lg text-gray-400 hover:text-white transition">
-                        Classements
-                    </button>
-                </div>
-
-                <!-- Contenu Statistiques Personnelles -->
-                <div id="statsPersonalView">
-                    <div id="statsContent">
-                        <p class="text-gray-500 text-center py-8">Chargement...</p>
-                    </div>
-                </div>
-
-                <!-- Contenu Classements -->
-                <div id="statsLeaderboardView" class="hidden">
-                    <p class="text-sm text-gray-400 mb-6">Vois où tu te situes parmi tes camarades !</p>
-                    
-                    <!-- Onglets de classement -->
-                    <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-700">
-                        <button onclick="loadLeaderboard('messages')" id="leaderboardTabMessages" class="px-4 py-2 rounded-t-lg bg-primary bg-opacity-20 text-primary font-semibold border-b-2 border-primary">
-                            Messages
-                        </button>
-                        <button onclick="loadLeaderboard('reputation')" id="leaderboardTabReputation" class="px-4 py-2 rounded-t-lg text-gray-400 hover:text-white transition">
-                            Réputation
-                        </button>
-                        <button onclick="loadLeaderboard('points')" id="leaderboardTabPoints" class="px-4 py-2 rounded-t-lg text-gray-400 hover:text-white transition">
-                            Points
-                        </button>
-                        <button onclick="loadLeaderboard('activeDays')" id="leaderboardTabActiveDays" class="px-4 py-2 rounded-t-lg text-gray-400 hover:text-white transition">
-                            Jours Actifs
-                        </button>
-                        <button onclick="loadLeaderboard('monthly')" id="leaderboardTabMonthly" class="px-4 py-2 rounded-t-lg text-gray-400 hover:text-white transition">
-                            Ce Mois
-                        </button>
-                    </div>
-                    
-                    <div id="leaderboardContent">
-                        <p class="text-gray-500 text-center py-8">Sélectionne un classement ci-dessus</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Vue Favoris -->
-            <section id="viewFavorites" class="card p-6 rounded-xl hidden">
-                <h2 class="text-2xl font-bold mb-6 flex items-center">
-                    <i data-lucide="heart" class="w-6 h-6 mr-2"></i>
-                    Mes Favoris
-                </h2>
-                <p class="text-sm text-gray-400 mb-6">Les anniversaires que tu as marqués comme favoris</p>
-                <div id="favoritesContent">
-                    <p class="text-gray-500 text-center py-8">Chargement...</p>
-                </div>
-            </section>
 
             <!-- Vue Paramètres -->
             <section id="viewSettings" class="card p-6 rounded-xl hidden">
@@ -1010,14 +944,12 @@
 
     <!-- Inclusion du fichier firebase.js -->
     <script src="firebase.js"></script>
+    <!-- Système de logging automatique des activités -->
+    <script src="js/activity-logger.js"></script>
     <!-- Gestionnaire de thème (mode sombre/clair) -->
     <script src="js/theme-manager.js"></script>
     <script src="js/progression-system.js"></script>
     <script src="js/vote-system.js"></script>
-    <!-- Système de statistiques -->
-    <script src="js/stats-system.js"></script>
-    <!-- Système de favoris -->
-    <script src="js/favorites-system.js"></script>
     <!-- Système de classements -->
     <script src="js/leaderboard-system.js"></script>
     <!-- Système d'annonces -->
@@ -1032,7 +964,6 @@
         const mainContent = document.getElementById('mainContent');
         const welcomeName = document.getElementById('welcomeName');
         const adminBtn = document.getElementById('adminBtn');
-        const celebrationsList = document.getElementById('celebrationsList');
         const calendarContainer = document.getElementById('calendarContainer');
         const pageTitle = document.getElementById('pageTitle');
         const notificationBadge = document.getElementById('notificationBadge');
@@ -1124,16 +1055,6 @@
             // Charger la photo de profil dans l'en-tête
             await loadHeaderProfilePhoto();
 
-                // Initialiser le système de statistiques et mettre à jour les jours actifs
-                try {
-                    if (!statsSystem) {
-                        statsSystem = new StatsSystem(currentUserId);
-                    }
-                    await statsSystem.updateActiveDays();
-                } catch (statsError) {
-                    console.error('Erreur lors de la mise à jour des statistiques:', statsError);
-                    // Continuer même si les stats échouent
-                }
 
             // Récupérer la date d'anniversaire de l'utilisateur
             if (docData && docData.email) {
@@ -1176,6 +1097,11 @@
             loadCelebrations();
             loadNotifications();
                 loadAnnouncements();
+            // Initialiser le calendrier par défaut
+            if (!currentCalendarView) {
+                currentCalendarView = 'month';
+            }
+            loadCalendarView();
             } catch (error) {
                 console.error('Erreur lors de la vérification de l\'authentification:', error);
                 // S'assurer que l'écran de chargement est masqué même en cas d'erreur
@@ -1221,9 +1147,7 @@
 
                     // Charger la vue actuelle
                     const currentView = document.querySelector('.sidebar-item.active')?.id;
-                    if (currentView === 'btnListe') {
-                        loadListView();
-                    } else if (currentView === 'btnCalendrier') {
+                    if (currentView === 'btnCalendrier') {
                         loadCalendarView();
                     } else if (currentView === 'btnNotifications') {
                         loadNotificationsView();
@@ -1233,102 +1157,10 @@
                     loadNotifications();
                 }, error => {
                     console.error("Erreur lors du chargement:", error);
-                    celebrationsList.innerHTML = '<p class="text-red-400 text-center py-8">Erreur de chargement des données.</p>';
+                    calendarContainer.innerHTML = '<p class="text-red-400 text-center py-8">Erreur de chargement des données.</p>';
                 });
         }
 
-        // Charger la vue liste
-        let favoritesSystem = null;
-        async function loadListView() {
-            if (allCelebrations.length === 0) {
-                celebrationsList.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun anniversaire enregistré pour le moment.</p>';
-                return;
-            }
-
-            if (!favoritesSystem && currentUserId) {
-                favoritesSystem = new FavoritesSystem(currentUserId);
-            }
-
-            const favorites = favoritesSystem ? await favoritesSystem.getFavorites() : [];
-
-            celebrationsList.innerHTML = '';
-            
-            // Charger tous les utilisateurs une seule fois pour éviter les requêtes multiples
-            const allUsers = await getAllUsers();
-            const userMap = new Map();
-            allUsers.forEach(user => {
-                if (user.email) {
-                    const fileNumber = user.email.split('@')[0];
-                    userMap.set(fileNumber, user.id);
-                }
-            });
-
-            // Charger toutes les photos de profil en une fois
-            const userPhotosMap = new Map();
-            for (const userId of userMap.values()) {
-                const photoUrl = await getUserProfilePhoto(userId);
-                if (photoUrl) {
-                    userPhotosMap.set(userId, photoUrl);
-                }
-            }
-
-            for (const data of allCelebrations) {
-                const card = document.createElement('div');
-                card.className = 'bg-bg-dark p-4 rounded-lg flex items-center justify-between hover:bg-opacity-80 transition';
-                
-                const dateParts = data.birthday ? data.birthday.split('-') : ['?', '?', '?'];
-                const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}` : 'N/A';
-                const age = calculateAge(data.birthday);
-                const isFavorite = favorites.includes(data.id);
-                
-                // Récupérer l'ID utilisateur depuis le fileNumber
-                const userId = data.fileNumber ? userMap.get(data.fileNumber) : null;
-                const profilePhotoUrl = userId ? userPhotosMap.get(userId) : null;
-                
-                card.innerHTML = `
-                    <div class="flex items-center space-x-4 flex-1">
-                        ${profilePhotoUrl ? `
-                            <img src="${profilePhotoUrl}" alt="${data.fullName || 'N/A'}" class="w-12 h-12 rounded-full object-cover border-2 border-primary">
-                        ` : `
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xl font-bold">
-                                ${(data.fullName || 'A')[0].toUpperCase()}
-                            </div>
-                        `}
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                            <h3 class="font-bold text-lg">${data.fullName || 'N/A'}</h3>
-                                ${userId ? `<button onclick="viewStudentProfile('${userId}')" class="p-1 rounded-lg hover:bg-primary hover:bg-opacity-20 transition text-primary" title="Voir le profil">
-                                    <i data-lucide="user" class="w-4 h-4"></i>
-                                </button>` : ''}
-                            </div>
-                            <p class="text-sm text-gray-400">Anniversaire: ${formattedDate} • ${age} ans</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <button onclick="toggleFavorite('${data.id}')" class="p-2 rounded-lg hover:bg-opacity-20 transition ${isFavorite ? 'text-red-500' : 'text-gray-400'}">
-                            <i data-lucide="${isFavorite ? 'heart' : 'heart-off'}" class="w-5 h-5"></i>
-                        </button>
-                    <div class="text-right">
-                        <span class="text-xs text-gray-500">${data.classNumber || 'N/A'}</span>
-                        </div>
-                    </div>
-                `;
-                celebrationsList.appendChild(card);
-            }
-            lucide.createIcons();
-        }
-
-        // Toggle favori
-        async function toggleFavorite(celebrationId) {
-            if (!currentUserId) return;
-            
-            if (!favoritesSystem) {
-                favoritesSystem = new FavoritesSystem(currentUserId);
-            }
-            
-            await favoritesSystem.toggleFavorite(celebrationId);
-            await loadListView(); // Recharger la liste
-        }
 
         // Système de liste de souhaits
         let wishlistSystem = null;
@@ -1818,96 +1650,6 @@
             }
         });
 
-        // Charger la vue des favoris
-        async function loadFavoritesView() {
-            if (!currentUserId) {
-                document.getElementById('favoritesContent').innerHTML = '<p class="text-red-400 text-center py-8">Erreur : utilisateur non connecté</p>';
-                return;
-            }
-
-            const favoritesContent = document.getElementById('favoritesContent');
-            favoritesContent.innerHTML = '<p class="text-gray-500 text-center py-8">Chargement de tes favoris...</p>';
-
-            try {
-                if (!favoritesSystem) {
-                    favoritesSystem = new FavoritesSystem(currentUserId);
-                }
-
-                const favorites = await favoritesSystem.getFavorites();
-                
-                if (favorites.length === 0) {
-                    favoritesContent.innerHTML = `
-                        <div class="text-center py-12">
-                            <i data-lucide="heart-off" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
-                            <p class="text-gray-400 text-lg mb-2">Aucun favori pour le moment</p>
-                            <p class="text-gray-500 text-sm">Marque des anniversaires comme favoris depuis la liste pour les voir ici !</p>
-                        </div>
-                    `;
-            lucide.createIcons();
-                    return;
-                }
-
-                // Récupérer les détails des célébrations favorites
-                const favoriteCelebrations = [];
-                for (const favId of favorites) {
-                    const celebration = allCelebrations.find(c => c.id === favId);
-                    if (celebration) {
-                        favoriteCelebrations.push(celebration);
-                    }
-                }
-
-                if (favoriteCelebrations.length === 0) {
-                    favoritesContent.innerHTML = `
-                        <div class="text-center py-12">
-                            <i data-lucide="heart-off" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
-                            <p class="text-gray-400 text-lg mb-2">Aucun favori trouvé</p>
-                            <p class="text-gray-500 text-sm">Les anniversaires favoris peuvent avoir été supprimés.</p>
-                        </div>
-                    `;
-                    lucide.createIcons();
-                    return;
-                }
-
-                favoritesContent.innerHTML = `
-                    <div class="space-y-4">
-                        ${favoriteCelebrations.map(data => {
-                            const dateParts = data.birthday ? data.birthday.split('-') : ['?', '?', '?'];
-                            const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}` : 'N/A';
-                            const age = calculateAge(data.birthday);
-                            const days = daysUntilBirthday(data.birthday);
-                            
-                            return `
-                                <div class="bg-bg-dark p-4 rounded-lg flex items-center justify-between hover:bg-opacity-80 transition border-2 border-red-500 border-opacity-30">
-                                    <div class="flex items-center space-x-4 flex-1">
-                                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-2xl">
-                                            🎂
-                                        </div>
-                                        <div class="flex-1">
-                                            <h3 class="font-bold text-lg">${data.fullName || 'N/A'}</h3>
-                                            <p class="text-sm text-gray-400">Anniversaire: ${formattedDate} • ${age} ans</p>
-                                            ${days !== null ? `<p class="text-xs text-primary mt-1">${days === 0 ? "C'est aujourd'hui ! 🎉" : days === 1 ? "C'est demain !" : `Dans ${days} jours`}</p>` : ''}
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-3">
-                                        <button onclick="toggleFavorite('${data.id}')" class="p-2 rounded-lg hover:bg-opacity-20 transition text-red-500">
-                                            <i data-lucide="heart" class="w-5 h-5"></i>
-                                        </button>
-                                        <div class="text-right">
-                                            <span class="text-xs text-gray-500">${data.classNumber || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-
-                lucide.createIcons();
-            } catch (error) {
-                console.error('Erreur lors du chargement des favoris:', error);
-                favoritesContent.innerHTML = '<p class="text-red-400 text-center py-8">Erreur lors du chargement des favoris.</p>';
-            }
-        }
 
         // Exporter le calendrier en format iCal
         window.exportCalendar = function() {
@@ -1983,21 +1725,55 @@
             alert('Calendrier exporté avec succès ! Tu peux l\'importer dans Google Calendar, Apple Calendar ou Outlook.');
         };
 
+        // Variable pour stocker la vue actuelle du calendrier
+        let currentCalendarView = 'month';
+        let currentCalendarDate = new Date();
+
+        // Changer la vue du calendrier (mois, semaine, année)
+        window.changeCalendarView = function(view) {
+            currentCalendarView = view;
+            
+            // Mettre à jour les boutons
+            document.getElementById('btnViewMonth').className = view === 'month' 
+                ? 'px-4 py-2 rounded-lg bg-primary bg-opacity-20 text-primary font-semibold border-2 border-primary transition'
+                : 'px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary hover:bg-opacity-10 transition';
+            document.getElementById('btnViewWeek').className = view === 'week' 
+                ? 'px-4 py-2 rounded-lg bg-primary bg-opacity-20 text-primary font-semibold border-2 border-primary transition'
+                : 'px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary hover:bg-opacity-10 transition';
+            document.getElementById('btnViewYear').className = view === 'year' 
+                ? 'px-4 py-2 rounded-lg bg-primary bg-opacity-20 text-primary font-semibold border-2 border-primary transition'
+                : 'px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary hover:bg-opacity-10 transition';
+            
+            loadCalendarView();
+        };
+
+        // Navigation du calendrier
+        window.navigateCalendar = function(direction) {
+            if (currentCalendarView === 'month') {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            } else if (currentCalendarView === 'week') {
+                currentCalendarDate.setDate(currentCalendarDate.getDate() + (direction * 7));
+            } else if (currentCalendarView === 'year') {
+                currentCalendarDate.setFullYear(currentCalendarDate.getFullYear() + direction);
+            }
+            loadCalendarView();
+        };
+
         // Charger la vue calendrier
         async function loadCalendarView() {
             if (allCelebrations.length === 0) {
-                calendarContainer.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">Aucun anniversaire enregistré pour le moment.</p>';
+                calendarContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun anniversaire enregistré pour le moment.</p>';
                 return;
             }
 
             // Charger tous les utilisateurs pour avoir accès aux IDs
             const allUsers = await getAllUsers();
-
-            // Organiser les anniversaires par mois
-            const celebrationsByMonth = {};
             const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
                               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
+            // Organiser les anniversaires par date
+            const celebrationsByDate = {};
             allCelebrations.forEach(celeb => {
                 if (!celeb.birthday) return;
                 const dateParts = celeb.birthday.split('-');
@@ -2005,53 +1781,183 @@
                 
                 const month = parseInt(dateParts[1]) - 1;
                 const day = parseInt(dateParts[2]);
+                const key = `${month}-${day}`;
                 
-                if (!celebrationsByMonth[month]) {
-                    celebrationsByMonth[month] = [];
+                if (!celebrationsByDate[key]) {
+                    celebrationsByDate[key] = [];
                 }
                 
-                celebrationsByMonth[month].push({
+                celebrationsByDate[key].push({
                     ...celeb,
                     day: day,
+                    month: month,
                     age: calculateAge(celeb.birthday)
                 });
             });
 
-            // Créer le calendrier
+            // Mettre à jour la navigation
+            const navContainer = document.getElementById('calendarNavigation');
+            let navText = '';
+            if (currentCalendarView === 'month') {
+                navText = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+            } else if (currentCalendarView === 'week') {
+                const weekStart = new Date(currentCalendarDate);
+                weekStart.setDate(currentCalendarDate.getDate() - currentCalendarDate.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                navText = `${weekStart.getDate()} ${monthNames[weekStart.getMonth()]} - ${weekEnd.getDate()} ${monthNames[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`;
+            } else if (currentCalendarView === 'year') {
+                navText = currentCalendarDate.getFullYear().toString();
+            }
+            
+            navContainer.innerHTML = `
+                <button onclick="navigateCalendar(-1)" class="px-3 py-2 rounded-lg hover:bg-primary hover:bg-opacity-10 transition">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <span class="px-4 py-2 font-semibold">${navText}</span>
+                <button onclick="navigateCalendar(1)" class="px-3 py-2 rounded-lg hover:bg-primary hover:bg-opacity-10 transition">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+                <button onclick="currentCalendarDate = new Date(); loadCalendarView();" class="ml-2 px-3 py-2 rounded-lg hover:bg-primary hover:bg-opacity-10 transition" title="Aujourd'hui">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                </button>
+            `;
+
             calendarContainer.innerHTML = '';
             
-            for (let month = 0; month < 12; month++) {
-                const monthCard = document.createElement('div');
-                monthCard.className = 'calendar-day card p-4 rounded-lg';
-                
-                const monthCelebrations = celebrationsByMonth[month] || [];
-                monthCelebrations.sort((a, b) => a.day - b.day);
-                
-                let content = `
-                    <h3 class="font-bold text-lg mb-3 text-primary">${monthNames[month]}</h3>
+            if (currentCalendarView === 'month') {
+                // Vue mensuelle - calendrier classique
+                const year = currentCalendarDate.getFullYear();
+                const month = currentCalendarDate.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+
+                let html = `
+                    <div class="grid grid-cols-7 gap-2 mb-4">
+                        ${dayNames.map(day => `<div class="text-center font-semibold text-gray-400 py-2">${day.substring(0, 3)}</div>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-7 gap-2">
                 `;
+
+                // Jours vides au début
+                for (let i = 0; i < startingDayOfWeek; i++) {
+                    html += '<div class="aspect-square"></div>';
+                }
+
+                // Jours du mois
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const key = `${month}-${day}`;
+                    const dayCelebrations = celebrationsByDate[key] || [];
+                    const isToday = new Date().getDate() === day && 
+                                   new Date().getMonth() === month && 
+                                   new Date().getFullYear() === year;
+                    
+                    html += `
+                        <div class="aspect-square bg-bg-dark rounded-lg p-2 border-2 ${isToday ? 'border-primary' : 'border-transparent'} hover:border-primary transition">
+                            <div class="font-semibold ${isToday ? 'text-primary' : 'text-white'} mb-1">${day}</div>
+                            <div class="space-y-1 overflow-y-auto max-h-20">
+                                ${dayCelebrations.map(celeb => {
+                                    const userId = allUsers.find(u => u.email && u.email.split('@')[0] === celeb.fileNumber)?.id;
+                                    return `
+                                        <div class="text-xs bg-primary bg-opacity-20 rounded px-1 py-0.5 cursor-pointer hover:bg-opacity-30 transition truncate" 
+                                             onclick="event.stopPropagation(); showProfileModal('${userId || ''}', '${celeb.fullName || 'N/A'}', '${celeb.birthday || ''}', '${celeb.email || ''}')"
+                                             title="${celeb.fullName || 'N/A'}">
+                                            ${(celeb.fullName || 'N/A').substring(0, 8)}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                calendarContainer.innerHTML = html;
+
+            } else if (currentCalendarView === 'week') {
+                // Vue hebdomadaire
+                const weekStart = new Date(currentCalendarDate);
+                weekStart.setDate(currentCalendarDate.getDate() - currentCalendarDate.getDay());
                 
-                if (monthCelebrations.length === 0) {
-                    content += '<p class="text-gray-500 text-sm">Aucun anniversaire</p>';
-                } else {
-                    content += '<div class="space-y-2">';
-                    monthCelebrations.forEach(celeb => {
-                        const dateParts = celeb.birthday.split('-');
-                        const formattedDate = `${celeb.day}/${parseInt(dateParts[1])}`;
-                        // Récupérer l'ID utilisateur depuis le fileNumber
+                let html = '<div class="grid grid-cols-7 gap-4">';
+                
+                for (let i = 0; i < 7; i++) {
+                    const currentDay = new Date(weekStart);
+                    currentDay.setDate(weekStart.getDate() + i);
+                    const day = currentDay.getDate();
+                    const month = currentDay.getMonth();
+                    const key = `${month}-${day}`;
+                    const dayCelebrations = celebrationsByDate[key] || [];
+                    const isToday = currentDay.toDateString() === new Date().toDateString();
+                    
+                    html += `
+                        <div class="bg-bg-dark rounded-lg p-4 border-2 ${isToday ? 'border-primary' : 'border-transparent'}">
+                            <div class="font-bold text-lg mb-2 ${isToday ? 'text-primary' : 'text-white'}">
+                                ${dayNames[currentDay.getDay()]}
+                            </div>
+                            <div class="text-sm text-gray-400 mb-3">${day} ${monthNames[month]}</div>
+                            <div class="space-y-2">
+                                ${dayCelebrations.map(celeb => {
                         const userId = allUsers.find(u => u.email && u.email.split('@')[0] === celeb.fileNumber)?.id;
-                        content += `
-                            <div class="bg-bg-dark p-2 rounded text-sm cursor-pointer hover:bg-opacity-80 transition" onclick="showProfileModal('${userId || ''}', '${celeb.fullName || 'N/A'}', '${celeb.birthday || ''}', '${celeb.email || ''}')">
-                                <div class="font-semibold">${celeb.fullName || 'N/A'}</div>
-                                <div class="text-gray-400 text-xs">${formattedDate} • ${celeb.age} ans</div>
+                                    return `
+                                        <div class="bg-primary bg-opacity-20 rounded p-2 cursor-pointer hover:bg-opacity-30 transition" 
+                                             onclick="showProfileModal('${userId || ''}', '${celeb.fullName || 'N/A'}', '${celeb.birthday || ''}', '${celeb.email || ''}')">
+                                            <div class="font-semibold text-sm">${celeb.fullName || 'N/A'}</div>
+                                            <div class="text-xs text-gray-400">${celeb.age} ans</div>
                             </div>
                         `;
-                    });
-                    content += '</div>';
+                                }).join('')}
+                                ${dayCelebrations.length === 0 ? '<p class="text-gray-500 text-xs">Aucun anniversaire</p>' : ''}
+                            </div>
+                        </div>
+                    `;
                 }
                 
-                monthCard.innerHTML = content;
-                calendarContainer.appendChild(monthCard);
+                html += '</div>';
+                calendarContainer.innerHTML = html;
+
+            } else if (currentCalendarView === 'year') {
+                // Vue annuelle - tous les mois
+                const year = currentCalendarDate.getFullYear();
+                let html = '<div class="grid grid-cols-3 gap-4">';
+                
+                for (let month = 0; month < 12; month++) {
+                    const monthCelebrations = [];
+                    for (let day = 1; day <= 31; day++) {
+                        const key = `${month}-${day}`;
+                        if (celebrationsByDate[key]) {
+                            monthCelebrations.push(...celebrationsByDate[key]);
+                        }
+                    }
+                    monthCelebrations.sort((a, b) => a.day - b.day);
+                    
+                    html += `
+                        <div class="bg-bg-dark rounded-lg p-4">
+                            <h3 class="font-bold text-lg mb-3 text-primary">${monthNames[month]}</h3>
+                            <div class="space-y-2">
+                                ${monthCelebrations.length === 0 
+                                    ? '<p class="text-gray-500 text-sm">Aucun anniversaire</p>'
+                                    : monthCelebrations.map(celeb => {
+                                        const userId = allUsers.find(u => u.email && u.email.split('@')[0] === celeb.fileNumber)?.id;
+                                        const formattedDate = `${celeb.day}/${month + 1}`;
+                                        return `
+                                            <div class="bg-primary bg-opacity-20 rounded p-2 cursor-pointer hover:bg-opacity-30 transition" 
+                                                 onclick="showProfileModal('${userId || ''}', '${celeb.fullName || 'N/A'}', '${celeb.birthday || ''}', '${celeb.email || ''}')">
+                                                <div class="font-semibold text-sm">${celeb.fullName || 'N/A'}</div>
+                                                <div class="text-xs text-gray-400">${formattedDate} • ${celeb.age} ans</div>
+                                            </div>
+                                        `;
+                                    }).join('')
+                                }
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                calendarContainer.innerHTML = html;
             }
             
             lucide.createIcons();
@@ -2059,48 +1965,34 @@
 
         // Basculer entre les vues
         function showView(view) {
-            const viewListe = document.getElementById('viewListe');
             const viewCalendrier = document.getElementById('viewCalendrier');
             const viewNotifications = document.getElementById('viewNotifications');
             const viewDefis = document.getElementById('viewDefis');
             const viewSettings = document.getElementById('viewSettings');
-            const viewStats = document.getElementById('viewStats');
-            const viewFavorites = document.getElementById('viewFavorites');
-            const btnListe = document.getElementById('btnListe');
             const btnCalendrier = document.getElementById('btnCalendrier');
             const btnNotifications = document.getElementById('btnNotifications');
             const btnDefis = document.getElementById('btnDefis');
             const btnSettings = document.getElementById('btnSettings');
-            const btnStats = document.getElementById('btnStats');
-            const btnFavorites = document.getElementById('btnFavorites');
 
             // Cacher toutes les vues
-            viewListe.classList.add('hidden');
             viewCalendrier.classList.add('hidden');
             if (viewDefis) viewDefis.classList.add('hidden');
             viewNotifications.classList.add('hidden');
             if (viewSettings) viewSettings.classList.add('hidden');
-            if (viewStats) viewStats.classList.add('hidden');
-            if (viewFavorites) viewFavorites.classList.add('hidden');
             
             // Retirer l'état actif de tous les boutons
-            btnListe.classList.remove('active');
             btnCalendrier.classList.remove('active');
             btnNotifications.classList.remove('active');
             if (btnDefis) btnDefis.classList.remove('active');
             if (btnSettings) btnSettings.classList.remove('active');
-            if (btnStats) btnStats.classList.remove('active');
-            if (btnFavorites) btnFavorites.classList.remove('active');
 
-            if (view === 'liste') {
-                viewListe.classList.remove('hidden');
-                btnListe.classList.add('active');
-                pageTitle.textContent = 'Liste des Anniversaires';
-                loadListView();
-            } else if (view === 'calendrier') {
+            if (view === 'calendrier') {
                 viewCalendrier.classList.remove('hidden');
                 btnCalendrier.classList.add('active');
                 pageTitle.textContent = 'Calendrier des Anniversaires';
+                if (!currentCalendarView) {
+                    currentCalendarView = 'month';
+                }
                 loadCalendarView();
             } else if (view === 'notifications') {
                 viewNotifications.classList.remove('hidden');
@@ -2120,16 +2012,6 @@
                 loadProfilePhoto();
                 // Initialiser l'onglet par défaut (Mon Profil)
                 switchSettingsTab('profile');
-            } else if (view === 'stats' && viewStats) {
-                viewStats.classList.remove('hidden');
-                if (btnStats) btnStats.classList.add('active');
-                pageTitle.textContent = 'Statistiques & Classements';
-                showStatsTab('personal');
-            } else if (view === 'favorites' && viewFavorites) {
-                viewFavorites.classList.remove('hidden');
-                if (btnFavorites) btnFavorites.classList.add('active');
-                pageTitle.textContent = 'Mes Favoris';
-                loadFavoritesView();
             }
             
             lucide.createIcons();
@@ -3588,177 +3470,7 @@
             }
         }
 
-        // Basculer entre les onglets Statistiques/Classements
-        function showStatsTab(tab) {
-            const personalView = document.getElementById('statsPersonalView');
-            const leaderboardView = document.getElementById('statsLeaderboardView');
-            const personalTab = document.getElementById('statsTabPersonal');
-            const leaderboardTab = document.getElementById('statsTabLeaderboard');
 
-            if (tab === 'personal') {
-                personalView.classList.remove('hidden');
-                leaderboardView.classList.add('hidden');
-                personalTab.classList.add('bg-primary', 'bg-opacity-20', 'text-primary', 'font-semibold', 'border-b-2', 'border-primary');
-                personalTab.classList.remove('text-gray-400');
-                leaderboardTab.classList.remove('bg-primary', 'bg-opacity-20', 'text-primary', 'font-semibold', 'border-b-2', 'border-primary');
-                leaderboardTab.classList.add('text-gray-400');
-                loadStatsView();
-            } else if (tab === 'leaderboard') {
-                personalView.classList.add('hidden');
-                leaderboardView.classList.remove('hidden');
-                leaderboardTab.classList.add('bg-primary', 'bg-opacity-20', 'text-primary', 'font-semibold', 'border-b-2', 'border-primary');
-                leaderboardTab.classList.remove('text-gray-400');
-                personalTab.classList.remove('bg-primary', 'bg-opacity-20', 'text-primary', 'font-semibold', 'border-b-2', 'border-primary');
-                personalTab.classList.add('text-gray-400');
-                loadLeaderboard('messages');
-            }
-        }
-
-        // Charger la vue des statistiques
-        let statsSystem = null;
-        async function loadStatsView() {
-            if (!currentUserId) {
-                document.getElementById('statsContent').innerHTML = '<p class="text-red-400 text-center py-8">Erreur : utilisateur non connecté</p>';
-                return;
-            }
-
-            const statsContent = document.getElementById('statsContent');
-            statsContent.innerHTML = '<p class="text-gray-500 text-center py-8">Chargement de tes statistiques...</p>';
-
-            try {
-                if (!statsSystem) {
-                    statsSystem = new StatsSystem(currentUserId);
-                }
-
-                const stats = await statsSystem.getUserStats();
-                
-                // Récupérer la réputation depuis la collection users (source de vérité)
-                const userDoc = await firebase.firestore().collection('users').doc(currentUserId).get();
-                const userData = userDoc.data();
-                const reputation = userData?.reputation !== undefined ? userData.reputation : (stats.reputation || 100);
-                
-                // Mettre à jour stats avec la réputation correcte
-                stats.reputation = reputation;
-                
-                const badges = stats.badges || [];
-
-                // Calculer le pourcentage vers le prochain niveau
-                const currentLevel = stats.level || 1;
-                const currentPoints = stats.points || 0;
-                const pointsForCurrentLevel = Math.pow(currentLevel - 1, 2) * 10;
-                const pointsForNextLevel = Math.pow(currentLevel, 2) * 10;
-                const pointsInCurrentLevel = currentPoints - pointsForCurrentLevel;
-                const pointsNeededForNextLevel = pointsForNextLevel - pointsForCurrentLevel;
-                const progressPercent = Math.min(100, (pointsInCurrentLevel / pointsNeededForNextLevel) * 100);
-
-                statsContent.innerHTML = `
-                    <div class="space-y-6">
-                        <!-- Niveau et Points -->
-                        <div class="bg-gradient-to-r from-primary to-secondary bg-opacity-20 border border-primary rounded-lg p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 class="text-2xl font-bold mb-1">Niveau ${currentLevel}</h3>
-                                    <p class="text-gray-400 text-sm">${currentPoints} points</p>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-3xl font-bold">${Math.floor(progressPercent)}%</div>
-                                    <p class="text-gray-400 text-xs">vers niveau ${currentLevel + 1}</p>
-                                </div>
-                            </div>
-                            <div class="w-full bg-gray-700 rounded-full h-3 mb-2">
-                                <div class="bg-gradient-to-r from-primary to-secondary h-3 rounded-full transition-all duration-500" style="width: ${progressPercent}%"></div>
-                            </div>
-                            <p class="text-xs text-gray-400">${pointsNeededForNextLevel - pointsInCurrentLevel} points jusqu'au prochain niveau</p>
-                        </div>
-
-                        <!-- Statistiques principales -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="card p-4 rounded-lg text-center">
-                                <div class="text-3xl font-bold text-primary mb-1">${stats.messagesSent || 0}</div>
-                                <div class="text-sm text-gray-400">Messages envoyés</div>
-                            </div>
-                            <div class="card p-4 rounded-lg text-center">
-                                <div class="text-3xl font-bold text-secondary mb-1">${stats.messagesReceived || 0}</div>
-                                <div class="text-sm text-gray-400">Messages reçus</div>
-                            </div>
-                            <div class="card p-4 rounded-lg text-center">
-                                <div class="text-3xl font-bold text-green-400 mb-1">${stats.activeDays || 0}</div>
-                                <div class="text-sm text-gray-400">Jours actifs</div>
-                            </div>
-                            <div class="card p-4 rounded-lg text-center">
-                                <div class="text-3xl font-bold text-blue-400 mb-1">${stats.consecutiveDays || 0}</div>
-                                <div class="text-sm text-gray-400">Jours consécutifs</div>
-                            </div>
-                        </div>
-
-                        <!-- Série et Célébrations -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="card p-4 rounded-lg">
-                                <h4 class="font-bold mb-3 flex items-center">
-                                    <i data-lucide="flame" class="w-5 h-5 mr-2 text-orange-400"></i>
-                                    Série de jours
-                                </h4>
-                                <div class="text-2xl font-bold mb-1">${stats.consecutiveDays || 0} jours</div>
-                                <p class="text-sm text-gray-400">Meilleure série: ${stats.longestStreak || 0} jours</p>
-                            </div>
-                            <div class="card p-4 rounded-lg">
-                                <h4 class="font-bold mb-3 flex items-center">
-                                    <i data-lucide="party-popper" class="w-5 h-5 mr-2 text-yellow-400"></i>
-                                    Célébrations
-                                </h4>
-                                <div class="text-2xl font-bold mb-1">${stats.celebrationsParticipated || 0}</div>
-                                <p class="text-sm text-gray-400">Célébrations participées</p>
-                            </div>
-                        </div>
-
-                        <!-- Badges -->
-                        <div class="card p-4 rounded-lg">
-                            <h4 class="font-bold mb-4 flex items-center">
-                                <i data-lucide="award" class="w-5 h-5 mr-2 text-yellow-400"></i>
-                                Badges obtenus (${badges.length})
-                            </h4>
-                            ${badges.length > 0 ? `
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    ${badges.map(badgeId => {
-                                        const badgeInfo = statsSystem.getBadgeInfo(badgeId);
-                                        return `
-                                            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 bg-opacity-20 border border-yellow-500 rounded-lg p-3 text-center">
-                                                <div class="text-3xl mb-2">${badgeInfo.icon}</div>
-                                                <div class="text-sm font-bold">${badgeInfo.name}</div>
-                                                <div class="text-xs text-gray-400 mt-1">${badgeInfo.description}</div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            ` : `
-                                <p class="text-gray-400 text-center py-4">Aucun badge obtenu pour le moment. Continue à participer !</p>
-                            `}
-                        </div>
-
-                        <!-- Réputation -->
-                        <div class="card p-4 rounded-lg">
-                            <h4 class="font-bold mb-3 flex items-center">
-                                <i data-lucide="star" class="w-5 h-5 mr-2 text-yellow-400"></i>
-                                Réputation
-                            </h4>
-                            <div class="flex items-center space-x-4">
-                                <div class="flex-1">
-                                    <div class="w-full bg-gray-700 rounded-full h-4">
-                                        <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-4 rounded-full transition-all duration-500" style="width: ${stats.reputation || 100}%"></div>
-                                    </div>
-                                </div>
-                                <div class="text-xl font-bold">${stats.reputation || 100}/100</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                lucide.createIcons();
-            } catch (error) {
-                console.error('Erreur lors du chargement des statistiques:', error);
-                statsContent.innerHTML = '<p class="text-red-400 text-center py-8">Erreur lors du chargement des statistiques.</p>';
-            }
-        }
 
         // Charger les classements
         let leaderboardSystem = null;

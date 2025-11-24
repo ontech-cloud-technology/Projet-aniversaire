@@ -568,6 +568,17 @@
         console.log('Rôle extrait:', role);
         console.log('Nom extrait:', name);
 
+        // Logger la connexion
+        try {
+          await logActivity(uid, 'login', {
+            description: `Connexion réussie - Rôle: ${role}`,
+            email: email,
+            role: role
+          });
+        } catch (logError) {
+          console.warn('Erreur lors du logging de connexion:', logError);
+        }
+
         // 4. Vérifier si l'utilisateur doit compléter son profil (première connexion uniquement)
         // On vérifie si le profil n'est PAS complété OU si les règles ne sont PAS acceptées OU si le mot de passe doit être changé
         const needsProfileSetup = !userData.profileCompleted || 

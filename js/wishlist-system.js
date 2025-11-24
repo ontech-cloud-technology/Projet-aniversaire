@@ -119,3 +119,5 @@ class WishlistSystem {
 // Exposer globalement
 window.WishlistSystem = WishlistSystem;
 
+
+

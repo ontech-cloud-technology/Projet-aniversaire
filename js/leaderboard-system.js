@@ -227,3 +227,5 @@ class LeaderboardSystem {
 // Exposer globalement
 window.LeaderboardSystem = LeaderboardSystem;
 
+
+

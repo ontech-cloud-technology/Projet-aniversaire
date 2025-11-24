@@ -135,30 +135,59 @@
 
         /* Styles du menu latéral (SideNav) */
         #sidenav {
-            width: 250px;
-            min-width: 250px;
-            background-color: #24143a;
+            width: 280px;
+            min-width: 280px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 24px 0;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 10;
         }
+
         .nav-item {
             display: flex;
             align-items: center;
             padding: 12px 24px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
             text-decoration: none;
-            color: var(--text-color);
+            color: var(--text-secondary);
+            border-radius: 12px;
+            margin: 4px 12px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
         .nav-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--text-color);
+            transform: translateX(4px);
         }
+
         .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid var(--primary);
-            padding-left: 20px;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-item.active::before {
+            transform: scaleY(1);
         }
         /* Style actif pour les onglets de section */
         .section-tab.active-tab {
@@ -190,22 +219,48 @@
     
     <!-- Menu Latéral de Navigation (SideNav) -->
     <nav id="sidenav">
-        <div class="px-6 mb-8 text-2xl font-extrabold header-gradient">203 Hub</div>
+        <div class="px-6 py-6 mb-4 border-b border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <i data-lucide="shield" class="w-7 h-7 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black">
+                        <span class="header-gradient">Fêtes Express</span>
+                    </h2>
+                    <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
+                </div>
+            </div>
+        </div>
         
-        <!-- CORRECTION NAVIGATION: Les HREFs sont directs pour naviguer -->
+        <!-- Sections de navigation -->
         <a href="calendrier.html" class="nav-item">
-            <i data-lucide="calendar" class="w-5 h-5 mr-3"></i>
+            <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
             Calendrier des Fêtes
         </a>
         <a href="committee.html" class="nav-item active">
             <i data-lucide="shield-check" class="w-5 h-5 mr-3"></i>
             Gestion Comité
         </a>
-        <a onclick="signOutAndRedirect()" class="nav-item mt-auto text-red-400 hover:text-white">
+        
+        <!-- Séparateur et déconnexion -->
+        <div class="border-t border-gray-700 my-2"></div>
+        <a onclick="signOutAndRedirect()" class="nav-item text-red-400 hover:text-white hover:bg-red-900 hover:bg-opacity-20">
             <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
             Déconnexion
         </a>
-        <p class="text-xs px-6 py-2 text-gray-500 mt-2">Connecté: <span id="welcomeName" class="text-gray-400"></span></p>
+        
+        <div class="px-6 py-4 mt-4 border-t border-gray-700">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500">Connecté</p>
+                    <p id="welcomeName" class="text-sm font-semibold text-white truncate"></p>
+                </div>
+            </div>
+        </div>
     </nav>
     
     <!-- Écran de chargement/Autorisation -->
@@ -476,6 +531,8 @@
 
     <!-- Inclusion du fichier firebase.js -->
     <script src="firebase.js"></script>
+    <!-- Système de logging automatique des activités -->
+    <script src="js/activity-logger.js"></script>
     
     <!-- Script principal -->
     <script>

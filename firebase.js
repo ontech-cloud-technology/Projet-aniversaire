@@ -113,7 +113,104 @@ async function deleteUserDocument(uid) {
 // --- Fonctions de Logging d'Activité ---
 
 /**
- * Enregistre une activité utilisateur dans Firestore.
+ * Codes courts pour les actions (compression)
+ */
+const ACTION_CODES = {
+    'page_load': 'pl',
+    'page_unload': 'pu',
+    'button_click': 'clk',
+    'form_submit': 'fs',
+    'form_change': 'fc',
+    'key_press': 'kp',
+    'scroll': 'scr',
+    'window_focus': 'wf',
+    'window_blur': 'wb',
+    'window_resize': 'wr',
+    'javascript_error': 'err',
+    'unhandled_promise_rejection': 'upr',
+    'session_update': 'su',
+    'login': 'lg',
+    'logout': 'lo',
+    'create': 'cr',
+    'update': 'up',
+    'delete': 'del'
+};
+
+/**
+ * Compresse les détails en utilisant des noms de champs courts
+ */
+function compressLogDetails(details) {
+    const compressed = {};
+    const fieldMap = {
+        'description': 'd',
+        'elementClicked': 'el',
+        'tagName': 'tag',
+        'id': 'id',
+        'className': 'cls',
+        'textContent': 'txt',
+        'href': 'href',
+        'buttonType': 'type',
+        'formId': 'fid',
+        'formAction': 'act',
+        'formData': 'fd',
+        'elementName': 'name',
+        'elementType': 'type',
+        'newValue': 'val',
+        'key': 'key',
+        'keyCode': 'kc',
+        'ctrlKey': 'ctrl',
+        'shiftKey': 'shift',
+        'altKey': 'alt',
+        'scrollY': 'y',
+        'scrollX': 'x',
+        'documentHeight': 'h',
+        'viewportHeight': 'vh',
+        'page': 'p',
+        'referrer': 'ref',
+        'sessionDuration': 'dur',
+        'clickCount': 'clk',
+        'keyPressCount': 'key',
+        'scrollCount': 'scr',
+        'newSize': 'sz',
+        'errorMessage': 'msg',
+        'errorFile': 'file',
+        'errorLine': 'line',
+        'errorReason': 'reason',
+        'timeOnPage': 'top',
+        'email': 'em',
+        'role': 'r',
+        'modifiers': 'mod',
+        'modifiedData': 'md',
+        'location': 'loc'
+    };
+
+    for (const [key, value] of Object.entries(details)) {
+        const shortKey = fieldMap[key] || key.substring(0, 3);
+        
+        // Compresser les valeurs selon le type
+        if (typeof value === 'string' && value.length > 50) {
+            compressed[shortKey] = value.substring(0, 50);
+        } else if (value === null || value === undefined || value === '') {
+            // Ne pas inclure les valeurs vides
+            continue;
+        } else if (typeof value === 'object' && value !== null) {
+            // Compresser les objets JSON
+            try {
+                const jsonStr = JSON.stringify(value);
+                compressed[shortKey] = jsonStr.length > 200 ? jsonStr.substring(0, 200) : jsonStr;
+            } catch (e) {
+                compressed[shortKey] = '[Object]';
+            }
+        } else {
+            compressed[shortKey] = value;
+        }
+    }
+
+    return compressed;
+}
+
+/**
+ * Enregistre une activité utilisateur dans Firestore (OPTIMISÉ avec compression).
  * @param {string} userId - UID de l'utilisateur.
  * @param {string} action - Type d'action (ex: 'login', 'button_click', 'update').
  * @param {Object} details - Détails supplémentaires (optionnel).
@@ -122,91 +219,30 @@ async function logActivity(userId, action, details = {}) {
     if (!userId) return; // Ne pas logger si pas d'utilisateur
 
     try {
-        // Collecter les informations système de base
+        // Convertir l'action en code court
+        const actionCode = ACTION_CODES[action] || action.substring(0, 5);
+
+        // Créer le log compressé (sans dupliquer les infos système à chaque fois)
         const logData = {
-            userId,
-            action,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            userAgent: navigator.userAgent,
-            language: navigator.language,
-            screenResolution: `${screen.width}x${screen.height}`,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            cookiesEnabled: navigator.cookieEnabled,
-            jsEnabled: true, // JS fonctionne puisque cette fonction est appelée
-            referrer: document.referrer,
-            page: window.location.pathname,
-            sessionDuration: details.sessionDuration || null,
-            modifiedData: details.modifiedData || null,
-            elementClicked: details.elementClicked || null,
-            description: details.description || '',
-            deviceType: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
-            os: navigator.platform,
-            plugins: navigator.plugins ? navigator.plugins.length : 0,
-            touchScreen: 'ontouchstart' in window,
-            ...details
+            uid: userId, // UID court
+            a: actionCode, // Action code
+            t: firebase.firestore.FieldValue.serverTimestamp(),
+            p: window.location.pathname ? window.location.pathname.substring(0, 30) : '?', // Page (limité)
+            ...compressLogDetails(details)
         };
 
-        // Récupérer l'IP via une API externe
-        try {
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            if (ipResponse.ok) {
-                const ipData = await ipResponse.json();
-                logData.ip = ipData.ip;
-            } else {
-                logData.ip = 'Unknown';
-            }
-        } catch (error) {
-            console.warn('Impossible de récupérer l\'IP:', error);
-            logData.ip = 'Unknown';
-        }
-
-        // Récupérer le niveau de batterie
-        if ('getBattery' in navigator) {
-            try {
-                const battery = await navigator.getBattery();
-                logData.batteryLevel = `${Math.round(battery.level * 100)}%`;
-                logData.batteryCharging = battery.charging;
-            } catch (error) {
-                logData.batteryLevel = 'Non disponible';
-            }
-        } else {
-            logData.batteryLevel = 'Non supporté';
-        }
-
-        // Récupérer les informations de connexion réseau
-        if ('connection' in navigator) {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            if (connection) {
-                logData.connectionSpeed = connection.effectiveType || 'Unknown';
-                logData.connectionDownlink = connection.downlink || 'Unknown';
-                logData.connectionRtt = connection.rtt || 'Unknown';
-            } else {
-                logData.connectionSpeed = 'Non disponible';
-            }
-        } else {
-            logData.connectionSpeed = 'Non supporté';
-        }
-
-        // Récupérer la localisation approximative (si disponible)
-        if ('geolocation' in navigator) {
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        timeout: 5000,
-                        enableHighAccuracy: false
-                    });
-                });
-                logData.location = `${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`;
-            } catch (error) {
-                logData.location = 'Non autorisée ou indisponible';
-            }
-        } else {
-            logData.location = 'Non supporté';
+        // Ajouter seulement les infos système essentielles si pas déjà dans details
+        if (!details.skipSystemInfo) {
+            // Infos système minimales (une seule fois par session normalement)
+            logData.ua = navigator.userAgent ? navigator.userAgent.substring(0, 80) : '?';
+            logData.lang = navigator.language || '?';
+            logData.res = `${screen.width}x${screen.height}`;
+            logData.dev = /Mobi|Android/i.test(navigator.userAgent) ? 'm' : 'd'; // m=mobile, d=desktop
         }
 
         // Ajouter à Firestore
         await db.collection('activity_logs').add(logData);
-        console.log(`Activité loggée: ${action} pour ${userId}`);
+        console.log(`[Log] ${actionCode} pour ${userId.substring(0, 8)}...`);
     } catch (error) {
         console.error('Erreur lors du logging de l\'activité:', error);
     }

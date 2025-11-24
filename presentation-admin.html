@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
     <title>Présentation Admin — Fête Express</title>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/presentation-storage.js"></script>
     
     <style>
         :root {
@@ -30,7 +32,230 @@
             background: var(--bg);
             font-family: 'Manrope', sans-serif;
             color: #f1f5f9;
-            overflow: hidden;
+            overflow: auto;
+        }
+
+        /* Écran de gestion */
+        #managementScreen {
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .management-container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: var(--accent);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        h2 {
+            font-weight: 600;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 30px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(255, 111, 97, 0.4);
+            outline: none;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        button {
+            border: none;
+            background: var(--accent);
+            padding: 14px 24px;
+            border-radius: 10px;
+            color: #1a0f30;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 111, 97, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            color: #fff;
+        }
+
+        .error-message {
+            color: #f87171;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success-message {
+            color: #10b981;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .presentation-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .presentation-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .presentation-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .presentation-item.selected {
+            border-color: var(--primary);
+            background: rgba(255, 111, 97, 0.1);
+        }
+
+        .presentation-item h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .presentation-item .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status.ready {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status.pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(255, 111, 97, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(255, 111, 97, 0.1);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Écran de login */
@@ -51,67 +276,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
             box-shadow: var(--shadow);
-        }
-
-        h1 {
-            font-weight: 800;
-            font-size: 2em;
-            margin-bottom: 10px;
-            background: var(--accent);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--muted);
-            margin-bottom: 30px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 20px;
-            transition: all 0.2s ease;
-        }
-
-        input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 12px rgba(255, 111, 97, 0.4);
-            outline: none;
-        }
-
-        button {
-            width: 100%;
-            border: none;
-            background: var(--accent);
-            padding: 14px 0;
-            border-radius: 10px;
-            color: #1a0f30;
-            font-weight: 800;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 111, 97, 0.4);
-        }
-
-        .error-message {
-            color: #f87171;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            display: none;
         }
 
         /* Écran de présentation */
@@ -221,7 +385,6 @@
             color: #fff;
         }
 
-        /* Navigation au clavier */
         .keyboard-hint {
             position: fixed;
             bottom: 20px;
@@ -234,14 +397,123 @@
             color: var(--muted);
             z-index: 50;
         }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 <body>
+    <!-- Écran de Gestion -->
+    <div id="managementScreen">
+        <div class="management-container">
+            <h1>📊 Gestion des Présentations</h1>
+            <p class="subtitle">Téléchargez et convertissez vos présentations PowerPoint</p>
+
+            <!-- Section Upload -->
+            <div class="section-card">
+                <h2>📤 Télécharger une Présentation</h2>
+                <div id="bucketSetupWarning" style="display: none; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        <i data-lucide="alert-triangle" style="width: 24px; height: 24px; color: #fbbf24; flex-shrink: 0;"></i>
+                        <div style="flex: 1;">
+                            <p style="color: #fbbf24; font-weight: 600; margin-bottom: 8px;">Bucket "presentations" non trouvé</p>
+                            <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 10px;">
+                                Le bucket doit être créé avant de pouvoir uploader des fichiers.
+                            </p>
+                            <button onclick="createBucket()" id="createBucketBtn" class="btn-success" style="width: auto; padding: 8px 16px; font-size: 0.9em;">
+                                <i data-lucide="plus-circle"></i>
+                                Créer le bucket automatiquement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nom de la présentation</label>
+                    <input type="text" id="presentationName" placeholder="Ex: Présentation Anniversaire 2024" />
+                </div>
+                <div class="upload-area" id="uploadArea">
+                    <i data-lucide="upload" style="width: 48px; height: 48px; margin: 0 auto 20px; color: var(--muted);"></i>
+                    <p style="font-size: 1.1em; margin-bottom: 10px;">Glissez-déposez votre fichier PowerPoint ici</p>
+                    <p style="color: var(--muted); font-size: 0.9em;">ou cliquez pour sélectionner</p>
+                    <input type="file" id="pptxFile" accept=".pptx" style="display: none;" />
+                </div>
+                <div id="uploadStatus" class="error-message"></div>
+                <button onclick="uploadPresentation()" id="uploadBtn" disabled>
+                    <i data-lucide="upload"></i>
+                    Télécharger vers Supabase
+                </button>
+            </div>
+
+            <!-- Section Présentations -->
+            <div class="section-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">📋 Mes Présentations</h2>
+                    <button onclick="diagnoseBucket()" class="btn-secondary" style="width: auto; padding: 8px 16px; font-size: 0.9em;">
+                        <i data-lucide="search"></i>
+                        Diagnostic
+                    </button>
+                </div>
+                <div id="presentationsList" class="presentation-list">
+                    <p style="text-align: center; color: var(--muted);">Chargement...</p>
+                </div>
+            </div>
+
+            <!-- Section Conversion -->
+            <div class="section-card">
+                <h2>⚙️ Conversion</h2>
+                <p style="color: var(--muted); margin-bottom: 20px;">
+                    Sélectionnez une présentation ci-dessus, puis cliquez sur "Convertir" pour générer les images.
+                </p>
+                <div class="button-group">
+                    <button onclick="convertPresentation()" id="convertBtn" disabled class="btn-success">
+                        <i data-lucide="image"></i>
+                        Convertir en Images
+                    </button>
+                    <button onclick="refreshPresentations()" class="btn-secondary">
+                        <i data-lucide="refresh-cw"></i>
+                        Actualiser
+                    </button>
+                </div>
+                <div id="convertStatus" class="error-message"></div>
+            </div>
+
+            <!-- Section Présentation -->
+            <div class="section-card">
+                <h2>🎯 Lancer une Présentation</h2>
+                <div class="form-group">
+                    <label>Sélectionner une présentation</label>
+                    <select id="presentationSelect">
+                        <option value="">-- Choisir une présentation --</option>
+                    </select>
+                </div>
+                <button onclick="startPresentation()" id="startBtn" disabled class="btn-success">
+                    <i data-lucide="play"></i>
+                    Lancer la Présentation
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Écran de Login -->
-    <div id="loginScreen">
+    <div id="loginScreen" style="display: none;">
         <div class="login-card">
             <h1>🔐 Accès Présentation</h1>
             <p class="subtitle">Entrez le code d'accès administrateur</p>
+            <form onsubmit="event.preventDefault(); checkAccess();">
             <input 
                 type="password" 
                 id="accessCode" 
@@ -249,7 +521,8 @@
                 autocomplete="off"
                 autofocus
             />
-            <button onclick="checkAccess()">Accéder</button>
+                <button type="submit">Accéder</button>
+            </form>
             <div id="errorMessage" class="error-message">
                 Code d'accès incorrect
             </div>
@@ -290,14 +563,439 @@
     </div>
 
     <script>
-        // Code d'accès secret (à changer selon vos besoins)
+        // Configuration
         const ADMIN_ACCESS_CODE = '203ADMIN2024';
+        const API_URL = 'http://localhost:5000'; // URL de l'API de conversion
         
+        let presentationStorage = null;
         let currentSlideIndex = 0;
         let slides = [];
-        const SLIDES_DIR = 'presentation-slides/';
+        let selectedPresentation = null;
+        let presentations = [];
 
-        // Vérifier l'accès
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function() {
+            presentationStorage = new PresentationStorage();
+            lucide.createIcons();
+            
+            // Setup upload area
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('pptxFile');
+            
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    updateUploadButton();
+                }
+            });
+            
+            fileInput.addEventListener('change', updateUploadButton);
+            document.getElementById('presentationName').addEventListener('input', updateUploadButton);
+            
+            // Entrée pour valider le login
+            document.getElementById('accessCode')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkAccess();
+                }
+            });
+            
+            // Vérifier si le bucket existe au chargement
+            await checkBucketAndShowWarning();
+            await refreshPresentations();
+        });
+
+        async function checkBucketAndShowWarning() {
+            const bucketExists = await presentationStorage.checkBucketExists();
+            const warningDiv = document.getElementById('bucketSetupWarning');
+            
+            if (!bucketExists) {
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        }
+
+        async function createBucket() {
+            // Demander confirmation car on va utiliser la clé service_role
+            const confirmed = confirm(
+                '⚠️ ATTENTION SÉCURITÉ\n\n' +
+                'La création du bucket nécessite des permissions administrateur.\n\n' +
+                'Cette opération utilisera temporairement la clé service_role.\n\n' +
+                'Continuer ?'
+            );
+            
+            if (!confirmed) return;
+            
+            const createBtn = document.getElementById('createBucketBtn');
+            const originalText = createBtn.innerHTML;
+            
+            createBtn.disabled = true;
+            createBtn.innerHTML = '<span class="loading-spinner"></span> Création en cours...';
+            
+            try {
+                // Utiliser service_role pour créer le bucket
+                const result = await presentationStorage.createBucket(true);
+                
+                if (result.success) {
+                    showMessage('uploadStatus', `✅ ${result.message}`, 'success');
+                    document.getElementById('bucketSetupWarning').style.display = 'none';
+                    
+                    // Attendre un peu puis actualiser
+                    setTimeout(async () => {
+                        await checkBucketAndShowWarning();
+                        await refreshPresentations();
+                    }, 1000);
+                } else {
+                    // Si c'est une erreur de permissions/RLS, afficher des instructions détaillées
+                    if (result.requiresManualCreation) {
+                        const warningDiv = document.getElementById('bucketSetupWarning');
+                        warningDiv.innerHTML = `
+                            <div style="display: flex; align-items: start; gap: 10px;">
+                                <i data-lucide="alert-triangle" style="width: 24px; height: 24px; color: #f87171; flex-shrink: 0;"></i>
+                                <div style="flex: 1;">
+                                    <p style="color: #f87171; font-weight: 600; margin-bottom: 8px;">${result.message}</p>
+                                    <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 15px;">
+                                        ${result.details || 'Créez le bucket manuellement dans Supabase Dashboard.'}
+                        ${result.errorDetails ? `<p style="color: var(--muted); font-size: 0.8em; margin-top: 10px; font-family: monospace; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px;">Détails: ${result.errorDetails}</p>` : ''}
+                                    </p>
+                                    <div style="background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                        <p style="color: #fff; font-weight: 600; margin-bottom: 10px; font-size: 0.95em;">📋 Instructions étape par étape :</p>
+                                        <ol style="color: var(--muted); font-size: 0.85em; line-height: 1.8; margin-left: 15px;">
+                                            <li>Allez sur <a href="https://supabase.com/dashboard" target="_blank" style="color: var(--primary); font-weight: 600;">Supabase Dashboard</a></li>
+                                            <li>Cliquez sur <strong>"Storage"</strong> dans le menu de gauche</li>
+                                            <li>Cliquez sur <strong>"New bucket"</strong> (bouton en haut à droite)</li>
+                                            <li>Nom du bucket : <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #fff;">presentations</code></li>
+                                            <li>✅ <strong>Cochez "Public bucket"</strong> (très important !)</li>
+                                            <li>Cliquez sur <strong>"Create bucket"</strong></li>
+                                        </ol>
+                                        <p style="color: var(--muted); font-size: 0.8em; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                                            ⚠️ <strong>Important :</strong> Après la création, allez dans l'onglet <strong>"Policies"</strong> du bucket et créez 3 policies :
+                                            <ul style="margin-left: 15px; margin-top: 5px;">
+                                                <li><strong>SELECT</strong> : Policy = <code>true</code></li>
+                                                <li><strong>INSERT</strong> : Policy = <code>true</code></li>
+                                                <li><strong>UPDATE</strong> : Policy = <code>true</code></li>
+                                            </ul>
+                                        </p>
+                                    </div>
+                                    <button onclick="checkBucketAndShowWarning(); refreshPresentations();" class="btn-secondary" style="width: auto; padding: 8px 16px; font-size: 0.9em; margin-top: 5px;">
+                                        <i data-lucide="refresh-cw"></i>
+                                        Vérifier après création
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                    } else {
+                        showMessage('uploadStatus', `❌ ${result.message}`, 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage('uploadStatus', `❌ Erreur: ${error.message}`, 'error');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.innerHTML = originalText;
+                lucide.createIcons();
+            }
+        }
+
+        function updateUploadButton() {
+            const name = document.getElementById('presentationName').value.trim();
+            const file = document.getElementById('pptxFile').files[0];
+            document.getElementById('uploadBtn').disabled = !(name && file);
+        }
+
+        async function uploadPresentation() {
+            const name = document.getElementById('presentationName').value.trim();
+            const file = document.getElementById('pptxFile').files[0];
+            
+            if (!name || !file) {
+                showMessage('uploadStatus', 'Veuillez remplir tous les champs', 'error');
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading-spinner"></span> Téléchargement...';
+            
+            try {
+                const result = await presentationStorage.uploadPresentation(file, name);
+                showMessage('uploadStatus', `✅ Présentation "${name}" téléchargée avec succès!`, 'success');
+                document.getElementById('presentationName').value = '';
+                document.getElementById('pptxFile').value = '';
+                updateUploadButton();
+                await refreshPresentations();
+            } catch (error) {
+                console.error('Erreur upload:', error);
+                
+                // Si erreur RLS, afficher des instructions détaillées
+                if (error.isRLSError) {
+                    const statusDiv = document.getElementById('uploadStatus');
+                    statusDiv.innerHTML = `
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 15px;">
+                            <p style="color: #f87171; font-weight: 600; margin-bottom: 10px;">❌ Erreur de permissions RLS</p>
+                            <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 15px;">
+                                Les policies du bucket "presentations" bloquent l'upload. Configurez les policies :
+                            </p>
+                            <div style="background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                <p style="color: #fff; font-weight: 600; margin-bottom: 10px; font-size: 0.95em;">📋 Configuration des Policies RLS :</p>
+                                <ol style="color: var(--muted); font-size: 0.85em; line-height: 1.8; margin-left: 15px;">
+                                    <li>Allez dans <a href="https://supabase.com/dashboard" target="_blank" style="color: var(--primary);">Supabase Dashboard</a></li>
+                                    <li>Storage > <strong>presentations</strong> > Onglet <strong>"Policies"</strong></li>
+                                    <li>Cliquez sur <strong>"New Policy"</strong></li>
+                                    <li>Sélectionnez <strong>"For full customization"</strong></li>
+                                    <li>Créez 3 policies :
+                                        <ul style="margin-left: 15px; margin-top: 5px;">
+                                            <li><strong>Policy 1 - INSERT</strong> : Nom = "Allow public uploads", Operation = INSERT, Policy = <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">true</code></li>
+                                            <li><strong>Policy 2 - SELECT</strong> : Nom = "Allow public read", Operation = SELECT, Policy = <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">true</code></li>
+                                            <li><strong>Policy 3 - UPDATE</strong> : Nom = "Allow public update", Operation = UPDATE, Policy = <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">true</code></li>
+                                        </ul>
+                                    </li>
+                                    <li>Sauvegardez chaque policy</li>
+                                </ol>
+                            </div>
+                            <button onclick="uploadPresentation()" class="btn-secondary" style="width: auto; padding: 8px 16px; font-size: 0.9em;">
+                                <i data-lucide="refresh-cw"></i>
+                                Réessayer après configuration
+                            </button>
+                        </div>
+                    `;
+                    statusDiv.className = 'error-message';
+                    statusDiv.style.display = 'block';
+                } else {
+                    showMessage('uploadStatus', `❌ Erreur: ${error.message}`, 'error');
+                }
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i data-lucide="upload"></i> Télécharger vers Supabase';
+                lucide.createIcons();
+            }
+        }
+
+        async function refreshPresentations() {
+            try {
+                presentations = await presentationStorage.listPresentations();
+                
+                // Vérifier le statut de conversion pour chaque présentation
+                for (let pres of presentations) {
+                    pres.converted = await presentationStorage.isPresentationConverted(pres.presentationName);
+                }
+                
+                displayPresentations();
+                updatePresentationSelect();
+            } catch (error) {
+                console.error('Erreur lors du chargement des présentations:', error);
+                const container = document.getElementById('presentationsList');
+                const isBucketNotFound = error.message && error.message.includes('Bucket not found');
+                const isPermissionError = error.message && error.message.includes('Permissions');
+                
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; background: rgba(251, 191, 36, 0.1); border-radius: 12px; border: 2px solid rgba(251, 191, 36, 0.3);">
+                        <i data-lucide="alert-triangle" style="width: 48px; height: 48px; margin: 0 auto 20px; color: #fbbf24;"></i>
+                        <h3 style="color: #fbbf24; margin-bottom: 15px; font-size: 1.2em;">${isBucketNotFound ? 'Bucket non trouvé' : isPermissionError ? 'Problème de permissions' : 'Erreur lors du chargement'}</h3>
+                        ${isBucketNotFound ? `
+                            <div style="text-align: left; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <p style="color: #fff; margin-bottom: 15px; font-weight: 600;">📋 Pour créer le bucket "presentations" :</p>
+                                <ol style="color: var(--muted); font-size: 0.9em; line-height: 1.8; margin-left: 20px;">
+                                    <li>Allez sur <a href="https://supabase.com/dashboard" target="_blank" style="color: var(--primary);">Supabase Dashboard</a></li>
+                                    <li>Sélectionnez votre projet</li>
+                                    <li>Allez dans <strong>"Storage"</strong> dans le menu de gauche</li>
+                                    <li>Cliquez sur <strong>"New bucket"</strong></li>
+                                    <li>Nom du bucket : <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">presentations</code></li>
+                                    <li>✅ Cochez <strong>"Public bucket"</strong></li>
+                                    <li>Cliquez sur <strong>"Create bucket"</strong></li>
+                                </ol>
+                                <p style="color: var(--muted); font-size: 0.85em; margin-top: 15px;">
+                                    ⚠️ N'oubliez pas de configurer les policies RLS après la création (voir PRESENTATION_SYSTEM.md)
+                                </p>
+                            </div>
+                        ` : isPermissionError ? `
+                            <div style="text-align: left; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                <p style="color: #fff; margin-bottom: 15px; font-weight: 600;">🔒 Problème de permissions RLS</p>
+                                <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 15px;">
+                                    Le bucket existe mais les policies RLS bloquent la lecture. Configurez les policies :
+                                </p>
+                                <ol style="color: var(--muted); font-size: 0.9em; line-height: 1.8; margin-left: 20px;">
+                                    <li>Allez dans Supabase Dashboard > Storage > <strong>presentations</strong></li>
+                                    <li>Cliquez sur l'onglet <strong>"Policies"</strong></li>
+                                    <li>Créez une policy <strong>"SELECT"</strong> avec la définition : <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">true</code></li>
+                                    <li>Créez une policy <strong>"INSERT"</strong> avec la définition : <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">true</code></li>
+                                </ol>
+                            </div>
+                        ` : `
+                            <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 15px;">
+                                ${error.message || 'Une erreur est survenue'}
+                            </p>
+                            <p style="color: var(--muted); font-size: 0.85em;">
+                                💡 Si vous voyez vos fichiers dans Supabase mais pas ici, vérifiez :
+                                <ul style="text-align: left; margin-top: 10px; margin-left: 20px;">
+                                    <li>Les policies RLS du bucket</li>
+                                    <li>Que les fichiers sont dans le dossier <code>pptx/</code></li>
+                                    <li>La console du navigateur pour plus de détails</li>
+                                </ul>
+                            </p>
+                        `}
+                        <button onclick="refreshPresentations()" class="btn-secondary" style="width: auto; margin-top: 15px;">
+                            <i data-lucide="refresh-cw"></i>
+                            Réessayer
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function displayPresentations() {
+            const container = document.getElementById('presentationsList');
+            
+            if (presentations.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 2px dashed rgba(255, 255, 255, 0.1);">
+                        <i data-lucide="folder-plus" style="width: 48px; height: 48px; margin: 0 auto 20px; color: var(--muted);"></i>
+                        <p style="color: var(--muted); margin-bottom: 15px; font-size: 1.1em;">Aucune présentation trouvée</p>
+                        <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 20px;">
+                            Si vous venez de créer le bucket "presentations", attendez quelques secondes puis actualisez.
+                        </p>
+                        <button onclick="refreshPresentations()" class="btn-secondary" style="width: auto;">
+                            <i data-lucide="refresh-cw"></i>
+                            Actualiser
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = presentations.map(pres => {
+                const isSelected = selectedPresentation && selectedPresentation.fileName === pres.fileName;
+                return `
+                    <div class="presentation-item ${isSelected ? 'selected' : ''}" onclick="selectPresentation('${pres.fileName}')">
+                        <h3>${pres.presentationName}</h3>
+                        <p style="color: var(--muted); font-size: 0.9em; margin-bottom: 10px;">
+                            ${new Date(pres.uploadDate).toLocaleDateString('fr-FR')}
+                        </p>
+                        <span class="status ${pres.converted ? 'ready' : 'pending'}" id="status-${pres.fileName}">
+                            ${pres.converted ? '✅ Prêt' : '⏳ En attente'}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function selectPresentation(fileName) {
+            const pres = presentations.find(p => p.fileName === fileName);
+            if (!pres) return;
+
+            selectedPresentation = pres;
+            displayPresentations();
+            
+            // Vérifier si convertie
+            const isConverted = await presentationStorage.isPresentationConverted(pres.presentationName);
+            pres.converted = isConverted;
+            
+            document.getElementById('convertBtn').disabled = isConverted;
+            document.getElementById('startBtn').disabled = !isConverted;
+            
+            // Mettre à jour le statut
+            const statusEl = document.getElementById(`status-${fileName}`);
+            if (statusEl) {
+                statusEl.className = `status ${isConverted ? 'ready' : 'pending'}`;
+                statusEl.textContent = isConverted ? '✅ Prêt' : '⏳ En attente';
+            }
+        }
+
+        async function convertPresentation() {
+            if (!selectedPresentation) {
+                showMessage('convertStatus', 'Veuillez sélectionner une présentation', 'error');
+                return;
+            }
+
+            const convertBtn = document.getElementById('convertBtn');
+            convertBtn.disabled = true;
+            convertBtn.innerHTML = '<span class="loading-spinner"></span> Conversion en cours...';
+            
+            try {
+                // Appeler l'API de conversion
+                const response = await fetch(`${API_URL}/convert`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        presentationName: selectedPresentation.presentationName,
+                        pptxUrl: selectedPresentation.url
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erreur lors de la conversion');
+                }
+
+                showMessage('convertStatus', `✅ ${result.message}`, 'success');
+                selectedPresentation.converted = true;
+                displayPresentations();
+                document.getElementById('convertBtn').disabled = true;
+                document.getElementById('startBtn').disabled = false;
+                
+            } catch (error) {
+                showMessage('convertStatus', `❌ Erreur: ${error.message}`, 'error');
+            } finally {
+                convertBtn.disabled = false;
+                convertBtn.innerHTML = '<i data-lucide="image"></i> Convertir en Images';
+                lucide.createIcons();
+            }
+        }
+
+        function updatePresentationSelect() {
+            const select = document.getElementById('presentationSelect');
+            select.innerHTML = '<option value="">-- Choisir une présentation --</option>';
+            
+            presentations
+                .filter(p => p.converted)
+                .forEach(pres => {
+                    const option = document.createElement('option');
+                    option.value = pres.fileName;
+                    option.textContent = pres.presentationName;
+                    select.appendChild(option);
+                });
+        }
+
+        async function startPresentation() {
+            const select = document.getElementById('presentationSelect');
+            const fileName = select.value;
+            
+            if (!fileName) {
+                showMessage('convertStatus', 'Veuillez sélectionner une présentation', 'error');
+                return;
+            }
+
+            const pres = presentations.find(p => p.fileName === fileName);
+            if (!pres) return;
+
+            // Charger les slides depuis Supabase
+            slides = await presentationStorage.getPresentationSlides(pres.presentationName);
+            
+            if (slides.length === 0) {
+                showMessage('convertStatus', 'Aucune slide trouvée pour cette présentation', 'error');
+                return;
+            }
+
+            // Afficher l'écran de login
+            document.getElementById('managementScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+        }
+
         function checkAccess() {
             const code = document.getElementById('accessCode').value;
             const errorMsg = document.getElementById('errorMessage');
@@ -313,50 +1011,14 @@
             }
         }
 
-        // Entrée pour valider
-        document.getElementById('accessCode').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                checkAccess();
-            }
-        });
-
-        // Charger la présentation
         async function loadPresentation() {
             const slideContainer = document.getElementById('slideContainer');
             
-            // Essayer de charger les slides depuis le dossier
-            // Format attendu: slide-1.png, slide-2.png, etc.
-            slides = [];
-            let slideNumber = 1;
-            let foundSlides = true;
-
-            while (foundSlides) {
-                const img = new Image();
-                const slidePath = `${SLIDES_DIR}slide-${slideNumber}.png`;
-                
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        slides.push(slidePath);
-                        slideNumber++;
-                        resolve();
-                    };
-                    img.onerror = () => {
-                        foundSlides = false;
-                        resolve();
-                    };
-                    img.src = slidePath;
-                });
-            }
-
-            // Si aucune slide trouvée, afficher un message
             if (slides.length === 0) {
                 slideContainer.innerHTML = `
                     <div class="no-slides">
                         <h2>⚠️ Aucune slide trouvée</h2>
-                        <p>Veuillez convertir le PowerPoint en images et les placer dans le dossier <code>presentation-slides/</code></p>
-                        <p style="margin-top: 20px; font-size: 14px;">
-                            Format attendu: <code>slide-1.png</code>, <code>slide-2.png</code>, etc.
-                        </p>
+                        <p>Veuillez convertir une présentation d'abord.</p>
                     </div>
                 `;
                 document.getElementById('totalSlides').textContent = '0';
@@ -368,7 +1030,6 @@
             lucide.createIcons();
         }
 
-        // Afficher une slide
         function showSlide(index) {
             if (index < 0 || index >= slides.length) return;
             
@@ -376,17 +1037,15 @@
             const slideContainer = document.getElementById('slideContainer');
             
             slideContainer.innerHTML = `
-                <img src="${slides[index]}" alt="Slide ${index + 1}" class="slide-image" />
+                <img src="${slides[index].url}" alt="Slide ${index + 1}" class="slide-image" />
             `;
             
             document.getElementById('currentSlide').textContent = index + 1;
             
-            // Mettre à jour les boutons
             document.getElementById('prevBtn').disabled = index === 0;
             document.getElementById('nextBtn').disabled = index === slides.length - 1;
         }
 
-        // Navigation
         function nextSlide() {
             if (currentSlideIndex < slides.length - 1) {
                 showSlide(currentSlideIndex + 1);
@@ -402,9 +1061,8 @@
         function exitPresentation() {
             if (confirm('Êtes-vous sûr de vouloir quitter la présentation ?')) {
                 document.getElementById('presentationScreen').style.display = 'none';
-                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('managementScreen').style.display = 'flex';
                 document.getElementById('accessCode').value = '';
-                document.getElementById('accessCode').focus();
             }
         }
 
@@ -429,9 +1087,115 @@
             }
         });
 
-        // Initialiser les icônes
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = type === 'error' ? 'error-message' : 'success-message';
+            el.style.display = 'block';
+            
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 5000);
+        }
+
+        async function diagnoseBucket() {
+            const statusDiv = document.getElementById('presentationsList');
+            statusDiv.innerHTML = '<p style="text-align: center; color: var(--muted);">🔍 Diagnostic en cours...</p>';
+            
+            try {
+                // Lister tous les buckets disponibles
+                const allBuckets = await presentationStorage.listAllBuckets();
+                
+                // Vérifier si le bucket existe
+                const bucketExists = await presentationStorage.checkBucketExists();
+                
+                let report = `
+                    <div style="text-align: left; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 8px;">
+                        <h3 style="color: #fff; margin-bottom: 15px;">📊 Rapport de Diagnostic</h3>
+                        <div style="color: var(--muted); font-size: 0.9em; line-height: 1.8;">
+                            <p><strong>Bucket "presentations" :</strong> ${bucketExists ? '✅ Existe' : '❌ Non trouvé'}</p>
+                            
+                            ${allBuckets.length > 0 ? `
+                                <p style="margin-top: 15px;"><strong>Buckets disponibles dans Supabase :</strong></p>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    ${allBuckets.map(b => `<li><code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${b.name}</code> ${b.public ? '(Public)' : '(Privé)'}</li>`).join('')}
+                                </ul>
+                            ` : '<p style="margin-top: 10px; color: #fbbf24;">⚠️ Aucun bucket trouvé dans Supabase</p>'}
+                `;
+                
+                if (bucketExists) {
+                    // Essayer de lister les fichiers
+                    try {
+                        const files = await presentationStorage.listPresentations();
+                        report += `
+                            <p style="margin-top: 15px;"><strong>Fichiers trouvés :</strong> ${files.length}</p>
+                            ${files.length > 0 ? `
+                                <p style="margin-top: 10px;"><strong>Fichiers :</strong></p>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    ${files.map(f => `<li>${f.fileName}</li>`).join('')}
+                                </ul>
+                            ` : '<p style="color: #fbbf24; margin-top: 10px;">⚠️ Aucun fichier trouvé. Vérifiez les policies RLS.</p>'}
+                        `;
+                    } catch (listError) {
+                        report += `<p style="color: #f87171; margin-top: 10px;"><strong>Erreur lors de la liste :</strong> ${listError.message}</p>`;
+                    }
+                } else {
+                    report += `
+                        <div style="background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                            <p style="color: #fbbf24; margin-bottom: 10px; font-weight: 600;">📋 Pour créer le bucket "presentations" :</p>
+                            <div style="margin-bottom: 15px;">
+                                <button onclick="createBucket()" class="btn-success" style="width: auto; padding: 10px 20px;">
+                                    <i data-lucide="plus-circle"></i>
+                                    Créer automatiquement
+                                </button>
+                            </div>
+                            <p style="color: var(--muted); font-size: 0.85em; margin-bottom: 10px;">OU créez-le manuellement :</p>
+                            <ol style="margin-left: 20px; line-height: 2; font-size: 0.9em;">
+                                <li>Allez sur <a href="https://supabase.com/dashboard" target="_blank" style="color: var(--primary);">Supabase Dashboard</a></li>
+                                <li>Sélectionnez votre projet</li>
+                                <li>Allez dans <strong>"Storage"</strong> dans le menu de gauche</li>
+                                <li>Cliquez sur <strong>"New bucket"</strong></li>
+                                <li>Nom du bucket : <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">presentations</code></li>
+                                <li>✅ Cochez <strong>"Public bucket"</strong></li>
+                                <li>Cliquez sur <strong>"Create bucket"</strong></li>
+                            </ol>
+                            <p style="color: var(--muted); font-size: 0.85em; margin-top: 10px;">
+                                ⚠️ Après la création, configurez les policies RLS (SELECT, INSERT, UPDATE) avec la définition <code>true</code>
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                report += `
+                        </div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button onclick="refreshPresentations()" class="btn-secondary" style="width: auto;">
+                                <i data-lucide="refresh-cw"></i>
+                                Actualiser
+                            </button>
+                            <button onclick="diagnoseBucket()" class="btn-secondary" style="width: auto;">
+                                <i data-lucide="search"></i>
+                                Re-diagnostic
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                statusDiv.innerHTML = report;
+                lucide.createIcons();
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                        <p style="color: #f87171;">Erreur lors du diagnostic: ${error.message}</p>
+                        <button onclick="diagnoseBucket()" class="btn-secondary" style="width: auto; margin-top: 15px;">
+                            <i data-lucide="refresh-cw"></i>
+                            Réessayer
+                        </button>
+                    </div>
+                `;
         lucide.createIcons();
+            }
+        }
     </script>
 </body>
 </html>
-

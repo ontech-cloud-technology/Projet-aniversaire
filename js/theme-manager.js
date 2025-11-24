@@ -120,3 +120,5 @@ if (document.readyState === 'loading') {
 // Exposer globalement pour utilisation dans d'autres scripts
 window.themeManager = themeManager;
 
+
+

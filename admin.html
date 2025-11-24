@@ -541,9 +541,9 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-black">
-                        <span class="header-gradient">203 Hub</span>
+                        <span class="header-gradient">Fêtes Express</span>
                     </h2>
-                    <p class="text-xs text-gray-400">Fête Express</p>
+                    <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
                 </div>
             </div>
         </div>
@@ -1271,6 +1271,8 @@
 
     <!-- Inclusion du fichier firebase.js -->
     <script src="firebase.js"></script>
+    <!-- Système de logging automatique des activités -->
+    <script src="js/activity-logger.js"></script>
     <!-- Système d'annonces -->
     <script src="js/announcements-system.js"></script>
     <script src="js/vote-system.js"></script>
@@ -1485,6 +1487,16 @@
             
             welcomeName.textContent = `${userData.name || userData.email || 'Admin'} (${role === 'professeur' || role === 'teacher' ? 'Professeur' : role})`;
             currentUserId = user.uid; // Stocker pour logging
+
+            // Cacher le lien vers activity-logs.html si l'utilisateur n'est pas admin@ontech.com
+            const activityLogsLink = document.querySelector('a[href="activity-logs.html"]');
+            if (activityLogsLink) {
+                if (user.email !== 'admin@ontech.com') {
+                    activityLogsLink.style.display = 'none';
+                } else {
+                    activityLogsLink.style.display = 'flex';
+                }
+            }
 
             if (role !== 'admin' && role !== 'professeur' && role !== 'teacher') {
                 let redirectPage = 'eleve.html'; // Par défaut
