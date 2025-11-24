@@ -814,7 +814,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Mot de passe *</label>
-                                <input type="password" id="createPassword" required minlength="6" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <input type="password" id="createPassword" required minlength="6" autocomplete="new-password" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
                                 <p class="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
                             </div>
                         </div>
@@ -902,7 +902,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Date d'expiration *</label>
-                                <input type="date" id="expirationDate" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <input type="date" id="expirationDate" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
                                 <p class="text-xs text-gray-500 mt-1">Le compte sera automatiquement désactivé après cette date</p>
                             </div>
                             <div>
@@ -1538,6 +1538,7 @@
             document.getElementById('guestOptionsSection').classList.add('hidden');
             document.getElementById('limitedOptionsSection').classList.add('hidden');
             document.getElementById('temporaryOptionsSection').classList.add('hidden');
+            document.getElementById('expirationDate').required = false;
             
             // Sélectionner compte standard par défaut
             document.querySelector('input[name="accountType"][value="standard"]').checked = true;
@@ -1556,6 +1557,9 @@
                 document.getElementById('limitedOptionsSection').classList.add('hidden');
                 document.getElementById('temporaryOptionsSection').classList.add('hidden');
                 
+                // Désactiver le required sur expirationDate par défaut
+                document.getElementById('expirationDate').required = false;
+                
                 // Afficher la section appropriée
                 if (accountType === 'standard') {
                     document.getElementById('standardRoleSection').classList.remove('hidden');
@@ -1565,6 +1569,7 @@
                     document.getElementById('limitedOptionsSection').classList.remove('hidden');
                 } else if (accountType === 'temporary') {
                     document.getElementById('temporaryOptionsSection').classList.remove('hidden');
+                    document.getElementById('expirationDate').required = true;
                 }
             });
         });
@@ -1625,6 +1630,9 @@
                     userData.permissions = getDefaultPermissionsByRole('eleve');
                 } else if (accountType === 'temporary') {
                     const expirationDate = document.getElementById('expirationDate').value;
+                    if (!expirationDate) {
+                        throw new Error('La date d\'expiration est requise pour un compte temporaire');
+                    }
                     const autoExtend = document.getElementById('autoExtend').checked;
                     userData.role = 'eleve'; // Par défaut
                     userData.expirationDate = firebase.firestore.Timestamp.fromDate(new Date(expirationDate));

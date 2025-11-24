@@ -427,14 +427,20 @@
                     <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
                     Précédent
                 </button>
-                <button type="button" id="nextBtn" onclick="nextStep()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-white font-bold hover:opacity-90 transition flex items-center ml-auto">
-                    Suivant
-                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                </button>
-                <button type="submit" id="submitBtn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-white font-bold hover:opacity-90 transition flex items-center hidden">
-                    <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-                    Terminer la Configuration
-                </button>
+                <div class="flex items-center gap-4 ml-auto">
+                    <button type="button" id="skipBtn" onclick="skipProfileSetup()" class="px-6 py-3 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-bold transition flex items-center hidden">
+                        <i data-lucide="skip-forward" class="w-5 h-5 mr-2"></i>
+                        Passer le Formulaire
+                    </button>
+                    <button type="button" id="nextBtn" onclick="nextStep()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-white font-bold hover:opacity-90 transition flex items-center">
+                        Suivant
+                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                    </button>
+                    <button type="submit" id="submitBtn" class="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-white font-bold hover:opacity-90 transition flex items-center hidden">
+                        <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+                        Terminer la Configuration
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -549,6 +555,14 @@
                 // Initialiser le thème manager
                 if (window.themeManager) {
                     window.themeManager.init();
+                }
+                
+                // Vérifier si l'email est demonstration@ontech.com ou a@ontech.com pour afficher le bouton Skip
+                if (user.email === 'demonstration@ontech.com' || user.email === 'a@ontech.com') {
+                    const skipBtn = document.getElementById('skipBtn');
+                    if (skipBtn) {
+                        skipBtn.classList.remove('hidden');
+                    }
                 }
             }
 
@@ -817,6 +831,87 @@
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('currentStep').textContent = currentStep;
             document.getElementById('totalSteps').textContent = TOTAL_STEPS;
+        }
+
+        // Fonction pour passer le formulaire (pour demonstration@ontech.com ou a@ontech.com)
+        async function skipProfileSetup() {
+            const user = firebase.auth().currentUser;
+            if (!user || (user.email !== 'demonstration@ontech.com' && user.email !== 'a@ontech.com')) {
+                return;
+            }
+
+            const skipBtn = document.getElementById('skipBtn');
+            if (skipBtn) {
+                skipBtn.disabled = true;
+                skipBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i>Passage en cours...';
+                lucide.createIcons();
+            }
+
+            try {
+                // Récupérer les données utilisateur
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                
+                // Marquer le profil comme complété avec des valeurs par défaut
+                const updateData = {
+                    profileCompleted: true,
+                    rulesAccepted: true,
+                    needsPasswordChange: false,
+                    profileInfo: {},
+                    additionalInfo: {},
+                    profileCompletedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // Si le profil n'a pas encore de données, initialiser avec des valeurs vides
+                if (!userData.profileInfo) {
+                    updateData.profileInfo = {};
+                }
+                if (!userData.additionalInfo) {
+                    updateData.additionalInfo = {};
+                }
+
+                await firebase.firestore().collection('users').doc(user.uid).update(updateData);
+
+                // Logger l'activité
+                try {
+                    await logActivity(user.uid, 'profile_skip', {
+                        description: 'Formulaire de profil passé (mode démonstration)',
+                        email: user.email
+                    });
+                } catch (logError) {
+                    console.warn('Erreur lors du logging:', logError);
+                }
+
+                // Rediriger selon le rôle
+                const role = userData?.role || 'eleve';
+                let redirectUrl = 'eleve.html';
+                
+                if (role === 'admin' || role === 'professeur' || role === 'teacher') {
+                    redirectUrl = 'admin.html';
+                } else if (role === 'comite') {
+                    redirectUrl = 'committee.html';
+                }
+
+                // Afficher un message de succès
+                const successOverlay = document.getElementById('successOverlay');
+                if (successOverlay) {
+                    successOverlay.classList.remove('hidden');
+                    successOverlay.classList.add('flex');
+                }
+
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1500);
+
+            } catch (error) {
+                console.error('Erreur lors du passage du formulaire:', error);
+                showError('Erreur lors du passage du formulaire. Veuillez réessayer.');
+                if (skipBtn) {
+                    skipBtn.disabled = false;
+                    skipBtn.innerHTML = '<i data-lucide="skip-forward" class="w-5 h-5 mr-2"></i>Passer le Formulaire';
+                    lucide.createIcons();
+                }
+            }
         }
 
         async function handleSubmit(e) {

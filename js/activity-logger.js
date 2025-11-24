@@ -248,10 +248,15 @@ class ActivityLogger {
         const target = e.target;
         
         // Données minimales
+        // Convertir className en string si c'est un DOMTokenList
+        const classNameStr = typeof target.className === 'string' 
+            ? target.className 
+            : (target.className?.baseVal || target.className?.toString() || '');
+        
         const elementInfo = {
             tag: target.tagName,
             id: target.id || null,
-            cls: target.className?.substring(0, 30) || null, // Limiter la taille
+            cls: classNameStr ? classNameStr.substring(0, 30) : null, // Limiter la taille
             txt: target.textContent?.trim().substring(0, 30) || null
         };
 
