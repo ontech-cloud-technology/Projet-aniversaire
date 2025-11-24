@@ -557,9 +557,17 @@
             <i data-lucide="shield-check" class="w-5 h-5 mr-3"></i>
             Dashboard Admin
         </a>
+        <a href="documentation-enseignante.html" class="nav-item">
+            <i data-lucide="book-open" class="w-5 h-5 mr-3"></i>
+            Documentation
+        </a>
         <a href="activity-logs.html" class="nav-item">
             <i data-lucide="activity" class="w-5 h-5 mr-3"></i>
             Logs d'Activité
+        </a>
+        <a href="super-admin.html" id="superAdminLink" class="nav-item" style="display: none;">
+            <i data-lucide="crown" class="w-5 h-5 mr-3"></i>
+            Gestion des Comptes
         </a>
         <a href="send-email.html" class="nav-item">
             <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
@@ -625,11 +633,7 @@
 
         <!-- Navigation/Onglets Admin pour les sections -->
         <div class="flex border-b border-gray-700 mb-6 space-x-4 overflow-x-auto">
-            <button onclick="changeSection('users')" id="tab-users" class="px-4 py-2 border-b-2 font-semibold transition section-tab text-gray-400 hover:text-white border-transparent whitespace-nowrap">
-                <i data-lucide="users" class="w-4 h-4 inline-block mr-2"></i>
-                Gestion des Utilisateurs
-            </button>
-            <button onclick="changeSection('celebrations')" id="tab-celebrations" class="px-4 py-2 text-gray-400 hover:text-white border-b-2 border-transparent transition section-tab whitespace-nowrap">
+            <button onclick="changeSection('celebrations')" id="tab-celebrations" class="px-4 py-2 border-b-2 font-semibold transition section-tab text-gray-400 hover:text-white border-transparent whitespace-nowrap active-tab">
                 <i data-lucide="gift" class="w-4 h-4 inline-block mr-2"></i>
                 Personnes & Célébrations
             </button>
@@ -651,63 +655,8 @@
             </button>
         </div>
 
-        <!-- Section 1: Gestion des Utilisateurs -->
-        <section id="section-users" class="card p-6 rounded-xl">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                <h2 class="text-2xl font-bold flex items-center">
-                    <i data-lucide="user-cog" class="w-6 h-6 mr-2"></i>
-                    Utilisateurs de l'Application (Roles & Accès)
-                </h2>
-                <button onclick="openAddUserModal()" class="mt-4 md:mt-0 flex items-center px-4 py-2 rounded-lg bg-primary hover:bg-opacity-90 text-bg-dark font-semibold transition">
-                    <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>
-                    Ajouter un Utilisateur
-                </button>
-            </div>
-            
-            <!-- Barre de recherche -->
-            <div class="mb-4">
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                    <input type="text" id="userSearchInput" placeholder="Rechercher par nom, numéro de fiche ou numéro de classe..." class="w-full pl-10 pr-4 py-3 rounded-lg bg-bg-dark border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary transition">
-                </div>
-            </div>
-            
-            <!-- FILTRES PAR RÔLE -->
-            <div class="flex flex-wrap gap-2 mb-6 items-center" id="roleFilterTabs">
-                <button data-role="all" class="filter-btn active-filter px-4 py-2 rounded-lg bg-primary text-bg-dark text-sm hover:bg-opacity-90 transition">Tous</button>
-                <button data-role="professeur" class="filter-btn px-4 py-2 rounded-lg bg-gray-600 text-white text-sm hover:bg-gray-700 transition">Professeurs</button>
-                <button data-role="comite" class="filter-btn px-4 py-2 rounded-lg bg-gray-600 text-white text-sm hover:bg-gray-700 transition">Comité</button>
-                <button data-role="eleve" class="filter-btn px-4 py-2 rounded-lg bg-gray-600 text-white text-sm hover:bg-gray-700 transition">Élèves</button>
-                <button data-role="admin" class="filter-btn px-4 py-2 rounded-lg bg-gray-600 text-white text-sm hover:bg-gray-700 transition">Admins</button>
-                
-                <!-- Option pour masquer les élèves dans la vue "Tous" -->
-                <div class="ml-auto flex items-center space-x-2 px-4 py-2 rounded-lg bg-bg-dark border border-gray-700">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" id="hideElevesToggle" class="w-4 h-4 rounded border-gray-600 bg-bg-dark text-primary focus:ring-primary focus:ring-2">
-                        <span class="text-sm text-gray-300">Masquer les élèves</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto rounded-lg border border-gray-700">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-bg-dark">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nom Complet / Email</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden md:table-cell">UID</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rôle</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody" class="divide-y divide-gray-800">
-                        <tr><td colspan="4" class="text-center py-4 text-gray-500">Chargement des utilisateurs...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- NOUVELLE SECTION 2: Gestion des Célébrations -->
-        <section id="section-celebrations" class="hidden">
+        <!-- Section 1: Gestion des Célébrations -->
+        <section id="section-celebrations">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <!-- COLONNE GAUCHE: Formulaire d'Ajout -->
@@ -1113,99 +1062,6 @@
         </div>
     </div>
 
-    <!-- Modale d'Édition d'Utilisateur -->
-    <div id="editUserModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 class="text-2xl font-bold mb-6">Éditer l'Utilisateur</h3>
-            <form id="editUserForm">
-                <input type="hidden" id="editUserId">
-                
-                <div class="mb-4">
-                    <label for="editFullName" class="block text-sm font-medium mb-1">Nom Complet</label>
-                    <input type="text" id="editFullName" class="w-full p-2 rounded bg-bg-dark border border-gray-700 focus:ring-primary focus:border-primary">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="editEmail" class="block text-sm font-medium mb-1">Email (UID)</label>
-                    <input type="email" id="editEmail" readonly class="w-full p-2 rounded bg-gray-700 border border-gray-600 cursor-not-allowed text-gray-400">
-                </div>
-                
-                <div class="mb-6">
-                    <label for="editRole" class="block text-sm font-medium mb-1">Rôle</label>
-                    <select id="editRole" class="w-full p-2 rounded bg-bg-dark border border-gray-700 focus:ring-primary focus:border-primary">
-                        <option value="admin">Admin</option>
-                        <option value="comite">Comité</option>
-                        <option value="professeur">Professeur</option>
-                        <option value="eleve">Élève</option>
-                    </select>
-                </div>
-                
-                <div class="flex justify-between items-center pt-4 border-t border-gray-700">
-                    <!-- Bouton de Suppression -->
-                    <button type="button" onclick="confirmDeleteUser()" class="flex items-center text-red-400 hover:text-red-500 transition">
-                        <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>
-                        Supprimer l'Utilisateur
-                    </button>
-                    <div class="flex space-x-4">
-                        <button type="button" onclick="closeModal('editUserModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
-                        <button type="submit" class="px-4 py-2 rounded btn-primary">Sauvegarder</button>
-                    </div>
-                </div>
-                <div id="editError" class="text-sm text-red-400 mt-3 hidden">Erreur:</div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modale d'Ajout d'Utilisateur -->
-    <div id="addUserModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 class="text-2xl font-bold mb-6 flex items-center header-gradient">
-                <i data-lucide="user-plus" class="w-6 h-6 mr-2"></i>
-                Créer un Nouvel Utilisateur
-            </h3>
-            <form id="addUserForm">
-                <div class="space-y-4">
-                    <div>
-                        <label for="addFullName" class="block text-sm font-medium mb-2 text-gray-300">Nom Complet *</label>
-                        <input type="text" id="addFullName" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: Jean Dupont">
-                    </div>
-                    
-                    <div>
-                        <label for="addEmail" class="block text-sm font-medium mb-2 text-gray-300">Email *</label>
-                        <input type="email" id="addEmail" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: jean.dupont@example.com">
-                    </div>
-                    
-                    <div>
-                        <label for="addPassword" class="block text-sm font-medium mb-2 text-gray-300">Mot de passe *</label>
-                        <input type="password" id="addPassword" required minlength="6" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Minimum 6 caractères">
-                        <p class="text-xs text-gray-500 mt-1">Le mot de passe doit contenir au moins 6 caractères</p>
-                    </div>
-                    
-                    <div>
-                        <label for="addRole" class="block text-sm font-medium mb-2 text-gray-300">Rôle *</label>
-                        <select id="addRole" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
-                            <option value="" disabled selected>Sélectionner un rôle</option>
-                            <option value="eleve">Élève</option>
-                            <option value="comite">Comité</option>
-                            <option value="professeur">Professeur</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-4 mt-6 pt-4 border-t border-gray-700">
-                    <button type="button" onclick="closeModal('addUserModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
-                    <button type="submit" id="addUserBtn" class="px-4 py-2 rounded btn-primary flex items-center">
-                        <i data-lucide="check" class="w-4 h-4 mr-2"></i>
-                        Créer l'Utilisateur
-                    </button>
-                </div>
-                <div id="addUserError" class="text-sm text-red-400 mt-3 hidden">Erreur:</div>
-                <div id="addUserSuccess" class="text-sm text-green-400 mt-3 hidden">Succès:</div>
-            </form>
-        </div>
-    </div>
-
     <!-- Modale d'Ajout/Édition d'Activité -->
     <div id="addActivityModal" class="modal-overlay">
         <div class="modal-content">
@@ -1428,24 +1284,17 @@
 
         // --- Début du Script Principal ---
 
-        const userTableBody = document.getElementById('userTableBody');
         const celebrationListBody = document.getElementById('celebrationListBody');
         const loadingScreen = document.getElementById('loadingScreen');
         const adminContent = document.getElementById('adminContent');
         const welcomeName = document.getElementById('welcomeName');
-        const roleFilterTabs = document.getElementById('roleFilterTabs');
         const ioMsg = document.getElementById('ioMsg');
 
-        let allUsers = []; 
         let allCelebrations = []; // Pour la recherche par fileNumber et classNumber
-        let currentFilterRole = 'all';
-        let hideElevesInAllView = false; // Option pour masquer les élèves dans la vue "Tous"
-        let currentSearchTerm = ''; // Terme de recherche
         let unsubscribeCelebrations = null; 
         let currentUserId = null; // Pour le logging 
 
         const sections = {
-            'users': document.getElementById('section-users'),
             'celebrations': document.getElementById('section-celebrations'),
             'activities': document.getElementById('section-activities'),
             'profiles': document.getElementById('section-profiles'),
@@ -1484,28 +1333,37 @@
             }
             
             const role = userData.role;
+            const isAdmin = role === 'admin';
+            const isProfessor = role === 'professeur' || role === 'teacher';
             
-            welcomeName.textContent = `${userData.name || userData.email || 'Admin'} (${role === 'professeur' || role === 'teacher' ? 'Professeur' : role})`;
+            welcomeName.textContent = `${userData.name || userData.email || 'Admin'} (${isProfessor ? 'Professeur' : role})`;
             currentUserId = user.uid; // Stocker pour logging
+            window.currentUserRole = role; // Stocker le rôle globalement
 
-            // Cacher le lien vers activity-logs.html si l'utilisateur n'est pas admin@ontech.com
+            // Afficher les liens super-admin uniquement pour admin@ontech.com
             const activityLogsLink = document.querySelector('a[href="activity-logs.html"]');
-            if (activityLogsLink) {
-                if (user.email !== 'admin@ontech.com') {
-                    activityLogsLink.style.display = 'none';
-                } else {
-                    activityLogsLink.style.display = 'flex';
-                }
+            const superAdminLink = document.getElementById('superAdminLink');
+            if (user.email === 'admin@ontech.com') {
+                if (activityLogsLink) activityLogsLink.style.display = 'flex';
+                if (superAdminLink) superAdminLink.style.display = 'flex';
+            } else {
+                if (activityLogsLink) activityLogsLink.style.display = 'none';
+                if (superAdminLink) superAdminLink.style.display = 'none';
             }
 
-            if (role !== 'admin' && role !== 'professeur' && role !== 'teacher') {
+            // Masquer le lien Présentation pour les professeurs
+            const presentationLink = document.querySelector('a[href="presentation-admin.html"]');
+            if (presentationLink && isProfessor && !isAdmin) {
+                presentationLink.style.display = 'none';
+            }
+
+            // La section "Gestion des Utilisateurs" a été déplacée vers super-admin.html
+
+            if (!isAdmin && !isProfessor) {
                 let redirectPage = 'eleve.html'; // Par défaut
                 let roleName = 'Élève';
                 
-                if (role === 'professeur' || role === 'teacher') {
-                    redirectPage = 'admin.html';
-                    roleName = 'Professeur';
-                } else if (role === 'comite') {
+                if (role === 'comite') {
                     redirectPage = 'committee.html';
                     roleName = 'Comité';
                 }
@@ -1517,10 +1375,14 @@
                 return;
             }
 
+            // Appliquer les restrictions selon le rôle
+            applyRoleRestrictions(isAdmin, isProfessor);
+
             loadingScreen.style.display = 'none';
             adminContent.classList.remove('hidden');
-            fetchUsers();
-            changeSection('users'); // Afficher la section par défaut
+            
+            // Afficher la section célébrations par défaut
+            changeSection('celebrations');
 
             // Logger la connexion (ne pas bloquer si ça échoue)
             try {
@@ -1534,8 +1396,65 @@
             sessionStorage.setItem('loginTime', Date.now());
         }
 
+        /**
+         * Applique les restrictions selon le rôle de l'utilisateur
+         */
+        function applyRoleRestrictions(isAdmin, isProfessor) {
+            if (isProfessor && !isAdmin) {
+                // Professeurs : restrictions
+                // Limiter les rôles dans le formulaire de création - SEULEMENT ÉLÈVE
+                const addRoleSelect = document.getElementById('addRole');
+                if (addRoleSelect) {
+                    // Retirer toutes les options sauf élève
+                    const adminOption = addRoleSelect.querySelector('option[value="admin"]');
+                    const profOption = addRoleSelect.querySelector('option[value="professeur"]');
+                    const comiteOption = addRoleSelect.querySelector('option[value="comite"]');
+                    if (adminOption) adminOption.remove();
+                    if (profOption) profOption.remove();
+                    if (comiteOption) comiteOption.remove();
+                    
+                    // Forcer la valeur à élève
+                    addRoleSelect.value = 'eleve';
+                    addRoleSelect.disabled = true;
+                    
+                    // Ajouter un message d'aide
+                    const existingHelp = addRoleSelect.parentElement.querySelector('.help-text-prof');
+                    if (!existingHelp) {
+                        const helpText = document.createElement('p');
+                        helpText.className = 'text-xs text-gray-500 mt-1 help-text-prof';
+                        helpText.textContent = 'Les professeurs peuvent uniquement créer des comptes Élève';
+                        addRoleSelect.parentElement.appendChild(helpText);
+                    }
+                }
+                
+                // Limiter les rôles dans le formulaire d'édition
+                const editRoleSelect = document.getElementById('editRole');
+                if (editRoleSelect) {
+                    // Retirer les options admin et professeur
+                    const adminOption = editRoleSelect.querySelector('option[value="admin"]');
+                    const profOption = editRoleSelect.querySelector('option[value="professeur"]');
+                    if (adminOption) adminOption.remove();
+                    if (profOption) profOption.remove();
+                }
+
+                // Masquer les filtres de rôle - les professeurs ne voient que les élèves
+                const roleFilterTabs = document.getElementById('roleFilterTabs');
+                if (roleFilterTabs) {
+                    roleFilterTabs.style.display = 'none';
+                }
+            }
+        }
+
         /** Gère le changement d'onglet principal (Users, Celebrations, Settings). */
         window.changeSection = function(sectionId) {
+            // Empêcher les professeurs d'accéder à la section utilisateurs
+            const isProfessor = window.currentUserRole === 'professeur' || window.currentUserRole === 'teacher';
+            const isAdmin = window.currentUserRole === 'admin';
+            if (sectionId === 'users' && isProfessor && !isAdmin) {
+                showBootstrapAlert('Accès refusé. Cette section est réservée aux administrateurs.', 'warning');
+                return;
+            }
+
             // Gérer le listener OnSnapshot pour les célébrations (seulement actif si la section est visible)
             if (unsubscribeCelebrations) {
                 console.log("Stopping old listener.");
@@ -1857,396 +1776,6 @@
         }
 
 
-        // --- Gestion des Utilisateurs et Affichage ---
-
-        /** Récupère et affiche la liste des utilisateurs. */
-        async function fetchUsers() {
-            userTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Chargement...</td></tr>';
-            try {
-                // Utilisation des promesses pour l'initialisation asynchrone
-                const allUsersWithRoles = await getAllUsers();
-                // Assurer que les UID des utilisateurs Auth existent pour ceux qui n'ont pas de document Role
-                // C'est un scénario complexe, pour l'Admin Panel, on se fie aux documents dans la collection 'users'
-                allUsers = allUsersWithRoles;
-
-                allUsers.sort((a, b) => {
-                    const roleOrder = ['admin', 'professeur', 'comite', 'eleve'];
-                    return roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
-                });
-
-                // Charger aussi les célébrations pour la recherche
-                try {
-                    const celebrationsSnapshot = await firebase.firestore().collection('celebrations').get();
-                    allCelebrations = celebrationsSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                } catch (error) {
-                    console.error("Erreur lors du chargement des célébrations:", error);
-                    allCelebrations = [];
-                }
-
-                renderUserTable(allUsers);
-            } catch (error) {
-                console.error("Erreur lors de la récupération des utilisateurs:", error);
-                userTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-400">Erreur de chargement des données.</td></tr>';
-            }
-        }
-
-        /** Ouvre la modale d'édition et charge les données de l'utilisateur. */
-        window.openEditModal = function(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) {
-                console.error("Utilisateur non trouvé:", userId);
-                return;
-            }
-
-            document.getElementById('editUserId').value = user.id;
-            document.getElementById('editFullName').value = user.fullName || '';
-            document.getElementById('editEmail').value = user.email || user.id; 
-            document.getElementById('editRole').value = user.role;
-            document.getElementById('editError').classList.add('hidden');
-            
-            openModal('editUserModal');
-        }
-
-        /** Gère la soumission du formulaire d'édition d'utilisateur. */
-        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const userId = form.editUserId.value;
-            const newFullName = form.editFullName.value;
-            const newRole = form.editRole.value;
-            const errorElement = document.getElementById('editError');
-            const saveBtn = form.querySelector('button[type="submit"]');
-
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Sauvegarde...';
-            errorElement.classList.add('hidden');
-
-            try {
-                await updateUserData(userId, {
-                    fullName: newFullName,
-                    role: newRole
-                });
-                
-                closeModal('editUserModal');
-                fetchUsers(); // Recharger les utilisateurs pour mettre à jour le tableau
-
-                // Logger la modification
-                await logActivity(currentUserId, 'update', { 
-                    modifiedData: { userId, fullName: newFullName, role: newRole }, 
-                    description: `Modification de l'utilisateur ${newFullName}` 
-                });
-
-            } catch (error) {
-                console.error("Erreur lors de la mise à jour:", error);
-                errorElement.textContent = `Erreur lors de la mise à jour: ${error.message}`;
-                errorElement.classList.remove('hidden');
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Sauvegarder';
-            }
-        });
-
-
-        /** Génère les lignes du tableau des utilisateurs en appliquant le filtre. */
-        function renderUserTable(users) {
-            let filteredUsers = users.filter(user => {
-                // Filtre par rôle
-                if (currentFilterRole !== 'all') {
-                    if (user.role !== currentFilterRole) return false;
-                } else if (currentFilterRole === 'all' && hideElevesInAllView) {
-                    if (user.role === 'eleve') return false;
-                }
-
-                // Filtre par recherche
-                if (currentSearchTerm.trim()) {
-                    const searchTerm = currentSearchTerm.toLowerCase().trim();
-                    const fullName = (user.fullName || '').toLowerCase();
-                    const email = (user.email || '').toLowerCase();
-                    
-                    // Extraire le fileNumber de l'email (avant @)
-                    const fileNumberFromEmail = email.split('@')[0];
-                    
-                    // Chercher dans les célébrations pour fileNumber et classNumber
-                    let matchesCelebration = false;
-                    if (user.email) {
-                        const fileNumber = user.email.split('@')[0];
-                        const celebration = allCelebrations.find(c => c.fileNumber === fileNumber);
-                        if (celebration) {
-                            const fileNumberMatch = (celebration.fileNumber || '').toLowerCase().includes(searchTerm);
-                            const classNumberMatch = (celebration.classNumber || '').toLowerCase().includes(searchTerm);
-                            matchesCelebration = fileNumberMatch || classNumberMatch;
-                        }
-                    }
-                    
-                    // Vérifier si ça correspond
-                    const nameMatch = fullName.includes(searchTerm);
-                    const emailMatch = email.includes(searchTerm);
-                    const fileNumberMatch = fileNumberFromEmail.includes(searchTerm);
-                    
-                    if (!nameMatch && !emailMatch && !fileNumberMatch && !matchesCelebration) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-
-            userTableBody.innerHTML = '';
-            
-            if (filteredUsers.length === 0) {
-                let message = '';
-                if (currentSearchTerm.trim()) {
-                    message = 'Aucun utilisateur trouvé pour cette recherche.';
-                } else if (currentFilterRole === 'all' && hideElevesInAllView) {
-                    message = 'Aucun utilisateur trouvé (les élèves sont masqués).';
-                } else {
-                    message = 'Aucun utilisateur trouvé pour ce rôle.';
-                }
-                userTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-500">${message}</td></tr>`;
-                return;
-            }
-
-            // Afficher le nombre d'élèves masqués si applicable
-            if (currentFilterRole === 'all' && hideElevesInAllView) {
-                const elevesCount = users.filter(u => u.role === 'eleve').length;
-                if (elevesCount > 0) {
-                    const infoRow = document.createElement('tr');
-                    infoRow.className = 'bg-blue-900 bg-opacity-20 border-l-4 border-blue-500';
-                    infoRow.innerHTML = `
-                        <td colspan="4" class="px-4 py-2 text-sm text-blue-300">
-                            <i data-lucide="info" class="w-4 h-4 inline-block mr-2"></i>
-                            ${elevesCount} élève(s) masqué(s). Décochez "Masquer les élèves" pour les afficher.
-                        </td>
-                    `;
-                    userTableBody.appendChild(infoRow);
-                }
-            }
-
-            filteredUsers.forEach(user => {
-                const roleClass = `role-${user.role}`;
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-bg-dark transition cursor-pointer';
-                row.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${user.fullName || user.email || 'N/A'}</td>
-                    <td class="px-4 py-3 text-xs text-gray-400 hidden md:table-cell">${user.id}</td>
-                    <td class="px-4 py-3"><span class="${roleClass} capitalize">${user.role}</span></td>
-                    <td class="px-4 py-3 text-center">
-                        <button onclick="openEditModal('${user.id}')" class="text-primary hover:text-white transition p-2 rounded-full hover:bg-gray-700">
-                            <i data-lucide="pencil" class="w-4 h-4 inline-block"></i>
-                        </button>
-                    </td>
-                `;
-                userTableBody.appendChild(row);
-            });
-            lucide.createIcons();
-        }
-
-        // Écouteur pour la barre de recherche (sera initialisé dans DOMContentLoaded)
-
-        // Écouteur pour la checkbox "Masquer les élèves"
-        const hideElevesToggle = document.getElementById('hideElevesToggle');
-        if (hideElevesToggle) {
-            hideElevesToggle.addEventListener('change', (e) => {
-                hideElevesInAllView = e.target.checked;
-                // Re-rendre le tableau seulement si on est en mode "Tous"
-                if (currentFilterRole === 'all') {
-                    renderUserTable(allUsers);
-                }
-            });
-        }
-
-        // Écouteur pour les boutons de filtre de rôle
-        roleFilterTabs.addEventListener('click', (e) => {
-            const btn = e.target.closest('.filter-btn');
-            if (!btn) return;
-
-            // Retirer la classe active de tous les boutons
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('active-filter', 'bg-primary', 'text-bg-dark');
-                b.classList.add('bg-gray-600', 'text-white');
-            });
-
-            // Mettre à jour le filtre et l'état du bouton
-            currentFilterRole = btn.dataset.role;
-            btn.classList.add('active-filter', 'bg-primary', 'text-bg-dark');
-            btn.classList.remove('bg-gray-600', 'text-white');
-
-            renderUserTable(allUsers);
-        });
-        
-        // --- Modale de Suppression Utilisateur ---
-
-        /** Ouvre la modale de confirmation de suppression. */
-        window.confirmDeleteUser = function() {
-            closeModal('editUserModal'); // Ferme la modale d'édition
-            
-            const userId = document.getElementById('editUserId').value;
-            const user = allUsers.find(u => u.id === userId);
-
-            document.getElementById('deleteUserId').value = userId;
-            document.getElementById('userToDeleteName').textContent = user.fullName || user.email;
-            
-            document.getElementById('deleteError').classList.add('hidden');
-            openModal('deleteConfirmModal');
-        }
-
-        /** Exécute la suppression après confirmation. */
-        window.deleteUserConfirmed = async function() {
-            const userId = document.getElementById('deleteUserId').value;
-            const deleteBtn = document.getElementById('deleteConfirmBtn');
-            const errorElement = document.getElementById('deleteError');
-
-            deleteBtn.disabled = true;
-            deleteBtn.textContent = 'Suppression...';
-            errorElement.classList.add('hidden');
-
-            try {
-                // Récupérer l'utilisateur pour obtenir son email
-                const user = allUsers.find(u => u.id === userId);
-                if (user && user.email) {
-                    // Extraire le fileNumber de l'email
-                    const fileNumber = user.email.split('@')[0];
-                    
-                    // Chercher et supprimer la célébration associée
-                    try {
-                        const celebrationsSnapshot = await firebase.firestore()
-                            .collection('celebrations')
-                            .where('fileNumber', '==', fileNumber)
-                            .get();
-                        
-                        if (!celebrationsSnapshot.empty) {
-                            const batch = firebase.firestore().batch();
-                            celebrationsSnapshot.docs.forEach(doc => {
-                                batch.delete(doc.ref);
-                            });
-                            await batch.commit();
-                            console.log(`✅ Célébration(s) supprimée(s) pour le fileNumber: ${fileNumber}`);
-                        }
-                    } catch (celebError) {
-                        console.error("Erreur lors de la suppression de la célébration:", celebError);
-                        // Ne pas bloquer la suppression de l'utilisateur si la célébration échoue
-                    }
-                }
-
-                await deleteUserDocument(userId);
-                
-                closeModal('deleteConfirmModal');
-                fetchUsers(); // Recharger les utilisateurs
-                
-                // Recharger aussi les célébrations si la section est visible
-                if (unsubscribeCelebrations) {
-                    // Le listener en temps réel mettra à jour automatiquement
-                } else if (sections['celebrations'] && !sections['celebrations'].classList.contains('hidden')) {
-                    // Recharger manuellement si nécessaire
-                    const celebrationsSnapshot = await firebase.firestore().collection('celebrations').get();
-                    const celebrations = celebrationsSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    if (typeof renderCelebrationList === 'function') {
-                        renderCelebrationList(celebrations);
-                    }
-                }
-
-            } catch (error) {
-                console.error("Erreur de suppression:", error);
-                errorElement.textContent = `Erreur lors de la suppression: ${error.message}`;
-                errorElement.classList.remove('hidden');
-            } finally {
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = 'Oui, Supprimer Définitivement';
-            }
-        }
-        
-        // --- Fonctions d'Ajout d'Utilisateur ---
-        
-        /** Ouvre la modale d'ajout d'utilisateur */
-        window.openAddUserModal = function() {
-            document.getElementById('addUserForm').reset();
-            document.getElementById('addUserError').classList.add('hidden');
-            document.getElementById('addUserSuccess').classList.add('hidden');
-            openModal('addUserModal');
-            lucide.createIcons();
-        }
-        
-        /** Gère la soumission du formulaire d'ajout d'utilisateur */
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const addBtn = document.getElementById('addUserBtn');
-            const errorElement = document.getElementById('addUserError');
-            const successElement = document.getElementById('addUserSuccess');
-            
-            const fullName = form.addFullName.value.trim();
-            const email = form.addEmail.value.trim();
-            const password = form.addPassword.value;
-            const role = form.addRole.value;
-            
-            addBtn.disabled = true;
-            addBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i>Création...';
-            errorElement.classList.add('hidden');
-            successElement.classList.add('hidden');
-            
-            try {
-                // Créer l'utilisateur dans Firebase Auth
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
-                
-                // Créer le document utilisateur dans Firestore
-                await firebase.firestore().collection('users').doc(uid).set({
-                    fullName: fullName,
-                    email: email,
-                    role: role,
-                    needsPasswordChange: true, // Flag pour indiquer que le mot de passe doit être changé
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // Envoyer l'email de bienvenue
-                console.log('📧 Envoi de l\'email de bienvenue pour:', email);
-                const emailSent = await sendWelcomeEmail(email, fullName, password);
-                
-                if (emailSent) {
-                    successElement.textContent = `✅ Utilisateur "${fullName}" créé avec succès ! Email de bienvenue envoyé à ${email}`;
-                } else {
-                    successElement.textContent = `✅ Utilisateur "${fullName}" créé avec succès ! Email: ${email} (⚠️ Email non envoyé)`;
-                }
-                successElement.classList.remove('hidden');
-                
-                // Réinitialiser le formulaire
-                form.reset();
-                
-                // Recharger la liste des utilisateurs
-                setTimeout(() => {
-                    closeModal('addUserModal');
-                    fetchUsers();
-                }, 1500);
-                
-            } catch (error) {
-                console.error("Erreur lors de la création de l'utilisateur:", error);
-                
-                let errorMsg = "Une erreur est survenue lors de la création.";
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = "Cet email est déjà utilisé par un autre compte.";
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = "L'adresse email est invalide.";
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg = "Le mot de passe est trop faible (minimum 6 caractères).";
-                } else if (error.code === 'auth/operation-not-allowed') {
-                    errorMsg = "L'authentification par email/mot de passe n'est pas activée.";
-                }
-                
-                errorElement.textContent = `❌ ${errorMsg}`;
-                errorElement.classList.remove('hidden');
-            } finally {
-                addBtn.disabled = false;
-                addBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4 mr-2"></i>Créer l\'Utilisateur';
-                lucide.createIcons();
-            }
-        });
-        
         // --- Gestion des Célébrations ---
 
         /** Rendu de la liste des célébrations */
@@ -3389,14 +2918,6 @@
             lucide.createIcons();
             checkAdminAuth();
             
-            // Initialiser la barre de recherche
-            const searchInput = document.getElementById('userSearchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    currentSearchTerm = e.target.value;
-                    renderUserTable(allUsers);
-                });
-            }
         });
 
     </script>

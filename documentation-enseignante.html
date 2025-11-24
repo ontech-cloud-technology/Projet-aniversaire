@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation — Fête Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Bibliothèques pour PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="firebase.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 50%, #0f172a 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-content {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 25px;
+            border-radius: 16px;
+            border-left: 4px solid #6366f1;
+            line-height: 1.8;
+        }
+        
+        .section-content p {
+            margin-bottom: 15px;
+            color: #e2e8f0;
+        }
+        
+        .section-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .section-content li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #e2e8f0;
+        }
+        
+        .section-content li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .btn-download {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+        
+        .btn-back {
+            background: rgba(100, 116, 139, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            background: rgba(100, 116, 139, 0.5);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6366f1;
+        }
+        
+        @media print {
+            .btn-download, .btn-back {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+        <div style="text-align: center;">
+            <div style="border: 4px solid rgba(99, 102, 241, 0.3); border-top: 4px solid #6366f1; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <p style="color: #cbd5e1;">Vérification de l'accès...</p>
+        </div>
+    </div>
+    
+    <div id="content" style="display: none;">
+        <div class="container" id="documentationContent">
+            <button onclick="window.location.href='admin.html'" class="btn-back">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                Retour à l'administration
+            </button>
+            
+            <div class="header">
+                <h1>📚 Documentation Fête Express</h1>
+                <p>Guide simple pour l'enseignante</p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="info" class="w-6 h-6"></i>
+                    Qu'est-ce que Fête Express ?
+                </div>
+                <div class="section-content">
+                    <p><strong>Fête Express</strong> est une plateforme web simple et amusante pour gérer et célébrer les anniversaires des élèves de votre classe.</p>
+                    <p>Les élèves peuvent voir les anniversaires à venir, envoyer des messages d'anniversaire, et participer à des activités amusantes.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                    Les Rôles dans le Système
+                </div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Élève :</strong> Peut voir les anniversaires, envoyer des messages, et participer aux activités</li>
+                        <li><strong>Professeur :</strong> Peut gérer les anniversaires et voir les statistiques (comme vous)</li>
+                        <li><strong>Admin :</strong> Accès complet à toutes les fonctionnalités</li>
+                        <li><strong>Comité :</strong> Peut organiser des activités spéciales</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                    Gérer les Anniversaires
+                </div>
+                <div class="section-content">
+                    <p><strong>Comment ajouter un anniversaire :</strong></p>
+                    <ul>
+                        <li>Allez dans la section "Célébrations" du tableau de bord</li>
+                        <li>Cliquez sur "Ajouter une célébration"</li>
+                        <li>Remplissez le nom de l'élève et sa date d'anniversaire</li>
+                        <li>Cliquez sur "Enregistrer"</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <p><strong>💡 Astuce :</strong> Vous pouvez importer plusieurs anniversaires en une fois en utilisant un fichier Excel !</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="message-circle" class="w-6 h-6"></i>
+                    Les Messages d'Anniversaire
+                </div>
+                <div class="section-content">
+                    <p>Les élèves peuvent envoyer des messages d'anniversaire à leurs camarades :</p>
+                    <ul>
+                        <li><strong>Messages publics :</strong> Visibles par tout le monde</li>
+                        <li><strong>Messages secrets :</strong> Seulement visibles par la personne qui reçoit</li>
+                    </ul>
+                    <p>Les messages peuvent être envoyés jusqu'à 1 semaine avant l'anniversaire.</p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="target" class="w-6 h-6"></i>
+                    Les Défis et Activités
+                </div>
+                <div class="section-content">
+                    <p>Le système propose des défis amusants pour encourager la participation :</p>
+                    <ul>
+                        <li><strong>Défi de progression :</strong> Les élèves essaient d'envoyer des messages à 9 personnes consécutives</li>
+                        <li><strong>Vote d'activités :</strong> Les élèves peuvent voter pour les activités qu'ils préfèrent</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="shield" class="w-6 h-6"></i>
+                    La Sécurité et la Confidentialité
+                </div>
+                <div class="section-content">
+                    <ul>
+                        <li>Tous les élèves doivent se connecter avec leur compte</li>
+                        <li>Les messages sont modérés et sécurisés</li>
+                        <li>Les professeurs et admins peuvent voir toutes les activités</li>
+                        <li>Les données sont stockées de manière sécurisée</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="settings" class="w-6 h-6"></i>
+                    Paramètres Importants
+                </div>
+                <div class="section-content">
+                    <p><strong>Dans le tableau de bord admin, vous pouvez :</strong></p>
+                    <ul>
+                        <li>Voir tous les anniversaires de la classe</li>
+                        <li>Ajouter, modifier ou supprimer des anniversaires</li>
+                        <li>Voir les statistiques de participation</li>
+                        <li>Gérer les profils des élèves</li>
+                        <li>Voir les messages envoyés (pour modération si nécessaire)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="help-circle" class="w-6 h-6"></i>
+                    Besoin d'Aide ?
+                </div>
+                <div class="section-content">
+                    <p>Si vous avez des questions ou rencontrez un problème :</p>
+                    <ul>
+                        <li>Vérifiez que vous êtes bien connectée avec votre compte professeur</li>
+                        <li>Assurez-vous que les élèves ont bien complété leur profil</li>
+                        <li>Contactez l'administrateur technique si nécessaire</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <p><strong>✨ Rappel :</strong> Cette plateforme est conçue pour être simple et intuitive. Si quelque chose semble compliqué, n'hésitez pas à demander de l'aide !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="downloadPDF()" class="btn-download" id="btnDownload">
+            <i data-lucide="download" class="w-5 h-5"></i>
+            Télécharger en PDF
+        </button>
+        
+        <div id="loading" class="loading">
+            <p>Génération du PDF en cours...</p>
+        </div>
+    </div>
+    
+    <script>
+        let currentUserId = null;
+        let currentUserRole = null;
+        
+        // Vérifier l'accès
+        async function checkAccess() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUserId = user.uid;
+                
+                // Récupérer le rôle de l'utilisateur
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                if (!userDoc.exists) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                currentUserRole = userData.role;
+                
+                // Vérifier que l'utilisateur est admin ou professeur
+                const isAdmin = currentUserRole === 'admin';
+                const isProfessor = currentUserRole === 'professeur' || currentUserRole === 'teacher';
+                
+                if (!isAdmin && !isProfessor) {
+                    alert('Accès refusé. Cette page est réservée aux administrateurs et professeurs.');
+                    window.location.href = 'eleve.html';
+                    return;
+                }
+                
+                // Afficher le contenu
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error('Erreur lors de la vérification:', error);
+                alert('Erreur lors de la vérification de l\'accès.');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Télécharger en PDF
+        async function downloadPDF() {
+            const btnDownload = document.getElementById('btnDownload');
+            const loading = document.getElementById('loading');
+            
+            btnDownload.style.display = 'none';
+            loading.style.display = 'block';
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // Configuration
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                const maxWidth = pageWidth - (margin * 2);
+                let yPosition = margin;
+                
+                // Fonction pour ajouter une nouvelle page si nécessaire
+                function checkNewPage(requiredHeight) {
+                    if (yPosition + requiredHeight > pageHeight - margin) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+                }
+                
+                // Titre principal
+                doc.setFontSize(24);
+                doc.setTextColor(99, 102, 241);
+                doc.setFont('helvetica', 'bold');
+                doc.text('📚 Documentation Fête Express', margin, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(14);
+                doc.setTextColor(100, 116, 139);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Guide simple pour l\'enseignante', margin, yPosition);
+                yPosition += 15;
+                
+                // Sections
+                const sections = [
+                    {
+                        title: 'Qu\'est-ce que Fête Express ?',
+                        content: [
+                            'Fête Express est une plateforme web simple et amusante pour gérer et célébrer les anniversaires des élèves de votre classe.',
+                            'Les élèves peuvent voir les anniversaires à venir, envoyer des messages d\'anniversaire, et participer à des activités amusantes.'
+                        ]
+                    },
+                    {
+                        title: 'Les Rôles dans le Système',
+                        content: [
+                            '• Élève : Peut voir les anniversaires, envoyer des messages, et participer aux activités',
+                            '• Professeur : Peut gérer les anniversaires et voir les statistiques (comme vous)',
+                            '• Admin : Accès complet à toutes les fonctionnalités',
+                            '• Comité : Peut organiser des activités spéciales'
+                        ]
+                    },
+                    {
+                        title: 'Gérer les Anniversaires',
+                        content: [
+                            'Comment ajouter un anniversaire :',
+                            '1. Allez dans la section "Célébrations" du tableau de bord',
+                            '2. Cliquez sur "Ajouter une célébration"',
+                            '3. Remplissez le nom de l\'élève et sa date d\'anniversaire',
+                            '4. Cliquez sur "Enregistrer"',
+                            '',
+                            '💡 Astuce : Vous pouvez importer plusieurs anniversaires en une fois en utilisant un fichier Excel !'
+                        ]
+                    },
+                    {
+                        title: 'Les Messages d\'Anniversaire',
+                        content: [
+                            'Les élèves peuvent envoyer des messages d\'anniversaire à leurs camarades :',
+                            '• Messages publics : Visibles par tout le monde',
+                            '• Messages secrets : Seulement visibles par la personne qui reçoit',
+                            '',
+                            'Les messages peuvent être envoyés jusqu\'à 1 semaine avant l\'anniversaire.'
+                        ]
+                    },
+                    {
+                        title: 'Les Défis et Activités',
+                        content: [
+                            'Le système propose des défis amusants pour encourager la participation :',
+                            '• Défi de progression : Les élèves essaient d\'envoyer des messages à 9 personnes consécutives',
+                            '• Vote d\'activités : Les élèves peuvent voter pour les activités qu\'ils préfèrent'
+                        ]
+                    },
+                    {
+                        title: 'La Sécurité et la Confidentialité',
+                        content: [
+                            '• Tous les élèves doivent se connecter avec leur compte',
+                            '• Les messages sont modérés et sécurisés',
+                            '• Les professeurs et admins peuvent voir toutes les activités',
+                            '• Les données sont stockées de manière sécurisée'
+                        ]
+                    },
+                    {
+                        title: 'Paramètres Importants',
+                        content: [
+                            'Dans le tableau de bord admin, vous pouvez :',
+                            '• Voir tous les anniversaires de la classe',
+                            '• Ajouter, modifier ou supprimer des anniversaires',
+                            '• Voir les statistiques de participation',
+                            '• Gérer les profils des élèves',
+                            '• Voir les messages envoyés (pour modération si nécessaire)'
+                        ]
+                    },
+                    {
+                        title: 'Besoin d\'Aide ?',
+                        content: [
+                            'Si vous avez des questions ou rencontrez un problème :',
+                            '• Vérifiez que vous êtes bien connectée avec votre compte professeur',
+                            '• Assurez-vous que les élèves ont bien complété leur profil',
+                            '• Contactez l\'administrateur technique si nécessaire',
+                            '',
+                            '✨ Rappel : Cette plateforme est conçue pour être simple et intuitive. Si quelque chose semble compliqué, n\'hésitez pas à demander de l\'aide !'
+                        ]
+                    }
+                ];
+                
+                // Ajouter chaque section
+                sections.forEach((section, index) => {
+                    checkNewPage(30);
+                    
+                    // Titre de section
+                    doc.setFontSize(16);
+                    doc.setTextColor(99, 102, 241);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(section.title, margin, yPosition);
+                    yPosition += 10;
+                    
+                    // Contenu
+                    doc.setFontSize(11);
+                    doc.setTextColor(30, 41, 59);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    section.content.forEach(line => {
+                        checkNewPage(8);
+                        if (line.trim() !== '') {
+                            const lines = doc.splitTextToSize(line, maxWidth);
+                            lines.forEach(l => {
+                                doc.text(l, margin, yPosition);
+                                yPosition += 6;
+                            });
+                        } else {
+                            yPosition += 4;
+                        }
+                    });
+                    
+                    yPosition += 5; // Espace entre sections
+                });
+                
+                // Enregistrer le PDF
+                doc.save('Documentation-Fete-Express.pdf');
+                
+            } catch (error) {
+                console.error('Erreur lors de la génération du PDF:', error);
+                alert('Erreur lors de la génération du PDF. Veuillez réessayer.');
+            } finally {
+                btnDownload.style.display = 'flex';
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Vérifier l'accès au chargement
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                checkAccess();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>
+

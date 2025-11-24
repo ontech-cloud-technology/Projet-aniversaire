@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Comptes — Fêtes Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --bg-dark: #0f172a;
+            --bg-light: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --text-color: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f3a 50%, var(--bg-dark) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        #sidenav {
+            width: 280px;
+            min-width: 280px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border-radius: 12px;
+            margin: 4px 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--text-color);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--text-color);
+            border-left: 3px solid var(--primary);
+        }
+
+        .nav-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .role-admin { color: #f87171; font-weight: 700; }
+        .role-professeur { color: #34d399; font-weight: 700; }
+        .role-comite { color: #60a5fa; font-weight: 700; }
+        .role-eleve { color: #fde047; }
+
+        .status-active { color: #10b981; }
+        .status-disabled { color: #ef4444; }
+
+        input[type="text"], input[type="email"], input[type="date"], select {
+            color: var(--text-color) !important;
+            background-color: var(--bg-dark) !important;
+        }
+
+        input::placeholder {
+            color: #9ca3af !important;
+        }
+
+        select option {
+            color: #000 !important;
+            background-color: #ffffff !important;
+        }
+
+        @media (max-width: 768px) {
+            #sidenav {
+                display: none;
+            }
+            body {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Menu Latéral de Navigation -->
+    <nav id="sidenav">
+        <div class="px-6 py-6 mb-4 border-b border-gray-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                    <i data-lucide="shield" class="w-7 h-7 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black">
+                        <span class="header-gradient">Fêtes Express</span>
+                    </h2>
+                    <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sections de navigation -->
+        <a href="calendrier.html" class="nav-item">
+            <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
+            Calendrier des Fêtes
+        </a>
+        <a href="admin.html" class="nav-item">
+            <i data-lucide="shield-check" class="w-5 h-5 mr-3"></i>
+            Dashboard Admin
+        </a>
+        <a href="documentation-enseignante.html" class="nav-item">
+            <i data-lucide="book-open" class="w-5 h-5 mr-3"></i>
+            Documentation
+        </a>
+        <a href="activity-logs.html" class="nav-item">
+            <i data-lucide="activity" class="w-5 h-5 mr-3"></i>
+            Logs d'Activité
+        </a>
+        <a href="super-admin.html" class="nav-item active">
+            <i data-lucide="crown" class="w-5 h-5 mr-3"></i>
+            Gestion des Comptes
+        </a>
+        <a href="send-email.html" class="nav-item">
+            <i data-lucide="mail" class="w-5 h-5 mr-3"></i>
+            Envoyer un Email
+        </a>
+        <a href="fetes-tracking.html" class="nav-item">
+            <i data-lucide="trending-up" class="w-5 h-5 mr-3"></i>
+            Suivi des Fêtes
+        </a>
+        <a href="presentation-admin.html" class="nav-item">
+            <i data-lucide="presentation" class="w-5 h-5 mr-3"></i>
+            Présentation
+        </a>
+        
+        <!-- Séparateur et déconnexion -->
+        <div class="border-t border-gray-700 my-2"></div>
+        <a onclick="signOutAndRedirect()" class="nav-item text-red-400 hover:text-white hover:bg-red-900 hover:bg-opacity-20">
+            <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
+            Déconnexion
+        </a>
+        
+        <div class="px-6 py-4 mt-4 border-t border-gray-700">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500">Connecté</p>
+                    <p id="welcomeName" class="text-sm font-semibold text-white truncate"></p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Écran de chargement -->
+    <div id="loadingScreen" class="fixed inset-0 bg-bg-dark flex flex-col justify-center items-center z-50">
+        <div class="text-xl text-white">Vérification des autorisations...</div>
+        <div class="loading my-4 flex space-x-2">
+            <div class="w-4 h-4 rounded-full bg-primary animate-bounce"></div>
+            <div class="w-4 h-4 rounded-full bg-secondary animate-bounce delay-150"></div>
+            <div class="w-4 h-4 rounded-full bg-primary animate-bounce delay-300"></div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <main id="superAdminContent" class="hidden flex-grow p-4 md:p-8">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold">
+                    <span class="header-gradient">Gestion des Comptes</span>
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">Gestion complète de tous les utilisateurs et accès</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex space-x-3">
+                <button onclick="openCreateUserModal()" class="flex items-center px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition">
+                    <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>
+                    Créer un Compte
+                </button>
+                <button onclick="refreshUsers()" class="flex items-center px-4 py-2 rounded-lg bg-primary hover:bg-opacity-90 text-white font-semibold transition">
+                    <i data-lucide="refresh-ccw" class="w-5 h-5 mr-2"></i>
+                    Actualiser
+                </button>
+            </div>
+        </header>
+
+        <!-- Statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">Total Utilisateurs</p>
+                        <p id="totalUsers" class="text-2xl font-bold text-white">0</p>
+                    </div>
+                    <i data-lucide="users" class="w-8 h-8 text-primary"></i>
+                </div>
+            </div>
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">Comptes Actifs</p>
+                        <p id="activeUsers" class="text-2xl font-bold text-green-400">0</p>
+                    </div>
+                    <i data-lucide="user-check" class="w-8 h-8 text-green-400"></i>
+                </div>
+            </div>
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">Comptes Désactivés</p>
+                        <p id="disabledUsers" class="text-2xl font-bold text-red-400">0</p>
+                    </div>
+                    <i data-lucide="user-x" class="w-8 h-8 text-red-400"></i>
+                </div>
+            </div>
+            <div class="card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">Admins</p>
+                        <p id="adminUsers" class="text-2xl font-bold text-purple-400">0</p>
+                    </div>
+                    <i data-lucide="shield" class="w-8 h-8 text-purple-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i data-lucide="filter" class="w-6 h-6 mr-2 text-secondary"></i>
+                Filtres
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Recherche</label>
+                    <input type="text" id="searchInput" placeholder="Nom, email, UID..." class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Rôle</label>
+                    <select id="filterRole" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                        <option value="">Tous les rôles</option>
+                        <option value="admin">Admin</option>
+                        <option value="professeur">Professeur</option>
+                        <option value="comite">Comité</option>
+                        <option value="eleve">Élève</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Statut</label>
+                    <select id="filterStatus" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                        <option value="">Tous les statuts</option>
+                        <option value="active">Actifs</option>
+                        <option value="disabled">Désactivés</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="applyFilters()" class="w-full px-4 py-3 rounded btn-primary font-semibold">Appliquer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table des Utilisateurs -->
+        <div class="card p-6 rounded-xl">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i data-lucide="list" class="w-6 h-6 mr-2 text-secondary"></i>
+                Tous les Utilisateurs
+            </h2>
+            <div class="overflow-x-auto rounded-lg border border-gray-700">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-bg-dark">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Utilisateur</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rôle</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Statut</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden md:table-cell">Créé le</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-gray-800">
+                        <tr><td colspan="6" class="text-center py-4 text-gray-500">Chargement des utilisateurs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <p id="usersCount" class="text-sm text-gray-400">0 utilisateurs affichés</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modale de Confirmation de Suppression -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold mb-4 text-red-400">Confirmer la Suppression</h3>
+            <p class="text-gray-400 mb-6">Êtes-vous sûr de vouloir supprimer définitivement <strong id="deleteUserName" class="text-white"></strong> ?</p>
+            <p class="text-sm text-red-400 mb-6">⚠️ Cette action est irréversible et supprimera l'utilisateur de Firebase Auth et Firestore.</p>
+            <input type="hidden" id="deleteUserId">
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeModal('deleteModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
+                <button onclick="confirmDelete()" class="px-4 py-2 rounded btn-danger">Oui, Supprimer Définitivement</button>
+            </div>
+            <div id="deleteError" class="text-sm text-red-400 mt-3 hidden"></div>
+        </div>
+    </div>
+
+    <!-- Modale d'Édition -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold mb-6 flex items-center header-gradient">
+                <i data-lucide="edit" class="w-6 h-6 mr-2"></i>
+                Modifier l'Utilisateur
+            </h3>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Nom Complet</label>
+                        <input type="text" id="editFullName" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="editEmail" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Rôle</label>
+                        <select id="editRole" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                            <option value="eleve">Élève</option>
+                            <option value="comite">Comité</option>
+                            <option value="professeur">Professeur</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="editDisabled" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                            <span class="text-sm font-medium">Compte désactivé</span>
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">Un compte désactivé ne peut pas se connecter</p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6 pt-4 border-t border-gray-700">
+                    <button type="button" onclick="closeModal('editModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded btn-primary">Sauvegarder</button>
+                </div>
+                <div id="editError" class="text-sm text-red-400 mt-3 hidden"></div>
+                <div id="editSuccess" class="text-sm text-green-400 mt-3 hidden"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modale de Gestion des Permissions -->
+    <div id="permissionsModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <h3 class="text-2xl font-bold mb-6 flex items-center header-gradient">
+                <i data-lucide="key" class="w-6 h-6 mr-2"></i>
+                Gestion des Permissions - <span id="permissionsUserName" class="text-white"></span>
+            </h3>
+            <input type="hidden" id="permissionsUserId">
+            
+            <div class="space-y-6">
+                <!-- Catégorie: Calendrier -->
+                <div class="border border-gray-700 rounded-lg p-4">
+                    <h4 class="text-lg font-bold mb-4 flex items-center text-primary">
+                        <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
+                        Calendrier des Fêtes
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir le calendrier</span>
+                                <p class="text-xs text-gray-400">Accès à la vue calendrier</p>
+                            </div>
+                            <input type="checkbox" id="perm_calendar_view" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Vue mensuelle</span>
+                                <p class="text-xs text-gray-400">Voir le calendrier par mois</p>
+                            </div>
+                            <input type="checkbox" id="perm_calendar_month" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Vue hebdomadaire</span>
+                                <p class="text-xs text-gray-400">Voir le calendrier par semaine</p>
+                            </div>
+                            <input type="checkbox" id="perm_calendar_week" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Vue annuelle</span>
+                                <p class="text-xs text-gray-400">Voir le calendrier par année</p>
+                            </div>
+                            <input type="checkbox" id="perm_calendar_year" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Exporter le calendrier</span>
+                                <p class="text-xs text-gray-400">Télécharger le calendrier en iCal</p>
+                            </div>
+                            <input type="checkbox" id="perm_calendar_export" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catégorie: Messages -->
+                <div class="border border-gray-700 rounded-lg p-4">
+                    <h4 class="text-lg font-bold mb-4 flex items-center text-primary">
+                        <i data-lucide="bell" class="w-5 h-5 mr-2"></i>
+                        Messages
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir les messages</span>
+                                <p class="text-xs text-gray-400">Accès aux messages reçus</p>
+                            </div>
+                            <input type="checkbox" id="perm_messages_view" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Envoyer des messages</span>
+                                <p class="text-xs text-gray-400">Envoyer des messages d'anniversaire</p>
+                            </div>
+                            <input type="checkbox" id="perm_messages_send" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Messages publics</span>
+                                <p class="text-xs text-gray-400">Envoyer des messages publics</p>
+                            </div>
+                            <input type="checkbox" id="perm_messages_public" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Messages secrets</span>
+                                <p class="text-xs text-gray-400">Envoyer des messages privés</p>
+                            </div>
+                            <input type="checkbox" id="perm_messages_secret" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catégorie: Défis et Progression -->
+                <div class="border border-gray-700 rounded-lg p-4">
+                    <h4 class="text-lg font-bold mb-4 flex items-center text-primary">
+                        <i data-lucide="target" class="w-5 h-5 mr-2"></i>
+                        Défis et Progression
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir la progression</span>
+                                <p class="text-xs text-gray-400">Accès au système de progression</p>
+                            </div>
+                            <input type="checkbox" id="perm_progression_view" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Participer aux votes</span>
+                                <p class="text-xs text-gray-400">Voter pour les activités</p>
+                            </div>
+                            <input type="checkbox" id="perm_vote_participate" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir les résultats de votes</span>
+                                <p class="text-xs text-gray-400">Consulter les résultats des votes</p>
+                            </div>
+                            <input type="checkbox" id="perm_vote_results" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catégorie: Profil -->
+                <div class="border border-gray-700 rounded-lg p-4">
+                    <h4 class="text-lg font-bold mb-4 flex items-center text-primary">
+                        <i data-lucide="user" class="w-5 h-5 mr-2"></i>
+                        Profil et Paramètres
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir son profil</span>
+                                <p class="text-xs text-gray-400">Accès à sa propre page de profil</p>
+                            </div>
+                            <input type="checkbox" id="perm_profile_view_own" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Modifier son profil</span>
+                                <p class="text-xs text-gray-400">Modifier ses propres informations</p>
+                            </div>
+                            <input type="checkbox" id="perm_profile_edit_own" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir les profils des autres</span>
+                                <p class="text-xs text-gray-400">Consulter les profils des autres utilisateurs</p>
+                            </div>
+                            <input type="checkbox" id="perm_profile_view_others" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Changer le thème</span>
+                                <p class="text-xs text-gray-400">Modifier le thème clair/sombre</p>
+                            </div>
+                            <input type="checkbox" id="perm_theme_change" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Liste de souhaits</span>
+                                <p class="text-xs text-gray-400">Créer et gérer une liste de souhaits</p>
+                            </div>
+                            <input type="checkbox" id="perm_wishlist" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catégorie: Gestion (Admin/Comité) -->
+                <div class="border border-gray-700 rounded-lg p-4">
+                    <h4 class="text-lg font-bold mb-4 flex items-center text-primary">
+                        <i data-lucide="shield" class="w-5 h-5 mr-2"></i>
+                        Gestion et Administration
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Accès admin</span>
+                                <p class="text-xs text-gray-400">Accès au tableau de bord admin</p>
+                            </div>
+                            <input type="checkbox" id="perm_admin_access" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Gérer les utilisateurs</span>
+                                <p class="text-xs text-gray-400">Créer, modifier, supprimer des utilisateurs</p>
+                            </div>
+                            <input type="checkbox" id="perm_users_manage" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Gérer les célébrations</span>
+                                <p class="text-xs text-gray-400">Ajouter, modifier, supprimer des célébrations</p>
+                            </div>
+                            <input type="checkbox" id="perm_celebrations_manage" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Gérer les activités</span>
+                                <p class="text-xs text-gray-400">Créer et gérer les activités de vote</p>
+                            </div>
+                            <input type="checkbox" id="perm_activities_manage" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Gérer les annonces</span>
+                                <p class="text-xs text-gray-400">Créer et publier des annonces</p>
+                            </div>
+                            <input type="checkbox" id="perm_announcements_manage" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir les logs d'activité</span>
+                                <p class="text-xs text-gray-400">Accès aux logs d'activité des utilisateurs</p>
+                            </div>
+                            <input type="checkbox" id="perm_logs_view" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Envoyer des emails</span>
+                                <p class="text-xs text-gray-400">Utiliser le système d'envoi d'emails</p>
+                            </div>
+                            <input type="checkbox" id="perm_email_send" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Import/Export de données</span>
+                                <p class="text-xs text-gray-400">Importer et exporter des données Excel/CSV</p>
+                            </div>
+                            <input type="checkbox" id="perm_import_export" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catégorie: Statistiques -->
+                <div class="border border-gray-700 rounded-lg p-4">
+                    <h4 class="text-lg font-bold mb-4 flex items-center text-primary">
+                        <i data-lucide="bar-chart" class="w-5 h-5 mr-2"></i>
+                        Statistiques et Rapports
+                    </h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir ses statistiques</span>
+                                <p class="text-xs text-gray-400">Consulter ses propres statistiques</p>
+                            </div>
+                            <input type="checkbox" id="perm_stats_view_own" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir les classements</span>
+                                <p class="text-xs text-gray-400">Accès aux classements et leaderboards</p>
+                            </div>
+                            <input type="checkbox" id="perm_leaderboard_view" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Voir toutes les statistiques</span>
+                                <p class="text-xs text-gray-400">Accès aux statistiques de tous les utilisateurs</p>
+                            </div>
+                            <input type="checkbox" id="perm_stats_view_all" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                            <div>
+                                <span class="font-medium">Suivi des fêtes</span>
+                                <p class="text-xs text-gray-400">Accès au suivi des fêtes et célébrations</p>
+                            </div>
+                            <input type="checkbox" id="perm_tracking_view" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4 mt-6 pt-4 border-t border-gray-700">
+                <button onclick="closeModal('permissionsModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
+                <button onclick="savePermissions()" class="px-4 py-2 rounded btn-primary">Sauvegarder les Permissions</button>
+            </div>
+            <div id="permissionsError" class="text-sm text-red-400 mt-3 hidden"></div>
+            <div id="permissionsSuccess" class="text-sm text-green-400 mt-3 hidden"></div>
+        </div>
+    </div>
+
+    <!-- Modale de Création de Compte Spécial -->
+    <div id="createUserModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <h3 class="text-2xl font-bold mb-6 flex items-center header-gradient">
+                <i data-lucide="user-plus" class="w-6 h-6 mr-2"></i>
+                Créer un Compte Spécial
+            </h3>
+            <form id="createUserForm">
+                <div class="space-y-4">
+                    <!-- Informations de base -->
+                    <div class="border border-gray-700 rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Informations de Base</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Nom Complet *</label>
+                                <input type="text" id="createFullName" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Email *</label>
+                                <input type="email" id="createEmail" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Mot de passe *</label>
+                                <input type="password" id="createPassword" required minlength="6" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <p class="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Type de compte -->
+                    <div class="border border-gray-700 rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Type de Compte</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                                <input type="radio" name="accountType" value="standard" checked class="w-5 h-5 text-primary focus:ring-2 focus:ring-primary">
+                                <div>
+                                    <span class="font-medium">Compte Standard</span>
+                                    <p class="text-xs text-gray-400">Compte normal avec rôle classique</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                                <input type="radio" name="accountType" value="guest" class="w-5 h-5 text-primary focus:ring-2 focus:ring-primary">
+                                <div>
+                                    <span class="font-medium">Compte Invité</span>
+                                    <p class="text-xs text-gray-400">Accès limité avec permissions personnalisées</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                                <input type="radio" name="accountType" value="limited" class="w-5 h-5 text-primary focus:ring-2 focus:ring-primary">
+                                <div>
+                                    <span class="font-medium">Compte Limité</span>
+                                    <p class="text-xs text-gray-400">Nombre limité de connexions</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                                <input type="radio" name="accountType" value="temporary" class="w-5 h-5 text-primary focus:ring-2 focus:ring-primary">
+                                <div>
+                                    <span class="font-medium">Compte Temporaire</span>
+                                    <p class="text-xs text-gray-400">Valide jusqu'à une date d'expiration</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Rôle (pour compte standard) -->
+                    <div id="standardRoleSection" class="border border-gray-700 rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Rôle</h4>
+                        <select id="createRole" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                            <option value="eleve">Élève</option>
+                            <option value="comite">Comité</option>
+                            <option value="professeur">Professeur</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <!-- Options pour compte invité -->
+                    <div id="guestOptionsSection" class="border border-gray-700 rounded-lg p-4 hidden">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Options Compte Invité</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="guestNoPasswordChange" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                                <span class="text-sm font-medium">Pas de changement de mot de passe requis</span>
+                            </label>
+                            <p class="text-xs text-gray-500">Les permissions seront configurées après la création</p>
+                        </div>
+                    </div>
+
+                    <!-- Options pour compte limité -->
+                    <div id="limitedOptionsSection" class="border border-gray-700 rounded-lg p-4 hidden">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Options Compte Limité</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Nombre maximum de connexions</label>
+                                <input type="number" id="maxLogins" min="1" value="10" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <p class="text-xs text-gray-500 mt-1">Le compte sera désactivé après ce nombre de connexions</p>
+                            </div>
+                            <div>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="resetLoginCount" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                                    <span class="text-sm font-medium">Réinitialiser le compteur après expiration</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options pour compte temporaire -->
+                    <div id="temporaryOptionsSection" class="border border-gray-700 rounded-lg p-4 hidden">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Options Compte Temporaire</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Date d'expiration *</label>
+                                <input type="date" id="expirationDate" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <p class="text-xs text-gray-500 mt-1">Le compte sera automatiquement désactivé après cette date</p>
+                            </div>
+                            <div>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="autoExtend" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                                    <span class="text-sm font-medium">Prolongation automatique possible</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options supplémentaires -->
+                    <div class="border border-gray-700 rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Options Supplémentaires</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="createDisabled" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
+                                <span class="text-sm font-medium">Créer le compte comme désactivé</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="sendWelcomeEmail" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary" checked>
+                                <span class="text-sm font-medium">Envoyer un email de bienvenue</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6 pt-4 border-t border-gray-700">
+                    <button type="button" onclick="closeModal('createUserModal')" class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded btn-primary">Créer le Compte</button>
+                </div>
+                <div id="createUserError" class="text-sm text-red-400 mt-3 hidden"></div>
+                <div id="createUserSuccess" class="text-sm text-green-400 mt-3 hidden"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Inclusion Firebase -->
+    <script src="firebase.js"></script>
+    <script src="js/activity-logger.js"></script>
+    
+    <script>
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentUserId = null;
+
+        // Initialisation
+        async function checkSuperAdminAuth() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const superAdminContent = document.getElementById('superAdminContent');
+            const welcomeName = document.getElementById('welcomeName');
+            
+            loadingScreen.style.display = 'flex';
+            
+            const user = await new Promise(resolve => {
+                const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                    unsubscribe();
+                    resolve(u);
+                });
+            });
+
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Vérifier que l'email est exactement admin@ontech.com
+            if (user.email !== 'admin@ontech.com') {
+                window.location.href = 'eleve.html';
+                return;
+            }
+
+            const userData = await getUserRole(user.uid);
+            welcomeName.textContent = `${userData.name || userData.email || 'Admin'} (Gestion des Comptes)`;
+            currentUserId = user.uid;
+
+            loadingScreen.style.display = 'none';
+            superAdminContent.classList.remove('hidden');
+            
+            await loadUsers();
+        }
+
+        // Charger tous les utilisateurs
+        async function loadUsers() {
+            try {
+                const snapshot = await db.collection('users').get();
+                allUsers = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Trier par date de création (plus récent en premier)
+                allUsers.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+                
+                filteredUsers = [...allUsers];
+                updateStatistics();
+                renderUsers();
+            } catch (error) {
+                console.error('Erreur lors du chargement des utilisateurs:', error);
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Erreur lors du chargement.</td></tr>';
+            }
+        }
+
+        // Mettre à jour les statistiques
+        function updateStatistics() {
+            const total = allUsers.length;
+            const active = allUsers.filter(u => !u.disabled).length;
+            const disabled = allUsers.filter(u => u.disabled).length;
+            const admins = allUsers.filter(u => u.role === 'admin').length;
+            
+            document.getElementById('totalUsers').textContent = total;
+            document.getElementById('activeUsers').textContent = active;
+            document.getElementById('disabledUsers').textContent = disabled;
+            document.getElementById('adminUsers').textContent = admins;
+        }
+
+        // Rendre les utilisateurs
+        function renderUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Aucun utilisateur trouvé.</td></tr>';
+                document.getElementById('usersCount').textContent = '0 utilisateurs affichés';
+                return;
+            }
+
+            filteredUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-bg-dark transition';
+                
+                const createdAt = user.createdAt?.toDate ? new Date(user.createdAt.toDate()).toLocaleDateString('fr-FR') : 'N/A';
+                const isDisabled = user.disabled === true;
+                const statusClass = isDisabled ? 'status-disabled' : 'status-active';
+                const statusText = isDisabled ? 'Désactivé' : 'Actif';
+                const roleClass = `role-${user.role}`;
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="font-medium">${user.fullName || 'N/A'}</div>
+                        <div class="text-xs text-gray-400">UID: ${user.id.substring(0, 8)}...</div>
+                        ${user.accountType && user.accountType !== 'standard' ? 
+                            `<div class="text-xs mt-1">
+                                <span class="px-2 py-1 rounded bg-purple-600 text-white">${user.accountType === 'guest' ? 'Invité' : user.accountType === 'limited' ? 'Limité' : user.accountType === 'temporary' ? 'Temporaire' : user.accountType}</span>
+                                ${user.accountType === 'limited' && user.maxLogins ? `<span class="text-yellow-400 ml-2">(${user.loginCount || 0}/${user.maxLogins} connexions)</span>` : ''}
+                                ${user.accountType === 'temporary' && user.expirationDate ? `<span class="text-orange-400 ml-2">Exp: ${new Date(user.expirationDate.toDate()).toLocaleDateString('fr-FR')}</span>` : ''}
+                            </div>` : ''
+                        }
+                    </td>
+                    <td class="px-4 py-3 text-sm">${user.email || 'N/A'}</td>
+                    <td class="px-4 py-3">
+                        <span class="${roleClass} capitalize">${user.role || 'eleve'}</span>
+                        ${user.accountType && user.accountType !== 'standard' ? `<br><span class="text-xs text-gray-500">(${user.accountType})</span>` : ''}
+                    </td>
+                    <td class="px-4 py-3"><span class="${statusClass} font-semibold">${statusText}</span></td>
+                    <td class="px-4 py-3 text-sm hidden md:table-cell">${createdAt}</td>
+                    <td class="px-4 py-3 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <button onclick="openPermissionsModal('${user.id}')" class="p-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition" title="Gérer les Permissions">
+                                <i data-lucide="key" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="openEditModal('${user.id}')" class="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition" title="Modifier">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            ${isDisabled ? 
+                                `<button onclick="toggleUserStatus('${user.id}', false)" class="p-2 rounded-lg btn-success transition" title="Réactiver">
+                                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                                </button>` :
+                                `<button onclick="toggleUserStatus('${user.id}', true)" class="p-2 rounded-lg btn-warning transition" title="Désactiver">
+                                    <i data-lucide="user-x" class="w-4 h-4"></i>
+                                </button>`
+                            }
+                            <button onclick="openDeleteModal('${user.id}', '${(user.fullName || user.email || 'N/A').replace(/'/g, "\\'")}')" class="p-2 rounded-lg btn-danger transition" title="Supprimer">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('usersCount').textContent = `${filteredUsers.length} utilisateur(s) affiché(s)`;
+            lucide.createIcons();
+        }
+
+        // Appliquer les filtres
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('filterRole').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            
+            filteredUsers = allUsers.filter(user => {
+                // Filtre recherche
+                if (search) {
+                    const searchLower = search.toLowerCase();
+                    const matchesName = (user.fullName || '').toLowerCase().includes(searchLower);
+                    const matchesEmail = (user.email || '').toLowerCase().includes(searchLower);
+                    const matchesId = user.id.toLowerCase().includes(searchLower);
+                    if (!matchesName && !matchesEmail && !matchesId) return false;
+                }
+                
+                // Filtre rôle
+                if (roleFilter && user.role !== roleFilter) return false;
+                
+                // Filtre statut
+                if (statusFilter === 'active' && user.disabled) return false;
+                if (statusFilter === 'disabled' && !user.disabled) return false;
+                
+                return true;
+            });
+            
+            renderUsers();
+        }
+
+        // Ouvrir modale de suppression
+        function openDeleteModal(userId, userName) {
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUserName').textContent = userName;
+            document.getElementById('deleteError').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        // Confirmer suppression
+        async function confirmDelete() {
+            const userId = document.getElementById('deleteUserId').value;
+            const deleteBtn = document.querySelector('#deleteModal button.btn-danger');
+            const errorElement = document.getElementById('deleteError');
+            
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = 'Suppression...';
+            errorElement.classList.add('hidden');
+            
+            try {
+                // Supprimer de Firestore
+                await db.collection('users').doc(userId).delete();
+                
+                // Note: La suppression de Firebase Auth nécessite le Admin SDK
+                // Pour l'instant, on supprime seulement de Firestore
+                // Vous pouvez ajouter une Cloud Function pour supprimer aussi de Auth
+                
+                await logActivity(currentUserId, 'delete', {
+                    description: `Suppression de l'utilisateur ${userId}`,
+                    deletedUserId: userId
+                });
+                
+                closeModal('deleteModal');
+                await loadUsers();
+            } catch (error) {
+                console.error('Erreur lors de la suppression:', error);
+                errorElement.textContent = `Erreur: ${error.message}`;
+                errorElement.classList.remove('hidden');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Oui, Supprimer Définitivement';
+            }
+        }
+
+        // Ouvrir modale d'édition
+        function openEditModal(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editFullName').value = user.fullName || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editRole').value = user.role || 'eleve';
+            document.getElementById('editDisabled').checked = user.disabled === true;
+            document.getElementById('editError').classList.add('hidden');
+            document.getElementById('editSuccess').classList.add('hidden');
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        // Gérer le formulaire d'édition
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const fullName = document.getElementById('editFullName').value;
+            const email = document.getElementById('editEmail').value;
+            const role = document.getElementById('editRole').value;
+            const disabled = document.getElementById('editDisabled').checked;
+            
+            const saveBtn = e.target.querySelector('button[type="submit"]');
+            const errorElement = document.getElementById('editError');
+            const successElement = document.getElementById('editSuccess');
+            
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Sauvegarde...';
+            errorElement.classList.add('hidden');
+            successElement.classList.add('hidden');
+            
+            try {
+                await updateUserData(userId, {
+                    fullName: fullName,
+                    email: email,
+                    role: role,
+                    disabled: disabled
+                });
+                
+                await logActivity(currentUserId, 'update', {
+                    description: `Modification de l'utilisateur ${fullName}`,
+                    modifiedData: { userId, fullName, email, role, disabled }
+                });
+                
+                successElement.textContent = 'Utilisateur modifié avec succès !';
+                successElement.classList.remove('hidden');
+                
+                setTimeout(async () => {
+                    closeModal('editModal');
+                    await loadUsers();
+                }, 1000);
+            } catch (error) {
+                console.error('Erreur lors de la modification:', error);
+                errorElement.textContent = `Erreur: ${error.message}`;
+                errorElement.classList.remove('hidden');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Sauvegarder';
+            }
+        });
+
+        // Toggle statut utilisateur (activer/désactiver)
+        async function toggleUserStatus(userId, disable) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const action = disable ? 'désactiver' : 'réactiver';
+            if (!confirm(`Êtes-vous sûr de vouloir ${action} le compte de ${user.fullName || user.email} ?`)) {
+                return;
+            }
+            
+            try {
+                await updateUserData(userId, {
+                    disabled: disable
+                });
+                
+                await logActivity(currentUserId, disable ? 'disable' : 'enable', {
+                    description: `${disable ? 'Désactivation' : 'Réactivation'} du compte ${user.fullName || user.email}`,
+                    userId: userId
+                });
+                
+                await loadUsers();
+            } catch (error) {
+                console.error('Erreur lors du changement de statut:', error);
+                alert(`Erreur: ${error.message}`);
+            }
+        }
+
+        // Fonctions utilitaires
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function refreshUsers() {
+            loadUsers();
+        }
+
+        function signOutAndRedirect() {
+            signOutUser().then(() => {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            });
+        }
+
+        // Définir les permissions par défaut selon le rôle
+        function getDefaultPermissionsByRole(role) {
+            const defaults = {
+                'eleve': {
+                    // Calendrier
+                    calendar_view: true,
+                    calendar_month: true,
+                    calendar_week: true,
+                    calendar_year: true,
+                    calendar_export: true,
+                    // Messages
+                    messages_view: true,
+                    messages_send: true,
+                    messages_public: true,
+                    messages_secret: true,
+                    // Progression
+                    progression_view: true,
+                    vote_participate: true,
+                    vote_results: true,
+                    // Profil
+                    profile_view_own: true,
+                    profile_edit_own: true,
+                    profile_view_others: true,
+                    theme_change: true,
+                    wishlist: true,
+                    // Admin (tous à false pour élèves)
+                    admin_access: false,
+                    users_manage: false,
+                    celebrations_manage: false,
+                    activities_manage: false,
+                    announcements_manage: false,
+                    logs_view: false,
+                    email_send: false,
+                    import_export: false,
+                    // Statistiques
+                    stats_view_own: true,
+                    leaderboard_view: true,
+                    stats_view_all: false,
+                    tracking_view: false
+                },
+                'comite': {
+                    // Calendrier
+                    calendar_view: true,
+                    calendar_month: true,
+                    calendar_week: true,
+                    calendar_year: true,
+                    calendar_export: true,
+                    // Messages
+                    messages_view: true,
+                    messages_send: true,
+                    messages_public: true,
+                    messages_secret: true,
+                    // Progression
+                    progression_view: true,
+                    vote_participate: true,
+                    vote_results: true,
+                    // Profil
+                    profile_view_own: true,
+                    profile_edit_own: true,
+                    profile_view_others: true,
+                    theme_change: true,
+                    wishlist: true,
+                    // Admin (certaines permissions pour comité)
+                    admin_access: false,
+                    users_manage: false,
+                    celebrations_manage: true,
+                    activities_manage: false,
+                    announcements_manage: true,
+                    logs_view: false,
+                    email_send: true,
+                    import_export: true,
+                    // Statistiques
+                    stats_view_own: true,
+                    leaderboard_view: true,
+                    stats_view_all: true,
+                    tracking_view: true
+                },
+                'professeur': {
+                    // Calendrier
+                    calendar_view: true,
+                    calendar_month: true,
+                    calendar_week: true,
+                    calendar_year: true,
+                    calendar_export: true,
+                    // Messages
+                    messages_view: true,
+                    messages_send: true,
+                    messages_public: true,
+                    messages_secret: true,
+                    // Progression
+                    progression_view: true,
+                    vote_participate: true,
+                    vote_results: true,
+                    // Profil
+                    profile_view_own: true,
+                    profile_edit_own: true,
+                    profile_view_others: true,
+                    theme_change: true,
+                    wishlist: true,
+                    // Admin (permissions pour professeur)
+                    admin_access: true,
+                    users_manage: true,
+                    celebrations_manage: true,
+                    activities_manage: true,
+                    announcements_manage: true,
+                    logs_view: false,
+                    email_send: true,
+                    import_export: true,
+                    // Statistiques
+                    stats_view_own: true,
+                    leaderboard_view: true,
+                    stats_view_all: true,
+                    tracking_view: true
+                },
+                'admin': {
+                    // Toutes les permissions à true pour admin
+                    calendar_view: true,
+                    calendar_month: true,
+                    calendar_week: true,
+                    calendar_year: true,
+                    calendar_export: true,
+                    messages_view: true,
+                    messages_send: true,
+                    messages_public: true,
+                    messages_secret: true,
+                    progression_view: true,
+                    vote_participate: true,
+                    vote_results: true,
+                    profile_view_own: true,
+                    profile_edit_own: true,
+                    profile_view_others: true,
+                    theme_change: true,
+                    wishlist: true,
+                    admin_access: true,
+                    users_manage: true,
+                    celebrations_manage: true,
+                    activities_manage: true,
+                    announcements_manage: true,
+                    logs_view: true,
+                    email_send: true,
+                    import_export: true,
+                    stats_view_own: true,
+                    leaderboard_view: true,
+                    stats_view_all: true,
+                    tracking_view: true
+                }
+            };
+            
+            return defaults[role] || defaults['eleve'];
+        }
+
+        // Ouvrir modale de permissions
+        function openPermissionsModal(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('permissionsUserId').value = userId;
+            document.getElementById('permissionsUserName').textContent = user.fullName || user.email || 'Utilisateur';
+            document.getElementById('permissionsError').classList.add('hidden');
+            document.getElementById('permissionsSuccess').classList.add('hidden');
+            
+            // Obtenir les permissions par défaut selon le rôle
+            const defaultPermissions = getDefaultPermissionsByRole(user.role || 'eleve');
+            
+            // Charger les permissions personnalisées existantes (si elles existent)
+            const customPermissions = user.permissions || {};
+            
+            // Liste de toutes les permissions
+            const allPermissions = [
+                'perm_calendar_view', 'perm_calendar_month', 'perm_calendar_week', 'perm_calendar_year', 'perm_calendar_export',
+                'perm_messages_view', 'perm_messages_send', 'perm_messages_public', 'perm_messages_secret',
+                'perm_progression_view', 'perm_vote_participate', 'perm_vote_results',
+                'perm_profile_view_own', 'perm_profile_edit_own', 'perm_profile_view_others', 'perm_theme_change', 'perm_wishlist',
+                'perm_admin_access', 'perm_users_manage', 'perm_celebrations_manage', 'perm_activities_manage', 
+                'perm_announcements_manage', 'perm_logs_view', 'perm_email_send', 'perm_import_export',
+                'perm_stats_view_own', 'perm_leaderboard_view', 'perm_stats_view_all', 'perm_tracking_view'
+            ];
+            
+            // Appliquer les permissions : d'abord les valeurs par défaut, puis les personnalisations
+            allPermissions.forEach(permId => {
+                const checkbox = document.getElementById(permId);
+                if (checkbox) {
+                    const permKey = permId.replace('perm_', '');
+                    
+                    // Si une permission personnalisée existe, l'utiliser, sinon utiliser la valeur par défaut
+                    if (customPermissions.hasOwnProperty(permKey)) {
+                        checkbox.checked = customPermissions[permKey] === true;
+                    } else {
+                        checkbox.checked = defaultPermissions[permKey] === true;
+                    }
+                }
+            });
+            
+            document.getElementById('permissionsModal').classList.add('show');
+        }
+
+        // Sauvegarder les permissions
+        async function savePermissions() {
+            const userId = document.getElementById('permissionsUserId').value;
+            const errorElement = document.getElementById('permissionsError');
+            const successElement = document.getElementById('permissionsSuccess');
+            const saveBtn = document.querySelector('#permissionsModal button.btn-primary');
+            
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Sauvegarde...';
+            errorElement.classList.add('hidden');
+            successElement.classList.add('hidden');
+            
+            try {
+                // Collecter toutes les permissions
+                const permissions = {};
+                const allPermissionIds = [
+                    'perm_calendar_view', 'perm_calendar_month', 'perm_calendar_week', 'perm_calendar_year', 'perm_calendar_export',
+                    'perm_messages_view', 'perm_messages_send', 'perm_messages_public', 'perm_messages_secret',
+                    'perm_progression_view', 'perm_vote_participate', 'perm_vote_results',
+                    'perm_profile_view_own', 'perm_profile_edit_own', 'perm_profile_view_others', 'perm_theme_change', 'perm_wishlist',
+                    'perm_admin_access', 'perm_users_manage', 'perm_celebrations_manage', 'perm_activities_manage', 
+                    'perm_announcements_manage', 'perm_logs_view', 'perm_email_send', 'perm_import_export',
+                    'perm_stats_view_own', 'perm_leaderboard_view', 'perm_stats_view_all', 'perm_tracking_view'
+                ];
+                
+                allPermissionIds.forEach(permId => {
+                    const checkbox = document.getElementById(permId);
+                    if (checkbox) {
+                        const permKey = permId.replace('perm_', '');
+                        permissions[permKey] = checkbox.checked;
+                    }
+                });
+                
+                // Sauvegarder dans Firestore
+                await updateUserData(userId, {
+                    permissions: permissions,
+                    permissionsUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    permissionsUpdatedBy: currentUserId
+                });
+                
+                await logActivity(currentUserId, 'update', {
+                    description: `Modification des permissions de l'utilisateur ${userId}`,
+                    modifiedData: { userId, permissions }
+                });
+                
+                successElement.textContent = 'Permissions sauvegardées avec succès !';
+                successElement.classList.remove('hidden');
+                
+                setTimeout(async () => {
+                    closeModal('permissionsModal');
+                    await loadUsers();
+                }, 1500);
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde des permissions:', error);
+                errorElement.textContent = `Erreur: ${error.message}`;
+                errorElement.classList.remove('hidden');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Sauvegarder les Permissions';
+            }
+        }
+
+        // Ouvrir modale de création
+        function openCreateUserModal() {
+            document.getElementById('createUserForm').reset();
+            document.getElementById('createUserError').classList.add('hidden');
+            document.getElementById('createUserSuccess').classList.add('hidden');
+            
+            // Réinitialiser les sections
+            document.getElementById('standardRoleSection').classList.remove('hidden');
+            document.getElementById('guestOptionsSection').classList.add('hidden');
+            document.getElementById('limitedOptionsSection').classList.add('hidden');
+            document.getElementById('temporaryOptionsSection').classList.add('hidden');
+            
+            // Sélectionner compte standard par défaut
+            document.querySelector('input[name="accountType"][value="standard"]').checked = true;
+            
+            document.getElementById('createUserModal').classList.add('show');
+        }
+
+        // Gérer le changement de type de compte
+        document.querySelectorAll('input[name="accountType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const accountType = this.value;
+                
+                // Masquer toutes les sections
+                document.getElementById('standardRoleSection').classList.add('hidden');
+                document.getElementById('guestOptionsSection').classList.add('hidden');
+                document.getElementById('limitedOptionsSection').classList.add('hidden');
+                document.getElementById('temporaryOptionsSection').classList.add('hidden');
+                
+                // Afficher la section appropriée
+                if (accountType === 'standard') {
+                    document.getElementById('standardRoleSection').classList.remove('hidden');
+                } else if (accountType === 'guest') {
+                    document.getElementById('guestOptionsSection').classList.remove('hidden');
+                } else if (accountType === 'limited') {
+                    document.getElementById('limitedOptionsSection').classList.remove('hidden');
+                } else if (accountType === 'temporary') {
+                    document.getElementById('temporaryOptionsSection').classList.remove('hidden');
+                }
+            });
+        });
+
+        // Gérer la soumission du formulaire de création
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('createFullName').value;
+            const email = document.getElementById('createEmail').value;
+            const password = document.getElementById('createPassword').value;
+            const accountType = document.querySelector('input[name="accountType"]:checked').value;
+            const createDisabled = document.getElementById('createDisabled').checked;
+            const sendWelcomeEmail = document.getElementById('sendWelcomeEmail').checked;
+            
+            const errorElement = document.getElementById('createUserError');
+            const successElement = document.getElementById('createUserSuccess');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Création...';
+            errorElement.classList.add('hidden');
+            successElement.classList.add('hidden');
+            
+            try {
+                // Créer l'utilisateur dans Firebase Auth
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                
+                // Préparer les données utilisateur
+                const userData = {
+                    fullName: fullName,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    disabled: createDisabled,
+                    accountType: accountType,
+                    createdBy: currentUserId
+                };
+                
+                // Ajouter les options selon le type de compte
+                if (accountType === 'standard') {
+                    const role = document.getElementById('createRole').value;
+                    userData.role = role;
+                    // Appliquer les permissions par défaut
+                    userData.permissions = getDefaultPermissionsByRole(role);
+                } else if (accountType === 'guest') {
+                    userData.role = 'guest';
+                    userData.needsPasswordChange = !document.getElementById('guestNoPasswordChange').checked;
+                    // Permissions vides, à configurer après
+                    userData.permissions = {};
+                } else if (accountType === 'limited') {
+                    const maxLogins = parseInt(document.getElementById('maxLogins').value) || 10;
+                    const resetLoginCount = document.getElementById('resetLoginCount').checked;
+                    userData.role = 'eleve'; // Par défaut
+                    userData.maxLogins = maxLogins;
+                    userData.loginCount = 0;
+                    userData.resetLoginCount = resetLoginCount;
+                    userData.permissions = getDefaultPermissionsByRole('eleve');
+                } else if (accountType === 'temporary') {
+                    const expirationDate = document.getElementById('expirationDate').value;
+                    const autoExtend = document.getElementById('autoExtend').checked;
+                    userData.role = 'eleve'; // Par défaut
+                    userData.expirationDate = firebase.firestore.Timestamp.fromDate(new Date(expirationDate));
+                    userData.autoExtend = autoExtend;
+                    userData.permissions = getDefaultPermissionsByRole('eleve');
+                }
+                
+                // Créer le document dans Firestore
+                await firebase.firestore().collection('users').doc(uid).set(userData);
+                
+                // Envoyer l'email de bienvenue si demandé
+                if (sendWelcomeEmail) {
+                    // TODO: Implémenter l'envoi d'email de bienvenue
+                    console.log('Email de bienvenue à envoyer à:', email);
+                }
+                
+                // Logger l'action
+                await logActivity(currentUserId, 'create', {
+                    description: `Création d'un compte ${accountType}: ${fullName}`,
+                    createdUserId: uid,
+                    accountType: accountType
+                });
+                
+                successElement.textContent = `Compte ${accountType} créé avec succès !`;
+                successElement.classList.remove('hidden');
+                
+                setTimeout(async () => {
+                    closeModal('createUserModal');
+                    await loadUsers();
+                }, 1500);
+            } catch (error) {
+                console.error('Erreur lors de la création:', error);
+                let errorMsg = 'Erreur lors de la création du compte.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = 'Cet email est déjà utilisé.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Email invalide.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = 'Le mot de passe est trop faible.';
+                }
+                errorElement.textContent = errorMsg;
+                errorElement.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Créer le Compte';
+            }
+        });
+
+        // Écouteurs d'événements
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('filterRole').addEventListener('change', applyFilters);
+        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+
+        // Démarrage
+        checkSuperAdminAuth();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+

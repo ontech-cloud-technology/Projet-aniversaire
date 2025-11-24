@@ -516,16 +516,16 @@
                     </div>
                 </div>
                 <nav class="space-y-2">
-                    <button onclick="showView('calendrier')" id="btnCalendrier" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                    <button onclick="showView('calendrier')" id="btnCalendrier" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3" style="display: none;">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                         <span>Calendrier</span>
                     </button>
-                    <button onclick="showView('notifications')" id="btnNotifications" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 relative">
+                    <button onclick="showView('notifications')" id="btnNotifications" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 relative" style="display: none;">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span>Messages</span>
                         <span id="notificationBadge" class="hidden ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
                     </button>
-                    <button onclick="showView('defis')" id="btnDefis" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                    <button onclick="showView('defis')" id="btnDefis" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3" style="display: none;">
                         <i data-lucide="target" class="w-5 h-5"></i>
                         <span>Défis</span>
                     </button>
@@ -946,6 +946,8 @@
     <script src="firebase.js"></script>
     <!-- Système de logging automatique des activités -->
     <script src="js/activity-logger.js"></script>
+    <!-- Système de permissions -->
+    <script src="js/permissions-system.js"></script>
     <!-- Gestionnaire de thème (mode sombre/clair) -->
     <script src="js/theme-manager.js"></script>
     <script src="js/progression-system.js"></script>
@@ -1051,6 +1053,24 @@
             const userData = await getUserRole(user.uid);
             welcomeName.textContent = `Bienvenue, ${userData.name}`;
             currentUserId = user.uid;
+
+            // Initialiser le système de permissions
+            await permissionsSystem.init(user.uid);
+
+            // Afficher/masquer les boutons selon les permissions
+            const btnCalendrier = document.getElementById('btnCalendrier');
+            const btnNotifications = document.getElementById('btnNotifications');
+            const btnDefis = document.getElementById('btnDefis');
+            
+            if (btnCalendrier) {
+                btnCalendrier.style.display = hasPermission('calendar_view', true) ? 'flex' : 'none';
+            }
+            if (btnNotifications) {
+                btnNotifications.style.display = hasPermission('messages_view', true) ? 'flex' : 'none';
+            }
+            if (btnDefis) {
+                btnDefis.style.display = hasPermission('progression_view', true) ? 'flex' : 'none';
+            }
 
             // Charger la photo de profil dans l'en-tête
             await loadHeaderProfilePhoto();
@@ -1653,6 +1673,11 @@
 
         // Exporter le calendrier en format iCal
         window.exportCalendar = function() {
+            if (!hasPermission('calendar_export', false)) {
+                alert('⛔ Vous n\'avez pas la permission d\'exporter le calendrier.');
+                    return;
+                }
+
             if (allCelebrations.length === 0) {
                 alert('Aucun anniversaire à exporter');
                 return;
@@ -1761,6 +1786,12 @@
 
         // Charger la vue calendrier
         async function loadCalendarView() {
+            // Vérifier la permission
+            if (!hasPermission('calendar_view', true)) {
+                calendarContainer.innerHTML = '<div class="text-center py-8"><p class="text-red-400 mb-4">⛔ Accès refusé</p><p class="text-gray-500">Vous n\'avez pas la permission de voir le calendrier.</p></div>';
+                return;
+            }
+
             if (allCelebrations.length === 0) {
                 calendarContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun anniversaire enregistré pour le moment.</p>';
                 return;
@@ -1965,6 +1996,20 @@
 
         // Basculer entre les vues
         function showView(view) {
+            // Vérifier les permissions selon la vue
+            if (view === 'calendrier' && !hasPermission('calendar_view', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'accéder au calendrier.');
+                return;
+            }
+            if (view === 'notifications' && !hasPermission('messages_view', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'accéder aux messages.');
+                return;
+            }
+            if (view === 'defis' && !hasPermission('progression_view', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'accéder aux défis.');
+                return;
+            }
+
             const viewCalendrier = document.getElementById('viewCalendrier');
             const viewNotifications = document.getElementById('viewNotifications');
             const viewDefis = document.getElementById('viewDefis');
@@ -2185,8 +2230,25 @@
 
         // Envoyer un message
         async function sendMessage(celebrationId, recipientName) {
+            // Vérifier la permission d'envoyer des messages
+            if (!hasPermission('messages_send', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'envoyer des messages.');
+                return;
+            }
+
             const messageText = document.getElementById(`message_${celebrationId}`).value.trim();
             const isPublic = document.getElementById(`public_${celebrationId}`).checked;
+
+            // Vérifier les permissions spécifiques pour les types de messages
+            if (isPublic && !hasPermission('messages_public', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'envoyer des messages publics.');
+                return;
+            }
+
+            if (!isPublic && !hasPermission('messages_secret', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'envoyer des messages secrets.');
+                return;
+            }
 
             if (!messageText) {
                 alert('Veuillez écrire un message !');
@@ -2416,6 +2478,13 @@
 
         // Charger la vue notifications
         async function loadNotificationsView() {
+            // Vérifier la permission
+            if (!hasPermission('messages_view', true)) {
+                const messagesList = document.getElementById('messagesList');
+                messagesList.innerHTML = '<div class="text-center py-8"><p class="text-red-400 mb-4">⛔ Accès refusé</p><p class="text-gray-500">Vous n\'avez pas la permission de voir les messages.</p></div>';
+                return;
+            }
+
             const messagesList = document.getElementById('messagesList');
             const birthdayExplanation = document.getElementById('birthdayExplanation');
             const sendMessageSection = document.getElementById('sendMessageSection');

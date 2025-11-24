@@ -557,6 +557,65 @@
         // 2. Récupérer le rôle et le nom complet (fullName) depuis Firestore
         const userData = await getUserRole(uid);
         
+        // 2.5. Vérifier si le compte est désactivé et les limites spéciales
+        try {
+          const userDocRef = firebase.firestore().collection('users').doc(uid);
+          const userDoc = await userDocRef.get();
+          if (userDoc.exists) {
+            const userDocData = userDoc.data();
+            
+            // Vérifier si le compte est désactivé
+            if (userDocData.disabled === true) {
+              errorBox.textContent = "Votre compte a été désactivé. Veuillez contacter un administrateur.";
+              errorBox.style.display = "block";
+              await firebase.auth().signOut();
+              return;
+            }
+            
+            // Vérifier les comptes temporaires (expiration)
+            if (userDocData.accountType === 'temporary' && userDocData.expirationDate) {
+              const expirationDate = userDocData.expirationDate.toDate();
+              const now = new Date();
+              if (now > expirationDate) {
+                // Désactiver le compte automatiquement
+                await firebase.firestore().collection('users').doc(uid).update({
+                  disabled: true
+                });
+                errorBox.textContent = "Votre compte temporaire a expiré. Veuillez contacter un administrateur.";
+                errorBox.style.display = "block";
+                await firebase.auth().signOut();
+                return;
+              }
+            }
+            
+            // Vérifier les comptes limités (nombre de connexions)
+            if (userDocData.accountType === 'limited' && userDocData.maxLogins) {
+              const loginCount = userDocData.loginCount || 0;
+              const maxLogins = userDocData.maxLogins;
+              
+              if (loginCount >= maxLogins) {
+                // Désactiver le compte si la limite est atteinte
+                await firebase.firestore().collection('users').doc(uid).update({
+                  disabled: true
+                });
+                errorBox.textContent = `Votre compte a atteint la limite de ${maxLogins} connexions. Veuillez contacter un administrateur.`;
+                errorBox.style.display = "block";
+                await firebase.auth().signOut();
+                return;
+              }
+              
+              // Incrémenter le compteur de connexions
+              await firebase.firestore().collection('users').doc(uid).update({
+                loginCount: firebase.firestore.FieldValue.increment(1),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            }
+          }
+        } catch (checkError) {
+          console.warn('Erreur lors de la vérification du statut du compte:', checkError);
+          // Continuer même en cas d'erreur
+        }
+        
         // 3. Extraction correcte des données
         const role = userData.role || 'eleve'; 
         const name = userData.name || email.split('@')[0];
