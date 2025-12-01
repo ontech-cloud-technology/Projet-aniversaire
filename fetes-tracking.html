@@ -171,8 +171,12 @@
             }
 
             const userData = await getUserRole(user.uid);
-            if (userData.role !== 'admin') {
-                alert('Accès refusé. Cette page est réservée aux administrateurs.');
+            const role = userData.role;
+            const isAdmin = role === 'admin';
+            const isProfessor = role === 'professeur' || role === 'teacher';
+            
+            if (!isAdmin && !isProfessor) {
+                alert('Accès refusé. Cette page est réservée aux administrateurs et professeurs.');
                 window.location.href = 'admin.html';
                 return;
             }
