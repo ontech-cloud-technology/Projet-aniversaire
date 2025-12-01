@@ -1783,10 +1783,17 @@
             if (!userId) return null;
             try {
                 const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+                // Si l'utilisateur n'existe plus, retourner null sans erreur
+                if (!userDoc.exists) {
+                    return null;
+                }
                 const userData = userDoc.data();
                 return userData?.profilePhotoUrl || null;
             } catch (error) {
-                console.error('Erreur lors de la récupération de la photo:', error);
+                // Ne pas logger d'erreur si l'utilisateur n'existe plus (supprimé)
+                if (error.code !== 'not-found') {
+                    console.warn('Erreur lors de la récupération de la photo:', error);
+                }
                 return null;
             }
         }
@@ -2586,21 +2593,57 @@
                 return;
             }
 
+            // Filtrer les utilisateurs supprimés - ne garder que ceux qui existent encore
+            const existingUpcoming = [];
+            for (const person of upcoming) {
+                let userExists = false;
+                try {
+                    if (person.fileNumber) {
+                        const userCheck = await firebase.firestore().collection('users')
+                            .where('email', '==', `${person.fileNumber}@cslaval.qc.ca`)
+                            .limit(1)
+                            .get();
+                        userExists = !userCheck.empty;
+                    } else {
+                        // Si pas de fileNumber, on garde quand même (peut-être un compte admin/prof)
+                        userExists = true;
+                    }
+                } catch (error) {
+                    console.warn('Erreur lors de la vérification de l\'existence de l\'utilisateur:', error);
+                    userExists = false;
+                }
+                
+                // Ne garder que les utilisateurs qui existent encore
+                if (userExists) {
+                    existingUpcoming.push(person);
+                }
+            }
+
+            if (existingUpcoming.length === 0) {
+                sendMessageSection.classList.add('hidden');
+                return;
+            }
+
             sendMessageSection.classList.remove('hidden');
             upcomingBirthdaysDiv.innerHTML = '';
 
             // Vérifier pour chaque personne si un message a déjà été envoyé
-            for (const person of upcoming) {
+            for (const person of existingUpcoming) {
                 let messageAlreadySent = false;
                 
                 if (currentUserId) {
-                    const existingMessage = await firebase.firestore().collection('messages')
-                        .where('senderId', '==', currentUserId)
-                        .where('celebrationId', '==', person.id)
-                        .limit(1)
-                        .get();
-                    
-                    messageAlreadySent = !existingMessage.empty;
+                    try {
+                        const existingMessage = await firebase.firestore().collection('messages')
+                            .where('senderId', '==', currentUserId)
+                            .where('celebrationId', '==', person.id)
+                            .limit(1)
+                            .get();
+                        
+                        messageAlreadySent = !existingMessage.empty;
+                    } catch (error) {
+                        // En cas d'erreur, continuer sans bloquer l'affichage
+                        console.warn('Erreur lors de la vérification des messages existants:', error);
+                    }
                 }
 
                 const card = document.createElement('div');
@@ -2612,9 +2655,11 @@
                                 person.daysUntil === 1 ? "Demain ! 🎂" : 
                                 `Dans ${person.daysUntil} jours`;
 
-                const buttonDisabled = messageAlreadySent ? 'disabled opacity-50 cursor-not-allowed' : '';
+                // Déterminer si on peut envoyer un message
+                const canSendMessage = !messageAlreadySent;
+                const buttonDisabled = !canSendMessage ? 'disabled opacity-50 cursor-not-allowed' : '';
                 const buttonText = messageAlreadySent ? 'Déjà envoyé ✓' : 'Envoyer';
-                const textareaDisabled = messageAlreadySent ? 'disabled opacity-50 cursor-not-allowed' : '';
+                const textareaDisabled = !canSendMessage ? 'disabled opacity-50 cursor-not-allowed' : '';
                 const textareaPlaceholder = messageAlreadySent ? 'Vous avez déjà envoyé un message à cette personne.' : 'Écris un message personnalisé pour souhaiter un joyeux anniversaire... 🎉';
 
                 card.innerHTML = `
@@ -2633,18 +2678,18 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block text-sm font-medium text-gray-300">Ton message</label>
-                                ${!messageAlreadySent ? `
+                                ${canSendMessage ? `
                                     <button onclick="generateBirthdayMessage('${person.id}')" class="flex items-center px-3 py-1.5 rounded-lg bg-secondary hover:bg-opacity-90 text-bg-dark text-xs font-semibold transition">
                                         <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>
                                         Générer un message
                                     </button>
                                 ` : ''}
                             </div>
-                            <textarea id="message_${person.id}" ${messageAlreadySent ? 'disabled' : ''} class="w-full p-3 rounded-lg text-white text-sm resize-none ${textareaDisabled}" placeholder="${textareaPlaceholder}" rows="3"></textarea>
+                            <textarea id="message_${person.id}" ${!canSendMessage ? 'disabled' : ''} class="w-full p-3 rounded-lg text-white text-sm resize-none ${textareaDisabled}" placeholder="${textareaPlaceholder}" rows="3"></textarea>
                         </div>
                         <div class="flex items-center justify-end">
-                            <button onclick="${messageAlreadySent ? '' : `sendMessage('${person.id}', '${person.fullName}')`}" ${messageAlreadySent ? 'disabled' : ''} class="send-button px-6 py-2 rounded-lg text-white text-sm font-semibold flex items-center space-x-2 ${buttonDisabled}">
-                                <i data-lucide="${messageAlreadySent ? 'check' : 'send'}" class="w-4 h-4"></i>
+                            <button onclick="${canSendMessage ? `sendMessage('${person.id}', '${person.fullName}')` : ''}" ${!canSendMessage ? 'disabled' : ''} class="send-button px-6 py-2 rounded-lg text-white text-sm font-semibold flex items-center space-x-2 ${buttonDisabled}">
+                                <i data-lucide="${canSendMessage ? 'send' : 'check'}" class="w-4 h-4"></i>
                                 <span>${buttonText}</span>
                             </button>
                         </div>
@@ -2715,7 +2760,7 @@
                 .get();
 
             if (recipientUsers.empty) {
-                alert('Erreur : utilisateur destinataire non trouvé');
+                alert('Erreur : utilisateur destinataire non trouvé. Cette personne a peut-être été supprimée du système.');
                 return;
             }
 
@@ -2982,12 +3027,19 @@
                 messagesList.innerHTML = '';
                 
                 // Charger toutes les photos de profil des expéditeurs
+                // Note: Si un utilisateur a été supprimé, on continue quand même avec les données du message
                 const senderPhotosMap = new Map();
                 const uniqueSenderIds = [...new Set(messages.map(m => m.senderId).filter(Boolean))];
                 for (const senderId of uniqueSenderIds) {
-                    const photoUrl = await getUserProfilePhoto(senderId);
-                    if (photoUrl) {
-                        senderPhotosMap.set(senderId, photoUrl);
+                    try {
+                        const photoUrl = await getUserProfilePhoto(senderId);
+                        if (photoUrl) {
+                            senderPhotosMap.set(senderId, photoUrl);
+                        }
+                    } catch (error) {
+                        // Ignorer les erreurs si l'utilisateur n'existe plus
+                        // On utilisera les données stockées dans le message (senderName)
+                        console.warn(`Photo de profil non disponible pour ${senderId} (utilisateur peut-être supprimé)`);
                     }
                 }
                 

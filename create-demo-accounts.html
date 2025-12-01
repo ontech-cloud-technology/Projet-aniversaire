@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer Comptes Démo</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="firebase.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #333;
+        }
+        .success {
+            color: #10b981;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .info {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Créer Comptes de Démonstration</h1>
+        <p>Cette page permet de créer rapidement les comptes de démonstration.</p>
+        
+        <div id="authStatus" class="result info">
+            Vérification de l'authentification...
+        </div>
+
+        <div id="actions" style="display: none;">
+            <h2>Comptes à créer :</h2>
+            <ul>
+                <li><strong>demo1@onteech.com</strong> - Mot de passe: 123456 - Rôle: eleve - Type: standard</li>
+                <li><strong>demo2@ontech.com</strong> - Mot de passe: 123456 - Rôle: eleve - Type: standard</li>
+            </ul>
+
+            <button onclick="createAllAccounts()">Créer tous les comptes</button>
+            <button onclick="createAccount('demo1@onteech.com', '123456', 'Demo 1')">Créer Demo 1</button>
+            <button onclick="createAccount('demo2@ontech.com', '123456', 'Demo 2')">Créer Demo 2</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Vérifier l'authentification
+        firebase.auth().onAuthStateChanged(async (user) => {
+            const authStatus = document.getElementById('authStatus');
+            const actions = document.getElementById('actions');
+            
+            if (!user) {
+                authStatus.innerHTML = '<span class="error">❌ Vous devez être connecté pour créer des comptes. <a href="login.html" style="color: #60a5fa;">Se connecter</a></span>';
+                return;
+            }
+
+            // Vérifier que l'utilisateur est admin
+            const userData = await getUserRole(user.uid);
+            if (userData.role !== 'admin' && userData.role !== 'super-admin') {
+                authStatus.innerHTML = '<span class="error">❌ Accès refusé. Seuls les administrateurs peuvent créer des comptes.</span>';
+                return;
+            }
+
+            authStatus.innerHTML = '<span class="success">✅ Authentifié en tant qu\'administrateur</span>';
+            actions.style.display = 'block';
+        });
+
+        async function createAccount(email, password, fullName) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="result info">⏳ Création de ${email}...</div>`;
+
+            try {
+                // Note: Firebase Auth côté client ne permet pas de créer des utilisateurs directement
+                // Il faut utiliser Firebase Admin SDK ou l'API REST
+                // Pour l'instant, on va créer le document Firestore et indiquer qu'il faut créer l'utilisateur manuellement
+                
+                // Vérifier si l'utilisateur existe déjà dans Firestore
+                const usersRef = firebase.firestore().collection('users');
+                const existingUser = await usersRef.where('email', '==', email).limit(1).get();
+                
+                if (!existingUser.empty) {
+                    const userId = existingUser.docs[0].id;
+                    resultsDiv.innerHTML = `<div class="result error">⚠️ L'utilisateur ${email} existe déjà dans Firestore (UID: ${userId})</div>`;
+                    return;
+                }
+
+                // Créer un document temporaire avec les informations
+                // Note: L'utilisateur devra être créé dans Firebase Auth via la console ou super-admin.html
+                resultsDiv.innerHTML = `
+                    <div class="result info">
+                        <p>📝 Pour créer le compte ${email} :</p>
+                        <ol>
+                            <li>Allez sur <a href="super-admin.html" style="color: #60a5fa;">super-admin.html</a></li>
+                            <li>Cliquez sur "Créer un Compte"</li>
+                            <li>Remplissez les informations :
+                                <ul>
+                                    <li>Nom complet: ${fullName}</li>
+                                    <li>Email: ${email}</li>
+                                    <li>Mot de passe: ${password}</li>
+                                    <li>Rôle: Élève</li>
+                                    <li>Type: Standard</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                `;
+
+                // Alternative: Utiliser l'API REST de Firebase (nécessite une clé API)
+                // Pour l'instant, on va simplement afficher les instructions
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">❌ Erreur: ${error.message}</div>`;
+                console.error('Erreur:', error);
+            }
+        }
+
+        async function createAllAccounts() {
+            await createAccount('demo1@onteech.com', '123456', 'Demo 1');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await createAccount('demo2@ontech.com', '123456', 'Demo 2');
+        }
+    </script>
+</body>
+</html>
+

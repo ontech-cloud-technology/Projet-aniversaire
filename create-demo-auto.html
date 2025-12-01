@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création Automatique des Comptes Démo</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="firebase.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            width: 100%;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #333;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #60a5fa; }
+        .warning { color: #f59e0b; }
+        .log {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Création Automatique des Comptes Démo</h1>
+        <p>Cette page crée automatiquement les comptes de démonstration.</p>
+        
+        <div id="authStatus" class="result info">
+            Vérification de l'authentification...
+        </div>
+
+        <div id="actions" style="display: none;">
+            <h2>Comptes à créer :</h2>
+            <ul>
+                <li><strong>demo1@onteech.com</strong> - 123456 - Demo 1 - 2 décembre 2012</li>
+                <li><strong>demo2@ontech.com</strong> - 123456 - Demo 2 - 3 décembre 2012</li>
+            </ul>
+
+            <button onclick="createAllAccounts()" id="createBtn">🚀 Créer tous les comptes automatiquement</button>
+            
+            <div id="results"></div>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentUserId = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#60a5fa',
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b'
+            };
+            logDiv.innerHTML += `<div style="color: ${colors[type]}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Vérifier l'authentification
+        firebase.auth().onAuthStateChanged(async (user) => {
+            const authStatus = document.getElementById('authStatus');
+            const actions = document.getElementById('actions');
+            
+            if (!user) {
+                authStatus.innerHTML = '<span class="error">❌ Vous devez être connecté. <a href="login.html" style="color: #60a5fa;">Se connecter</a></span>';
+                return;
+            }
+
+            currentUser = user;
+            currentUserId = user.uid;
+
+            // Vérifier que l'utilisateur est admin
+            const userData = await getUserRole(user.uid);
+            if (userData.role !== 'admin' && userData.role !== 'super-admin') {
+                authStatus.innerHTML = '<span class="error">❌ Accès refusé. Seuls les administrateurs peuvent créer des comptes.</span>';
+                return;
+            }
+
+            authStatus.innerHTML = '<span class="success">✅ Authentifié en tant qu\'administrateur</span>';
+            actions.style.display = 'block';
+        });
+
+        async function createAccount(email, password, fullName, birthday) {
+            log(`Début de la création de ${email}...`, 'info');
+            
+            try {
+                // Note: On ne peut pas créer directement des utilisateurs Auth depuis le client
+                // On va créer le document Firestore et la célébration
+                // L'utilisateur devra être créé via super-admin.html ou Firebase Console
+                
+                // Pour l'instant, on va utiliser l'API REST via une Cloud Function ou
+                // créer directement les documents Firestore (mais sans Auth, l'utilisateur ne pourra pas se connecter)
+                
+                log(`⚠️  La création d'utilisateurs Auth nécessite Firebase Admin SDK`, 'warning');
+                log(`   Création du document Firestore pour ${email}...`, 'info');
+                
+                // Créer un document temporaire dans Firestore
+                // Note: Sans UID Auth, on ne peut pas créer un document users valide
+                // Il faut vraiment créer l'utilisateur Auth d'abord
+                
+                return {
+                    success: false,
+                    email: email,
+                    message: 'La création automatique nécessite Firebase Admin SDK. Utilisez super-admin.html pour créer les comptes manuellement.'
+                };
+                
+            } catch (error) {
+                log(`Erreur pour ${email}: ${error.message}`, 'error');
+                return { success: false, email: email, error: error.message };
+            }
+        }
+
+        async function createAllAccounts() {
+            const btn = document.getElementById('createBtn');
+            const resultsDiv = document.getElementById('results');
+            btn.disabled = true;
+            btn.textContent = '⏳ Création en cours...';
+            resultsDiv.innerHTML = '';
+            document.getElementById('log').innerHTML = '';
+
+            const accounts = [
+                { email: 'demo1@onteech.com', password: '123456', fullName: 'Demo 1', birthday: '2012-12-02' },
+                { email: 'demo2@ontech.com', password: '123456', fullName: 'Demo 2', birthday: '2012-12-03' }
+            ];
+
+            log('🚀 Démarrage de la création automatique...', 'info');
+            log('⚠️  Note: Cette méthode nécessite Firebase Admin SDK', 'warning');
+            log('   Redirection vers super-admin.html...', 'info');
+            
+            // Rediriger vers super-admin.html avec les instructions
+            setTimeout(() => {
+                window.location.href = 'super-admin.html';
+            }, 2000);
+
+            resultsDiv.innerHTML = `
+                <div class="result warning">
+                    <p>⚠️ La création automatique d'utilisateurs Auth nécessite Firebase Admin SDK.</p>
+                    <p>Redirection vers super-admin.html dans 2 secondes...</p>
+                    <p>Vous pourrez créer les comptes manuellement avec les informations suivantes:</p>
+                    <ul>
+                        ${accounts.map(acc => `
+                            <li>
+                                <strong>${acc.email}</strong><br>
+                                Mot de passe: ${acc.password}<br>
+                                Nom: ${acc.fullName}<br>
+                                Type: Élève<br>
+                                Anniversaire: ${acc.birthday}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+

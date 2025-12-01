@@ -227,25 +227,6 @@
             
             <div class="section">
                 <div class="section-title">
-                    <i data-lucide="calendar" class="w-6 h-6"></i>
-                    Gérer les Anniversaires
-                </div>
-                <div class="section-content">
-                    <p><strong>Comment ajouter un anniversaire :</strong></p>
-                    <ul>
-                        <li>Allez dans la section "Célébrations" du tableau de bord</li>
-                        <li>Cliquez sur "Ajouter une célébration"</li>
-                        <li>Remplissez le nom de l'élève et sa date d'anniversaire</li>
-                        <li>Cliquez sur "Enregistrer"</li>
-                    </ul>
-                    <div class="highlight-box">
-                        <p><strong>💡 Astuce :</strong> Vous pouvez importer plusieurs anniversaires en une fois en utilisant un fichier Excel !</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">
                     <i data-lucide="message-circle" class="w-6 h-6"></i>
                     Les Messages d'Anniversaire
                 </div>
@@ -297,6 +278,61 @@
                     <p style="margin-top: 20px;"><strong>Autres activités :</strong></p>
                     <ul>
                         <li><strong>Vote d'activités :</strong> Les élèves peuvent voter pour les activités qu'ils préfèrent</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <i data-lucide="award" class="w-6 h-6"></i>
+                    Système de Réputation et Surveillance des Messages
+                </div>
+                <div class="section-content">
+                    <p><strong>Le système de réputation :</strong></p>
+                    <ul>
+                        <li>Chaque élève commence avec une <strong>réputation de 100/100</strong></li>
+                        <li>La réputation reflète le comportement de l'élève dans le système</li>
+                        <li>Les comportements positifs maintiennent ou augmentent la réputation</li>
+                        <li>Les comportements inappropriés réduisent automatiquement la réputation</li>
+                    </ul>
+                    
+                    <div class="highlight-box" style="margin-top: 20px; margin-bottom: 20px;">
+                        <p><strong>🔍 Surveillance Automatique des Messages</strong></p>
+                        <p style="margin-top: 15px;">Le système dispose d'un <strong>filtre automatique</strong> qui surveille tous les messages envoyés :</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>✅ <strong>Plus de 200 mots interdits</strong> sont détectés automatiquement</li>
+                            <li>✅ Le filtre fonctionne même si les élèves essaient de contourner (variations, accents, caractères spéciaux, etc.)</li>
+                            <li>✅ Si un élève essaie d'envoyer un message avec un mot interdit, le message est <strong>BLOQUÉ</strong> et ne peut pas être envoyé</li>
+                            <li>✅ Le message bloqué est automatiquement enregistré dans un journal pour que vous puissiez le consulter</li>
+                        </ul>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>Conséquences en cas de message inapproprié :</strong></p>
+                    <ul>
+                        <li>❌ <strong>Perte de 5 points de réputation</strong> à chaque tentative d'envoi d'un message inapproprié</li>
+                        <li>📝 Le message est enregistré dans le journal des messages bloqués (accessible dans le tableau de bord admin)</li>
+                        <li>⚠️ <strong>Si la réputation tombe en dessous de 50/100</strong> : L'élève ne peut plus envoyer de messages jusqu'à ce que sa réputation remonte</li>
+                        <li>🚫 <strong>Si la réputation tombe en dessous de 20/100</strong> : L'élève risque de devenir "spectateur" et d'être exclu des activités et de la progression</li>
+                    </ul>
+
+                    <div class="highlight-box" style="margin-top: 20px; margin-bottom: 20px;">
+                        <p><strong>👨‍🏫 Gestion par les Administrateurs</strong></p>
+                        <p style="margin-top: 15px;">Dans le tableau de bord admin, vous pouvez :</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>📊 <strong>Voir la réputation de chaque élève</strong> dans la section "Réputation & Statuts"</li>
+                            <li>🔍 <strong>Consulter tous les messages bloqués</strong> avec les détails (qui, quand, pourquoi)</li>
+                            <li>✏️ <strong>Ajuster manuellement la réputation</strong> d'un élève si nécessaire</li>
+                            <li>🔓 <strong>Débloquer un élève</strong> ou modifier son statut (actif, bloqué, spectateur)</li>
+                            <li>📈 <strong>Suivre l'historique</strong> des modifications de réputation</li>
+                        </ul>
+                    </div>
+
+                    <p style="margin-top: 20px;"><strong>💡 Avantages du système :</strong></p>
+                    <ul>
+                        <li>🛡️ <strong>Protection automatique 24h/24</strong> : Le système fonctionne en continu, sans intervention nécessaire</li>
+                        <li>📚 <strong>Pédagogique</strong> : Encourage les bons comportements et décourage les comportements inappropriés</li>
+                        <li>⚖️ <strong>Équitable</strong> : Tous les élèves sont soumis aux mêmes règles</li>
+                        <li>🔐 <strong>Sécurisé</strong> : Tous les messages sont validés avant d'être envoyés</li>
                     </ul>
                 </div>
             </div>
@@ -471,24 +507,54 @@
                         ]
                     },
                     {
-                        title: 'Gérer les Anniversaires',
-                        content: [
-                            'Comment ajouter un anniversaire :',
-                            '1. Allez dans la section "Célébrations" du tableau de bord',
-                            '2. Cliquez sur "Ajouter une célébration"',
-                            '3. Remplissez le nom de l\'élève et sa date d\'anniversaire',
-                            '4. Cliquez sur "Enregistrer"',
-                            '',
-                            'ASTUCE : Vous pouvez importer plusieurs anniversaires en une fois en utilisant un fichier Excel !'
-                        ]
-                    },
-                    {
                         title: 'Les Messages d\'Anniversaire',
                         content: [
                             'Les élèves peuvent envoyer des messages d\'anniversaire à leurs camarades :',
                             '• Messages secrets : Seulement visibles par la personne qui reçoit (tous les messages sont privés)',
                             '',
                             'Les messages peuvent être envoyés jusqu\'à 1 semaine avant l\'anniversaire.'
+                        ]
+                    },
+                    {
+                        title: 'Système de Réputation et Surveillance des Messages',
+                        content: [
+                            'LE SYSTÈME DE RÉPUTATION',
+                            '',
+                            'Chaque élève commence avec une réputation de 100/100.',
+                            'La réputation reflète le comportement de l\'élève dans le système.',
+                            'Les comportements positifs maintiennent ou augmentent la réputation.',
+                            'Les comportements inappropriés réduisent automatiquement la réputation.',
+                            '',
+                            'SURVEILLANCE AUTOMATIQUE DES MESSAGES',
+                            '',
+                            'Le système dispose d\'un filtre automatique qui surveille tous les messages envoyés :',
+                            '• Plus de 200 mots interdits sont détectés automatiquement',
+                            '• Le filtre fonctionne même si les élèves essaient de contourner (variations, accents, caractères spéciaux)',
+                            '• Si un élève essaie d\'envoyer un message avec un mot interdit, le message est BLOQUÉ',
+                            '• Le message bloqué est automatiquement enregistré dans un journal',
+                            '',
+                            'CONSÉQUENCES EN CAS DE MESSAGE INAPPROPRIÉ',
+                            '',
+                            '• Perte de 5 points de réputation à chaque tentative d\'envoi d\'un message inapproprié',
+                            '• Le message est enregistré dans le journal des messages bloqués (accessible dans le tableau de bord admin)',
+                            '• Si la réputation tombe en dessous de 50/100 : L\'élève ne peut plus envoyer de messages',
+                            '• Si la réputation tombe en dessous de 20/100 : L\'élève risque de devenir "spectateur"',
+                            '',
+                            'GESTION PAR LES ADMINISTRATEURS',
+                            '',
+                            'Dans le tableau de bord admin, vous pouvez :',
+                            '• Voir la réputation de chaque élève dans la section "Réputation & Statuts"',
+                            '• Consulter tous les messages bloqués avec les détails (qui, quand, pourquoi)',
+                            '• Ajuster manuellement la réputation d\'un élève si nécessaire',
+                            '• Débloquer un élève ou modifier son statut (actif, bloqué, spectateur)',
+                            '• Suivre l\'historique des modifications de réputation',
+                            '',
+                            'AVANTAGES DU SYSTÈME',
+                            '',
+                            '• Protection automatique 24h/24 : Le système fonctionne en continu',
+                            '• Pédagogique : Encourage les bons comportements',
+                            '• Équitable : Tous les élèves sont soumis aux mêmes règles',
+                            '• Sécurisé : Tous les messages sont validés avant d\'être envoyés'
                         ]
                     },
                     {

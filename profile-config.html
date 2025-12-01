@@ -556,8 +556,8 @@
                     window.themeManager.init();
                 }
                 
-                // Vérifier si l'email est demonstration@ontech.com ou a@ontech.com pour afficher le bouton Skip
-                if (user.email === 'demonstration@ontech.com' || user.email === 'a@ontech.com') {
+                // Vérifier si l'email est 2253343@cslaval.qc.ca ou 2253344@cslaval.qc.ca pour afficher le bouton Skip
+                if (user.email === '2253343@cslaval.qc.ca' || user.email === '2253344@cslaval.qc.ca') {
                     const skipBtn = document.getElementById('skipBtn');
                     if (skipBtn) {
                         skipBtn.classList.remove('hidden');
@@ -832,10 +832,10 @@
             document.getElementById('totalSteps').textContent = TOTAL_STEPS;
         }
 
-        // Fonction pour passer le formulaire (pour demonstration@ontech.com ou a@ontech.com)
+        // Fonction pour passer le formulaire (pour 2253343@cslaval.qc.ca ou 2253344@cslaval.qc.ca)
         async function skipProfileSetup() {
             const user = firebase.auth().currentUser;
-            if (!user || (user.email !== 'demonstration@ontech.com' && user.email !== 'a@ontech.com')) {
+            if (!user || (user.email !== '2253343@cslaval.qc.ca' && user.email !== '2253344@cslaval.qc.ca')) {
                 return;
             }
 

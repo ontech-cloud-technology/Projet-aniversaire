@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création Automatique des Comptes Démo</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="firebase.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .log {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #60a5fa; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Création Automatique des Comptes Démo</h1>
+        <p>Cette page va créer automatiquement les comptes de démonstration.</p>
+        <div id="status" class="info">Initialisation...</div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#60a5fa',
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b'
+            };
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.style.color = colors[type];
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function createAccount(email, password, fullName, birthday) {
+            log(`Création de ${email}...`, 'info');
+            
+            try {
+                // Note: On ne peut pas créer directement des utilisateurs Auth depuis le client
+                // On va créer les documents Firestore et celebrations
+                // L'utilisateur devra être créé via Firebase Console ou super-admin.html
+                
+                // Pour l'instant, on va utiliser l'API REST de Firebase Identity Toolkit
+                // Mais cela nécessite aussi des permissions spéciales
+                
+                log(`⚠️  La création d'utilisateurs Auth nécessite Firebase Admin SDK`, 'warning');
+                log(`   Redirection vers super-admin.html...`, 'info');
+                
+                // Stocker les données dans sessionStorage pour les utiliser dans super-admin.html
+                sessionStorage.setItem('autoCreateAccounts', JSON.stringify([
+                    { email: 'demo1@onteech.com', password: '123456', fullName: 'Demo 1', birthday: '2012-12-02' },
+                    { email: 'demo2@ontech.com', password: '123456', fullName: 'Demo 2', birthday: '2012-12-03' }
+                ]));
+                
+                // Rediriger vers super-admin.html
+                window.location.href = 'super-admin.html?autoCreate=true';
+                
+            } catch (error) {
+                log(`Erreur: ${error.message}`, 'error');
+                return { success: false, email: email, error: error.message };
+            }
+        }
+
+        // Vérifier l'authentification
+        firebase.auth().onAuthStateChanged(async (user) => {
+            const statusDiv = document.getElementById('status');
+            
+            if (!user) {
+                statusDiv.innerHTML = '<span class="error">❌ Vous devez être connecté. <a href="login.html" style="color: #60a5fa;">Se connecter</a></span>';
+                return;
+            }
+
+            const userData = await getUserRole(user.uid);
+            if (userData.role !== 'admin' && userData.role !== 'super-admin') {
+                statusDiv.innerHTML = '<span class="error">❌ Accès refusé. Seuls les administrateurs peuvent créer des comptes.</span>';
+                return;
+            }
+
+            statusDiv.innerHTML = '<span class="success">✅ Authentifié en tant qu\'administrateur</span>';
+            log('✅ Authentifié, démarrage de la création...', 'success');
+            
+            // Rediriger vers super-admin.html avec le script
+            setTimeout(() => {
+                window.location.href = 'super-admin.html';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+

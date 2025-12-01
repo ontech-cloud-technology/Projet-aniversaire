@@ -803,7 +803,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Email *</label>
-                                <input type="email" id="createEmail" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <input type="email" id="createEmail" required autocomplete="username" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
                                 <p class="text-xs text-gray-500 mt-1" id="emailHelpText">Pour les élèves, l'email sera généré automatiquement</p>
                             </div>
                             <div>
@@ -841,16 +841,16 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Numéro de Fiche *</label>
-                                <input type="text" id="createFileNumber" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: 123456">
+                                <input type="text" id="createFileNumber" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: 123456">
                                 <p class="text-xs text-gray-500 mt-1">Le numéro de fiche sera utilisé pour l'email (@cslaval.qc.ca)</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Date d'Anniversaire *</label>
-                                <input type="date" id="createBirthday" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <input type="date" id="createBirthday" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Numéro de Classe *</label>
-                                <input type="text" id="createClassNumber" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: 101, 201, etc.">
+                                <input type="text" id="createClassNumber" class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: 101, 201, etc.">
                             </div>
                         </div>
                     </div>
@@ -1614,11 +1614,18 @@
             const standardRoleSection = document.getElementById('standardRoleSection');
             const createEmailInput = document.getElementById('createEmail');
             const createFileNumberInput = document.getElementById('createFileNumber');
+            const createBirthdayInput = document.getElementById('createBirthday');
+            const createClassNumberInput = document.getElementById('createClassNumber');
             
             if (userType === 'eleve') {
                 studentFieldsSection.classList.remove('hidden');
                 accountTypeSection.classList.add('hidden');
                 standardRoleSection.classList.add('hidden');
+                
+                // Ajouter required aux champs élèves quand la section est visible
+                createFileNumberInput.required = true;
+                createBirthdayInput.required = true;
+                createClassNumberInput.required = true;
                 
                 // Rendre l'email en lecture seule et le générer automatiquement
                 createEmailInput.readOnly = false;
@@ -1640,6 +1647,12 @@
                 studentFieldsSection.classList.add('hidden');
                 accountTypeSection.classList.remove('hidden');
                 standardRoleSection.classList.remove('hidden');
+                
+                // Retirer required des champs élèves quand la section est cachée
+                createFileNumberInput.required = false;
+                createBirthdayInput.required = false;
+                createClassNumberInput.required = false;
+                
                 createEmailInput.readOnly = false;
                 createEmailInput.placeholder = '';
             }
@@ -1793,6 +1806,24 @@
             }
         });
 
+        // Initialisation au chargement de la page
+        // S'assurer que les champs cachés n'ont pas l'attribut required
+        document.addEventListener('DOMContentLoaded', function() {
+            // Retirer required des champs dans les sections cachées par défaut
+            const studentFieldsSection = document.getElementById('studentFieldsSection');
+            if (studentFieldsSection && studentFieldsSection.classList.contains('hidden')) {
+                document.getElementById('createFileNumber').required = false;
+                document.getElementById('createBirthday').required = false;
+                document.getElementById('createClassNumber').required = false;
+            }
+            
+            // S'assurer que expirationDate n'a pas required si la section est cachée
+            const temporaryOptionsSection = document.getElementById('temporaryOptionsSection');
+            if (temporaryOptionsSection && temporaryOptionsSection.classList.contains('hidden')) {
+                document.getElementById('expirationDate').required = false;
+            }
+        });
+
         // Écouteurs d'événements
         document.getElementById('searchInput').addEventListener('input', applyFilters);
         document.getElementById('filterRole').addEventListener('change', applyFilters);
@@ -1801,6 +1832,20 @@
         // Démarrage
         checkSuperAdminAuth();
         lucide.createIcons();
+
+        // Auto-création des comptes démo si demandé
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autoCreate') === 'true') {
+            // Charger et exécuter le script de création automatique
+            setTimeout(async () => {
+                try {
+                    const script = await fetch('auto-create-demo.js').then(r => r.text());
+                    eval(script);
+                } catch (error) {
+                    console.error('Erreur lors du chargement du script auto-create:', error);
+                }
+            }, 3000); // Attendre que la page soit complètement chargée
+        }
     </script>
 </body>
 </html>
