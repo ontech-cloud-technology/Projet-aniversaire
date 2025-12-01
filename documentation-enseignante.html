@@ -252,8 +252,7 @@
                 <div class="section-content">
                     <p>Les élèves peuvent envoyer des messages d'anniversaire à leurs camarades :</p>
                     <ul>
-                        <li><strong>Messages publics :</strong> Visibles par tout le monde</li>
-                        <li><strong>Messages secrets :</strong> Seulement visibles par la personne qui reçoit</li>
+                        <li><strong>Messages secrets :</strong> Seulement visibles par la personne qui reçoit (tous les messages sont privés)</li>
                     </ul>
                     <p>Les messages peuvent être envoyés jusqu'à 1 semaine avant l'anniversaire.</p>
                 </div>
@@ -442,19 +441,18 @@
                 }
                 
                 // Titre principal
-                doc.setFontSize(24);
-                doc.setTextColor(99, 102, 241);
+                doc.setFontSize(18);
                 doc.setFont('helvetica', 'bold');
-                doc.text('📚 Documentation Fête Express', margin, yPosition);
-                yPosition += 10;
+                doc.setTextColor(0, 0, 0);
+                doc.text('Documentation Fête Express', margin, yPosition);
+                yPosition += 8;
                 
-                doc.setFontSize(14);
-                doc.setTextColor(100, 116, 139);
+                doc.setFontSize(12);
                 doc.setFont('helvetica', 'normal');
                 doc.text('Guide simple pour l\'enseignante', margin, yPosition);
                 yPosition += 15;
                 
-                // Sections
+                // Sections (sans emojis pour compatibilité PDF)
                 const sections = [
                     {
                         title: 'Qu\'est-ce que Fête Express ?',
@@ -481,15 +479,14 @@
                             '3. Remplissez le nom de l\'élève et sa date d\'anniversaire',
                             '4. Cliquez sur "Enregistrer"',
                             '',
-                            '💡 Astuce : Vous pouvez importer plusieurs anniversaires en une fois en utilisant un fichier Excel !'
+                            'ASTUCE : Vous pouvez importer plusieurs anniversaires en une fois en utilisant un fichier Excel !'
                         ]
                     },
                     {
                         title: 'Les Messages d\'Anniversaire',
                         content: [
                             'Les élèves peuvent envoyer des messages d\'anniversaire à leurs camarades :',
-                            '• Messages publics : Visibles par tout le monde',
-                            '• Messages secrets : Seulement visibles par la personne qui reçoit',
+                            '• Messages secrets : Seulement visibles par la personne qui reçoit (tous les messages sont privés)',
                             '',
                             'Les messages peuvent être envoyés jusqu\'à 1 semaine avant l\'anniversaire.'
                         ]
@@ -499,33 +496,35 @@
                         content: [
                             'Le système propose des défis amusants pour encourager la participation :',
                             '',
-                            '🎯 Le Défi de Progression (9 Personnes Consécutives)',
+                            'LE DEFI DE PROGRESSION (9 Personnes Consécutives)',
                             '',
                             'Comment ça marche concrètement :',
                             'Les anniversaires sont classés par ordre chronologique (du plus proche au plus lointain).',
                             '',
                             'Exemple simple :',
                             'Si les anniversaires sont :',
-                            '1. Marie (15 janvier)',
-                            '2. Pierre (20 janvier)',
-                            '3. Sophie (25 janvier)',
-                            '4. Luc (1er février)',
-                            '... et ainsi de suite',
+                            '  1. Marie (15 janvier)',
+                            '  2. Pierre (20 janvier)',
+                            '  3. Sophie (25 janvier)',
+                            '  4. Luc (1er février)',
+                            '  ... et ainsi de suite',
                             '',
-                            'L\'objectif : Quand TOUS les élèves de la classe ont envoyé un message à une même personne, le compteur augmente de 1.',
+                            'L\'objectif :',
+                            'Quand TOUS les élèves de la classe ont envoyé un message à une même personne, le compteur augmente de 1.',
                             '',
                             'Ce qui se passe :',
-                            '✅ Si tous les élèves envoient un message à Marie (1ère personne) → Le compteur passe à 1',
-                            '✅ Si tous les élèves envoient ensuite un message à Pierre (2ème personne) → Le compteur passe à 2',
-                            '✅ Si tous les élèves envoient ensuite un message à Sophie (3ème personne) → Le compteur passe à 3',
-                            '❌ Si une personne dans la séquence n\'a pas reçu de message de tous les élèves → Le compteur se réinitialise à zéro',
-                            '🎉 Quand le compteur atteint 9 personnes consécutives → Le défi est réussi pour toute la classe !',
-                            '🏆 Récompense : Quand 9 personnes consécutives sont atteintes, les activités sont gagnées !',
+                            '  ✓ Si tous les élèves envoient un message à Marie (1ère personne), le compteur passe à 1',
+                            '  ✓ Si tous les élèves envoient ensuite un message à Pierre (2ème personne), le compteur passe à 2',
+                            '  ✓ Si tous les élèves envoient ensuite un message à Sophie (3ème personne), le compteur passe à 3',
+                            '  ✗ Si une personne dans la séquence n\'a pas reçu de message de tous les élèves, le compteur se réinitialise à zéro',
+                            '  ✓ Quand le compteur atteint 9 personnes consécutives, le défi est réussi pour toute la classe',
+                            '  ✓ Récompense : Quand 9 personnes consécutives sont atteintes, les activités sont gagnées',
                             '',
                             'Pourquoi ce défi ?',
                             'Cela encourage tous les élèves à participer et à ne pas oublier les anniversaires de leurs camarades. C\'est un défi collectif qui crée de la cohésion dans la classe !',
                             '',
-                            '💡 Important : Les activités proposées dans le système sont débloquées et gagnées lorsque la classe atteint l\'objectif de 9 personnes consécutives. C\'est une récompense collective pour toute la classe !',
+                            'IMPORTANT :',
+                            'Les activités proposées dans le système sont débloquées et gagnées lorsque la classe atteint l\'objectif de 9 personnes consécutives. C\'est une récompense collective pour toute la classe !',
                             '',
                             'Autres activités :',
                             '• Vote d\'activités : Les élèves peuvent voter pour les activités qu\'ils préfèrent'
@@ -559,42 +558,73 @@
                             '• Assurez-vous que les élèves ont bien complété leur profil',
                             '• Contactez l\'administrateur technique si nécessaire',
                             '',
-                            '✨ Rappel : Cette plateforme est conçue pour être simple et intuitive. Si quelque chose semble compliqué, n\'hésitez pas à demander de l\'aide !'
+                            'RAPPEL : Cette plateforme est conçue pour être simple et intuitive. Si quelque chose semble compliqué, n\'hésitez pas à demander de l\'aide !'
                         ]
                     }
                 ];
                 
                 // Ajouter chaque section
                 sections.forEach((section, index) => {
-                    checkNewPage(30);
+                    checkNewPage(20);
+                    
+                    // Espace avant la section
+                    if (index > 0) {
+                        yPosition += 10;
+                    }
                     
                     // Titre de section
-                    doc.setFontSize(16);
-                    doc.setTextColor(99, 102, 241);
+                    doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(section.title, margin, yPosition);
-                    yPosition += 10;
+                    doc.setTextColor(0, 0, 0);
+                    const titleLines = doc.splitTextToSize(section.title, maxWidth);
+                    titleLines.forEach(line => {
+                        checkNewPage(8);
+                        doc.text(line, margin, yPosition);
+                        yPosition += 7;
+                    });
+                    yPosition += 5;
                     
                     // Contenu
                     doc.setFontSize(11);
-                    doc.setTextColor(30, 41, 59);
                     doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(0, 0, 0);
                     
                     section.content.forEach(line => {
-                        checkNewPage(8);
-                        if (line.trim() !== '') {
-                            const lines = doc.splitTextToSize(line, maxWidth);
-                            lines.forEach(l => {
-                                doc.text(l, margin, yPosition);
-                                yPosition += 6;
-                            });
-                        } else {
-                            yPosition += 4;
+                        const trimmedLine = line.trim();
+                        
+                        if (trimmedLine === '') {
+                            yPosition += 5;
+                            return;
                         }
+                        
+                        checkNewPage(8);
+                        
+                        // Nettoyer le texte
+                        let cleanText = trimmedLine.replace(/→/g, '->');
+                        
+                        const textLines = doc.splitTextToSize(cleanText, maxWidth);
+                        textLines.forEach(l => {
+                            checkNewPage(7);
+                            doc.text(l, margin, yPosition);
+                            yPosition += 7;
+                        });
                     });
-                    
-                    yPosition += 5; // Espace entre sections
                 });
+                
+                // Pied de page
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(
+                        `Page ${i} sur ${pageCount}`,
+                        pageWidth / 2,
+                        pageHeight - 10,
+                        { align: 'center' }
+                    );
+                }
                 
                 // Enregistrer le PDF
                 doc.save('Documentation-Fete-Express.pdf');

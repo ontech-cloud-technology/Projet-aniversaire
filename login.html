@@ -667,8 +667,8 @@
 
         welcomeTitle.textContent = `Bonjour, ${name} (${role})`;
         
-        let redirectUrl = 'eleve.html'; // Par défaut
-        let subText = 'Chargement du calendrier...';
+        let redirectUrl = 'accueil-eleve.html'; // Par défaut
+        let subText = 'Chargement de votre page d\'accueil...';
 
         // Définir la redirection et le message en fonction du rôle
         if (role === 'admin') {
@@ -681,7 +681,7 @@
              redirectUrl = 'committee.html';
              subText = "Accès aux outils du comité...";
         } else if (role === 'eleve') {
-             redirectUrl = 'eleve.html';
+             redirectUrl = 'accueil-eleve.html';
              subText = "Chargement du calendrier des anniversaires...";
         }
         

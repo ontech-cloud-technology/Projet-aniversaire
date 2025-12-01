@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accueil — Fête Express</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --bg-dark: #0f172a;
+            --bg-light: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f3a 50%, var(--bg-dark) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-animated::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            top: -250px;
+            left: -250px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-animated::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            bottom: -200px;
+            right: -200px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-strong {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .sidebar {
+            width: 280px;
+            min-height: calc(100vh - 2rem);
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(99, 102, 241, 0.15);
+            border-left: 3px solid var(--primary);
+        }
+
+        .sidebar-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .birthday-card {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .birthday-card:hover {
+            transform: translateX(4px);
+            border-left-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+    
+    <!-- Écran de chargement -->
+    <div id="loadingScreen" class="fixed inset-0 flex flex-col justify-center items-center z-50" style="background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f3a 50%, var(--bg-dark) 100%);">
+        <div class="text-xl text-white mb-4">Chargement...</div>
+        <div class="flex space-x-2">
+            <div class="w-4 h-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 animate-bounce"></div>
+            <div class="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-bounce" style="animation-delay: 0.15s;"></div>
+            <div class="w-4 h-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 animate-bounce" style="animation-delay: 0.3s;"></div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <main id="mainContent" class="hidden flex flex-col md:flex-row gap-6 relative z-10">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar glass-strong p-6 rounded-2xl">
+            <div class="mb-6">
+                <a href="accueil-eleve.html" class="flex items-center space-x-3 mb-6 hover:opacity-80 transition">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <i data-lucide="gift" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-black">
+                            <span class="header-gradient">Fêtes Express</span>
+                        </h2>
+                        <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
+                    </div>
+                </a>
+                <nav class="space-y-2">
+                    <a href="accueil-eleve.html" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 border border-indigo-500/30">
+                        <i data-lucide="home" class="w-5 h-5 text-indigo-400"></i>
+                        <span class="font-semibold">Accueil</span>
+                    </a>
+                    <a href="eleve.html?view=calendrier" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                        <span>Calendrier</span>
+                    </a>
+                    <a href="eleve.html?view=messaging" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 relative">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                        <span>Messagerie</span>
+                        <span id="messagingBadge" class="hidden ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                    </a>
+                    <a href="eleve.html?view=notifications" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 relative">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span>Messages</span>
+                        <span id="notificationBadge" class="hidden ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                    </a>
+                    <a href="progression.html" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i data-lucide="target" class="w-5 h-5"></i>
+                        <span>Défis</span>
+                    </a>
+                    <a href="eleve.html?view=settings" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="mt-auto pt-6 border-t border-gray-700">
+                <div class="glass p-4 rounded-lg">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <img id="headerProfilePhoto" src="" alt="Photo de profil" class="w-12 h-12 rounded-full object-cover border-2 border-indigo-500 shadow-lg" style="display: none;">
+                        <div id="headerProfilePhotoPlaceholder" class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border-2 border-indigo-500 shadow-lg">
+                            <i data-lucide="user" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-500">Connecté</p>
+                            <p id="welcomeName" class="text-sm font-semibold text-white truncate"></p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <button onclick="goToAdmin()" id="adminBtn" class="hidden flex items-center justify-center text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition transform hover:scale-105 shadow-lg">
+                            <i data-lucide="shield" class="w-4 h-4 mr-2"></i>
+                            Admin
+                        </button>
+                        <button onclick="signOutAndRedirect()" class="flex items-center justify-center text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 transition transform hover:scale-105 shadow-lg">
+                            <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                            Déconnexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Contenu principal -->
+        <div class="flex-1">
+            <header class="mb-6 fade-in">
+                <div class="flex items-center space-x-4 mb-2">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <i data-lucide="home" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-black">
+                            <span class="header-gradient" id="pageTitle">Page d'Accueil</span>
+                        </h1>
+                        <p class="text-sm text-gray-400 mt-1">Fête Express — Classe 203</p>
+                    </div>
+                </div>
+            </header>
+
+        <!-- Message de bienvenue -->
+        <div class="card p-6 mb-6 fade-in">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-2xl font-bold mb-2">Bienvenue sur ta page d'accueil ! 🎉</h2>
+                    <p class="text-gray-300">Ici, tu peux voir les prochains anniversaires, tes statistiques et accéder rapidement à toutes les fonctionnalités.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 fade-in">
+            <div class="stat-card card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Messages reçus</p>
+                        <p class="text-3xl font-bold text-indigo-400" id="messagesReceived">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <i data-lucide="mail" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Messages envoyés</p>
+                        <p class="text-3xl font-bold text-purple-400" id="messagesSent">0</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                        <i data-lucide="send" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Réputation</p>
+                        <p class="text-3xl font-bold text-pink-400" id="reputation">100</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+                        <i data-lucide="star" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="card p-6 mb-6 fade-in">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i data-lucide="zap" class="w-5 h-5 mr-2 text-yellow-400"></i>
+                Actions rapides
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button onclick="goToPage('eleve.html')" class="action-btn text-white px-6 py-4 rounded-lg flex items-center justify-center space-x-2">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span>Voir le calendrier</span>
+                </button>
+                <button onclick="goToPage('eleve.html?view=messaging')" class="action-btn text-white px-6 py-4 rounded-lg flex items-center justify-center space-x-2">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                    <span>Envoyer un message</span>
+                </button>
+                <button onclick="goToPage('eleve.html?view=notifications')" class="action-btn text-white px-6 py-4 rounded-lg flex items-center justify-center space-x-2 relative">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span>Mes messages</span>
+                    <span id="notificationBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                </button>
+                <button onclick="goToPage('progression.html')" class="action-btn text-white px-6 py-4 rounded-lg flex items-center justify-center space-x-2">
+                    <i data-lucide="target" class="w-5 h-5"></i>
+                    <span>Voir les défis</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Prochains anniversaires -->
+            <div class="card p-6 fade-in">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i data-lucide="calendar-days" class="w-5 h-5 mr-2 text-indigo-400"></i>
+                    Prochains anniversaires
+                </h2>
+                <div id="upcomingBirthdays" class="space-y-3">
+                    <div class="text-center py-8 text-gray-400">
+                        <i data-lucide="loader" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
+                        <p>Chargement...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Défi de classe -->
+            <div class="card p-6 fade-in">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i data-lucide="trophy" class="w-5 h-5 mr-2 text-yellow-400"></i>
+                    Défi de classe
+                </h2>
+                <div id="challengeInfo" class="space-y-4">
+                    <div class="text-center py-8 text-gray-400">
+                        <i data-lucide="loader" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
+                        <p>Chargement...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    </main>
+
+    <!-- Script Firebase -->
+    <script src="firebase.js"></script>
+    <!-- Script de progression -->
+    <script src="js/progression-system.js"></script>
+
+    <script>
+        let currentUserId = null;
+        let currentUserData = null;
+
+        // Vérifier l'authentification
+        async function checkAuth() {
+            try {
+                const user = await new Promise(resolve => {
+                    const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                        unsubscribe();
+                        resolve(u);
+                    });
+                });
+
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Vérifier si le profil est complété
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                const docData = userDoc.data();
+                
+                if (docData && docData.role === 'eleve' && !docData.profileCompleted) {
+                    window.location.href = 'profile-config.html';
+                    return;
+                }
+
+                currentUserId = user.uid;
+                currentUserData = await getUserRole(user.uid);
+                
+                document.getElementById('welcomeName').textContent = currentUserData.name || 'Élève';
+                
+                // Charger la photo de profil
+                await loadHeaderProfilePhoto();
+                
+                // Afficher le bouton admin si l'utilisateur est admin
+                if (currentUserData.role === 'admin') {
+                    document.getElementById('adminBtn').classList.remove('hidden');
+                }
+                
+                // Charger les données
+                await loadAllData();
+                
+                // Afficher le contenu
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('mainContent').classList.remove('hidden');
+                
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur lors de la vérification:', error);
+                alert('Erreur lors du chargement. Veuillez réessayer.');
+            }
+        }
+
+        // Charger toutes les données
+        async function loadAllData() {
+            await Promise.all([
+                loadStatistics(),
+                loadUpcomingBirthdays(),
+                loadChallengeInfo(),
+                loadNotificationBadge()
+            ]);
+        }
+
+        // Charger les statistiques
+        async function loadStatistics() {
+            try {
+                // Messages reçus
+                const receivedMessages = await firebase.firestore()
+                    .collection('messages')
+                    .where('recipientId', '==', currentUserId)
+                    .get();
+                
+                document.getElementById('messagesReceived').textContent = receivedMessages.size;
+
+                // Messages envoyés
+                const sentMessages = await firebase.firestore()
+                    .collection('messages')
+                    .where('senderId', '==', currentUserId)
+                    .get();
+                
+                document.getElementById('messagesSent').textContent = sentMessages.size;
+
+                // Réputation
+                const userDoc = await firebase.firestore().collection('users').doc(currentUserId).get();
+                const userData = userDoc.data();
+                const reputation = userData?.reputation || 100;
+                document.getElementById('reputation').textContent = reputation;
+            } catch (error) {
+                console.error('Erreur lors du chargement des statistiques:', error);
+            }
+        }
+
+        // Charger les prochains anniversaires
+        async function loadUpcomingBirthdays() {
+            try {
+                const today = new Date();
+                const nextWeek = new Date(today);
+                nextWeek.setDate(today.getDate() + 7);
+
+                // Récupérer toutes les célébrations
+                const celebrationsSnapshot = await firebase.firestore()
+                    .collection('celebrations')
+                    .get();
+
+                const upcomingBirthdays = [];
+                
+                celebrationsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.birthday) return;
+
+                    const birthdayParts = data.birthday.split('-');
+                    if (birthdayParts.length !== 3) return;
+
+                    const birthMonth = parseInt(birthdayParts[1]) - 1;
+                    const birthDay = parseInt(birthdayParts[2]);
+                    const currentYear = today.getFullYear();
+
+                    let nextBirthday = new Date(currentYear, birthMonth, birthDay);
+                    if (nextBirthday < today) {
+                        nextBirthday = new Date(currentYear + 1, birthMonth, birthDay);
+                    }
+
+                    if (nextBirthday <= nextWeek) {
+                        const daysUntil = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+                        upcomingBirthdays.push({
+                            name: data.fullName || data.name || 'Inconnu',
+                            date: nextBirthday,
+                            daysUntil: daysUntil,
+                            fileNumber: data.fileNumber
+                        });
+                    }
+                });
+
+                // Trier par date
+                upcomingBirthdays.sort((a, b) => a.date - b.date);
+
+                // Afficher
+                const container = document.getElementById('upcomingBirthdays');
+                if (upcomingBirthdays.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-400">
+                            <i data-lucide="calendar-x" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Aucun anniversaire dans les 7 prochains jours</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = upcomingBirthdays.slice(0, 5).map(birthday => {
+                        const isToday = birthday.daysUntil === 0;
+                        const isTomorrow = birthday.daysUntil === 1;
+                        
+                        let dateText = '';
+                        if (isToday) {
+                            dateText = '<span class="text-green-400 font-bold pulse">Aujourd\'hui ! 🎉</span>';
+                        } else if (isTomorrow) {
+                            dateText = '<span class="text-yellow-400 font-semibold">Demain</span>';
+                        } else {
+                            dateText = `Dans ${birthday.daysUntil} jours`;
+                        }
+
+                        return `
+                            <div class="birthday-card glass p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                            <i data-lucide="cake" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">${birthday.name}</p>
+                                            <p class="text-sm text-gray-400">${dateText}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="goToPage('eleve.html?view=messaging&fileNumber=${birthday.fileNumber}')" class="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm transition">
+                                        <i data-lucide="send" class="w-4 h-4 inline mr-1"></i>
+                                        Souhaiter
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Erreur lors du chargement des anniversaires:', error);
+                document.getElementById('upcomingBirthdays').innerHTML = `
+                    <div class="text-center py-8 text-red-400">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p>Erreur lors du chargement</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Charger les informations du défi
+        async function loadChallengeInfo() {
+            try {
+                // Charger le script de progression si disponible
+                if (typeof calculateProgression === 'function') {
+                    const progression = await calculateProgression();
+                    const container = document.getElementById('challengeInfo');
+                    
+                    container.innerHTML = `
+                        <div class="text-center mb-4">
+                            <div class="text-4xl font-bold text-yellow-400 mb-2">${progression.consecutiveCount}/9</div>
+                            <p class="text-gray-400">Personnes consécutives</p>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3 mb-4">
+                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500" style="width: ${(progression.consecutiveCount / 9) * 100}%"></div>
+                        </div>
+                        <p class="text-sm text-gray-400 text-center">
+                            Objectif : 9 personnes consécutives doivent recevoir des messages de tous les élèves
+                        </p>
+                        <button onclick="goToPage('progression.html')" class="w-full mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white transition">
+                            Voir les détails
+                        </button>
+                    `;
+                } else {
+                    // Fallback si le script n'est pas disponible
+                    document.getElementById('challengeInfo').innerHTML = `
+                        <div class="text-center py-8 text-gray-400">
+                            <i data-lucide="trophy" class="w-12 h-12 mx-auto mb-2"></i>
+                            <p>Défi de classe</p>
+                            <button onclick="goToPage('progression.html')" class="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white transition">
+                                Voir les détails
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement du défi:', error);
+                document.getElementById('challengeInfo').innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p>Erreur lors du chargement</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Charger les badges de notification
+        async function loadNotificationBadge() {
+            try {
+                const unreadMessages = await firebase.firestore()
+                    .collection('messages')
+                    .where('recipientId', '==', currentUserId)
+                    .where('read', '==', false)
+                    .get();
+
+                const notificationBadge = document.getElementById('notificationBadge');
+                if (unreadMessages.size > 0) {
+                    notificationBadge.textContent = unreadMessages.size;
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+
+                // Badge pour la messagerie (messages non lus dans la messagerie)
+                const messagingBadge = document.getElementById('messagingBadge');
+                // Pour l'instant, on utilise le même nombre
+                if (unreadMessages.size > 0) {
+                    messagingBadge.textContent = unreadMessages.size;
+                    messagingBadge.classList.remove('hidden');
+                } else {
+                    messagingBadge.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des notifications:', error);
+            }
+        }
+
+        // Charger la photo de profil dans l'en-tête
+        async function loadHeaderProfilePhoto() {
+            if (!currentUserId) return;
+
+            try {
+                const userDoc = await firebase.firestore().collection('users').doc(currentUserId).get();
+                const userData = userDoc.data();
+                
+                const headerPhoto = document.getElementById('headerProfilePhoto');
+                const headerPlaceholder = document.getElementById('headerProfilePhotoPlaceholder');
+                
+                if (userData && userData.profilePhotoUrl) {
+                    headerPhoto.src = userData.profilePhotoUrl;
+                    headerPhoto.style.display = 'block';
+                    headerPlaceholder.style.display = 'none';
+                } else {
+                    headerPhoto.style.display = 'none';
+                    headerPlaceholder.style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la photo de profil:', error);
+            }
+        }
+
+        // Déconnexion
+        function signOutAndRedirect() {
+            firebase.auth().signOut().then(() => {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }).catch(error => {
+                console.error("Erreur de déconnexion:", error);
+            });
+        }
+
+        // Aller vers admin
+        function goToAdmin() {
+            window.location.href = 'admin.html';
+        }
+
+        // Navigation
+        function goToPage(url) {
+            window.location.href = url;
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html>
+

@@ -318,15 +318,15 @@
                     const createdAt = msg.createdAt ? msg.createdAt.toDate() : new Date();
                     
                     return `
-                        <div class="border border-gray-700 rounded-lg p-4 ${isPublic ? 'bg-blue-900 bg-opacity-20' : 'bg-purple-900 bg-opacity-20'}">
+                        <div class="border border-gray-700 rounded-lg p-4 bg-purple-900 bg-opacity-20">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center space-x-2">
                                     <span class="font-bold">${senderName}</span>
                                     <span class="text-xs px-2 py-1 rounded ${senderRole === 'eleve' ? 'bg-yellow-900 text-yellow-300' : 'bg-gray-700 text-gray-300'}">
                                         ${senderRole === 'eleve' ? 'Élève' : senderRole}
                                     </span>
-                                    <span class="text-xs px-2 py-1 rounded ${isPublic ? 'bg-blue-900 text-blue-300' : 'bg-purple-900 text-purple-300'}">
-                                        ${isPublic ? 'Public' : 'Privé'}
+                                    <span class="text-xs px-2 py-1 rounded bg-purple-900 text-purple-300">
+                                        Privé
                                     </span>
                                 </div>
                                 <span class="text-xs text-gray-400">${createdAt.toLocaleString('fr-FR')}</span>

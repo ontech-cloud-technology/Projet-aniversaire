@@ -195,8 +195,7 @@
                             <ul class="list-disc list-inside space-y-2 text-sm text-gray-300 ml-4">
                                 <li>Les messages doivent être positifs et bienveillants</li>
                                 <li>Un seul message par personne et par anniversaire</li>
-                                <li>Les messages publics sont visibles par tous les membres</li>
-                                <li>Les messages privés restent confidentiels</li>
+                                <li>Tous les messages sont privés et restent confidentiels</li>
                             </ul>
                         </div>
 
@@ -533,7 +532,7 @@
                     userData.needsPasswordChange !== true) {
                     
                     const role = userData.role || 'eleve';
-                    let redirectUrl = 'eleve.html';
+                    let redirectUrl = 'accueil-eleve.html';
                     
                     if (role === 'admin' || role === 'professeur' || role === 'teacher') {
                         redirectUrl = 'admin.html';
@@ -884,7 +883,7 @@
 
                 // Rediriger selon le rôle
                 const role = userData?.role || 'eleve';
-                let redirectUrl = 'eleve.html';
+                let redirectUrl = 'accueil-eleve.html';
                 
                 if (role === 'admin' || role === 'professeur' || role === 'teacher') {
                     redirectUrl = 'admin.html';
@@ -1039,13 +1038,13 @@
                 const userData = existingData;
                 const role = userData.role || 'eleve';
                 
-                let redirectUrl = 'eleve.html'; // Par défaut
+                let redirectUrl = 'accueil-eleve.html'; // Par défaut
                 if (role === 'admin' || role === 'professeur' || role === 'teacher') {
                     redirectUrl = 'admin.html';
                 } else if (role === 'comite') {
                     redirectUrl = 'committee.html';
                 } else if (role === 'eleve') {
-                    redirectUrl = 'eleve.html';
+                    redirectUrl = 'accueil-eleve.html';
                 }
 
                 // Rediriger vers la page appropriée

@@ -1,0 +1,44 @@
+🎬 PROMPT VIDÉO - VERSION COURTE (À UTILISER DIRECTEMENT)
+
+Crée une vidéo explicative de 3-5 minutes pour présenter la plateforme "203 Celebration Hub" aux élèves.
+
+TON : Amical, chaleureux, simple (comme parler à un ami). Parle lentement et clairement.
+
+STRUCTURE :
+
+1. INTRODUCTION (30s) : "Salut ! Tu veux savoir comment souhaiter joyeux anniversaire à tes copains ? C'est super simple avec 203 Celebration Hub !"
+
+2. CONNEXION (45s) : Montre comment se connecter avec email/mot de passe. "C'est simple comme se connecter à n'importe quel site !"
+
+3. CALENDRIER (1min) : "Regarde le calendrier ! Les jours avec un gâteau 🎂 ont un anniversaire. Tu cliques pour voir les détails."
+
+4. ENVOYER UN MESSAGE (1min30) : "Tu cliques sur le nom, tu écris un message sympa comme 'Joyeux anniversaire ! 🎉', tu envoies. C'est tout ! Le message est secret, seul ton copain le voit. Il reçoit aussi un email automatiquement."
+
+5. RECEVOIR DES MESSAGES (45s) : "Tu reçois une notification quand quelqu'un t'écrit. Tu cliques et tu lis tes messages. C'est comme recevoir des cartes !"
+
+6. PROFIL ET DÉFIS (1min) : "Tu vois ton profil, tes statistiques, et tu peux participer au défi de classe : on essaie tous ensemble de souhaiter joyeux anniversaire à 9 personnes consécutives !"
+
+7. CONCLUSION (30s) : "Voilà ! C'est vraiment simple : tu te connectes, tu vois les anniversaires, tu envoies des messages, et c'est tout ! 🎉"
+
+STYLE VISUEL :
+- Interface colorée et moderne
+- Animations douces (curseur qui clique, transitions)
+- Texte lisible et gros
+- Emojis et icônes
+- Zoom sur les éléments importants
+- Effets de confirmation (checkmarks, confettis)
+
+À ÉVITER :
+- Jargon technique
+- Parler trop vite
+- Rendre ça compliqué
+- Mentionner les fonctionnalités admin
+
+À FAIRE :
+- Parler comme à un ami
+- Montrer chaque étape clairement
+- Utiliser des exemples concrets
+- Rendre ça amusant et positif
+
+MESSAGE PRINCIPAL : "C'est super simple : tu te connectes, tu vois les anniversaires, tu envoies un message sympa, et c'est tout !"
+

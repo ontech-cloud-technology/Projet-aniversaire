@@ -586,13 +586,6 @@
                         </label>
                         <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
                             <div>
-                                <span class="font-medium">Messages publics</span>
-                                <p class="text-xs text-gray-400">Envoyer des messages publics</p>
-                            </div>
-                            <input type="checkbox" id="perm_messages_public" class="w-5 h-5 rounded border-gray-600 text-primary focus:ring-2 focus:ring-primary">
-                        </label>
-                        <label class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
-                            <div>
                                 <span class="font-medium">Messages secrets</span>
                                 <p class="text-xs text-gray-400">Envoyer des messages privés</p>
                             </div>
@@ -811,6 +804,7 @@
                             <div>
                                 <label class="block text-sm font-medium mb-2">Email *</label>
                                 <input type="email" id="createEmail" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                                <p class="text-xs text-gray-500 mt-1" id="emailHelpText">Pour les élèves, l'email sera généré automatiquement</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Mot de passe *</label>
@@ -820,8 +814,49 @@
                         </div>
                     </div>
 
-                    <!-- Type de compte -->
+                    <!-- Type d'utilisateur -->
                     <div class="border border-gray-700 rounded-lg p-4">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Type d'Utilisateur</h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                                <input type="radio" name="userType" value="normal" checked class="w-5 h-5 text-primary focus:ring-2 focus:ring-primary" onchange="toggleStudentFields()">
+                                <div>
+                                    <span class="font-medium">Utilisateur Normal</span>
+                                    <p class="text-xs text-gray-400">Compte standard avec rôle classique</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
+                                <input type="radio" name="userType" value="eleve" class="w-5 h-5 text-primary focus:ring-2 focus:ring-primary" onchange="toggleStudentFields()">
+                                <div>
+                                    <span class="font-medium">Élève</span>
+                                    <p class="text-xs text-gray-400">Compte élève avec informations supplémentaires</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Champs supplémentaires pour les élèves -->
+                    <div id="studentFieldsSection" class="border border-gray-700 rounded-lg p-4 hidden">
+                        <h4 class="text-lg font-bold mb-4 text-primary">Informations Élève</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Numéro de Fiche *</label>
+                                <input type="text" id="createFileNumber" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: 123456">
+                                <p class="text-xs text-gray-500 mt-1">Le numéro de fiche sera utilisé pour l'email (@cslaval.qc.ca)</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Date d'Anniversaire *</label>
+                                <input type="date" id="createBirthday" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Numéro de Classe *</label>
+                                <input type="text" id="createClassNumber" required class="w-full p-3 rounded border border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition text-white" placeholder="Ex: 101, 201, etc.">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Type de compte (pour utilisateurs normaux) -->
+                    <div id="accountTypeSection" class="border border-gray-700 rounded-lg p-4">
                         <h4 class="text-lg font-bold mb-4 text-primary">Type de Compte</h4>
                         <div class="space-y-3">
                             <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition cursor-pointer">
@@ -1282,7 +1317,6 @@
                     // Messages
                     messages_view: true,
                     messages_send: true,
-                    messages_public: true,
                     messages_secret: true,
                     // Progression
                     progression_view: true,
@@ -1319,7 +1353,6 @@
                     // Messages
                     messages_view: true,
                     messages_send: true,
-                    messages_public: true,
                     messages_secret: true,
                     // Progression
                     progression_view: true,
@@ -1356,7 +1389,6 @@
                     // Messages
                     messages_view: true,
                     messages_send: true,
-                    messages_public: true,
                     messages_secret: true,
                     // Progression
                     progression_view: true,
@@ -1439,7 +1471,7 @@
             // Liste de toutes les permissions
             const allPermissions = [
                 'perm_calendar_view', 'perm_calendar_month', 'perm_calendar_week', 'perm_calendar_year', 'perm_calendar_export',
-                'perm_messages_view', 'perm_messages_send', 'perm_messages_public', 'perm_messages_secret',
+                'perm_messages_view', 'perm_messages_send', 'perm_messages_secret',
                 'perm_progression_view', 'perm_vote_participate', 'perm_vote_results',
                 'perm_profile_view_own', 'perm_profile_edit_own', 'perm_profile_view_others', 'perm_theme_change', 'perm_wishlist',
                 'perm_admin_access', 'perm_users_manage', 'perm_celebrations_manage', 'perm_activities_manage', 
@@ -1482,7 +1514,7 @@
                 const permissions = {};
                 const allPermissionIds = [
                     'perm_calendar_view', 'perm_calendar_month', 'perm_calendar_week', 'perm_calendar_year', 'perm_calendar_export',
-                    'perm_messages_view', 'perm_messages_send', 'perm_messages_public', 'perm_messages_secret',
+                    'perm_messages_view', 'perm_messages_send', 'perm_messages_secret',
                     'perm_progression_view', 'perm_vote_participate', 'perm_vote_results',
                     'perm_profile_view_own', 'perm_profile_edit_own', 'perm_profile_view_others', 'perm_theme_change', 'perm_wishlist',
                     'perm_admin_access', 'perm_users_manage', 'perm_celebrations_manage', 'perm_activities_manage', 
@@ -1574,14 +1606,52 @@
             });
         });
 
+        // Fonction pour afficher/masquer les champs élèves
+        function toggleStudentFields() {
+            const userType = document.querySelector('input[name="userType"]:checked').value;
+            const studentFieldsSection = document.getElementById('studentFieldsSection');
+            const accountTypeSection = document.getElementById('accountTypeSection');
+            const standardRoleSection = document.getElementById('standardRoleSection');
+            const createEmailInput = document.getElementById('createEmail');
+            const createFileNumberInput = document.getElementById('createFileNumber');
+            
+            if (userType === 'eleve') {
+                studentFieldsSection.classList.remove('hidden');
+                accountTypeSection.classList.add('hidden');
+                standardRoleSection.classList.add('hidden');
+                
+                // Rendre l'email en lecture seule et le générer automatiquement
+                createEmailInput.readOnly = false;
+                createEmailInput.placeholder = 'Sera généré automatiquement à partir du numéro de fiche';
+                
+                // Écouter les changements du numéro de fiche pour générer l'email
+                const fileNumberHandler = function() {
+                    const fileNumber = this.value.trim();
+                    if (fileNumber) {
+                        createEmailInput.value = `${fileNumber}@cslaval.qc.ca`;
+                    } else {
+                        createEmailInput.value = '';
+                    }
+                };
+                // Retirer l'ancien listener s'il existe
+                createFileNumberInput.removeEventListener('input', fileNumberHandler);
+                createFileNumberInput.addEventListener('input', fileNumberHandler);
+            } else {
+                studentFieldsSection.classList.add('hidden');
+                accountTypeSection.classList.remove('hidden');
+                standardRoleSection.classList.remove('hidden');
+                createEmailInput.readOnly = false;
+                createEmailInput.placeholder = '';
+            }
+        }
+
         // Gérer la soumission du formulaire de création
         document.getElementById('createUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const fullName = document.getElementById('createFullName').value;
-            const email = document.getElementById('createEmail').value;
             const password = document.getElementById('createPassword').value;
-            const accountType = document.querySelector('input[name="accountType"]:checked').value;
+            const userType = document.querySelector('input[name="userType"]:checked').value;
             const createDisabled = document.getElementById('createDisabled').checked;
             const sendWelcomeEmail = document.getElementById('sendWelcomeEmail').checked;
             
@@ -1595,50 +1665,91 @@
             successElement.classList.add('hidden');
             
             try {
-                // Créer l'utilisateur dans Firebase Auth
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
-                
-                // Préparer les données utilisateur
-                const userData = {
+                let email;
+                let userData = {
                     fullName: fullName,
-                    email: email,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     disabled: createDisabled,
-                    accountType: accountType,
                     createdBy: currentUserId
                 };
                 
-                // Ajouter les options selon le type de compte
-                if (accountType === 'standard') {
-                    const role = document.getElementById('createRole').value;
-                    userData.role = role;
-                    // Appliquer les permissions par défaut
-                    userData.permissions = getDefaultPermissionsByRole(role);
-                } else if (accountType === 'guest') {
-                    userData.role = 'guest';
-                    userData.needsPasswordChange = !document.getElementById('guestNoPasswordChange').checked;
-                    // Permissions vides, à configurer après
-                    userData.permissions = {};
-                } else if (accountType === 'limited') {
-                    const maxLogins = parseInt(document.getElementById('maxLogins').value) || 10;
-                    const resetLoginCount = document.getElementById('resetLoginCount').checked;
-                    userData.role = 'eleve'; // Par défaut
-                    userData.maxLogins = maxLogins;
-                    userData.loginCount = 0;
-                    userData.resetLoginCount = resetLoginCount;
-                    userData.permissions = getDefaultPermissionsByRole('eleve');
-                } else if (accountType === 'temporary') {
-                    const expirationDate = document.getElementById('expirationDate').value;
-                    if (!expirationDate) {
-                        throw new Error('La date d\'expiration est requise pour un compte temporaire');
+                // Gérer les élèves différemment
+                if (userType === 'eleve') {
+                    const fileNumber = document.getElementById('createFileNumber').value.trim();
+                    const birthday = document.getElementById('createBirthday').value;
+                    const classNumber = document.getElementById('createClassNumber').value.trim();
+                    
+                    if (!fileNumber) {
+                        throw new Error('Le numéro de fiche est requis pour un élève');
                     }
-                    const autoExtend = document.getElementById('autoExtend').checked;
-                    userData.role = 'eleve'; // Par défaut
-                    userData.expirationDate = firebase.firestore.Timestamp.fromDate(new Date(expirationDate));
-                    userData.autoExtend = autoExtend;
+                    if (!birthday) {
+                        throw new Error('La date d\'anniversaire est requise pour un élève');
+                    }
+                    if (!classNumber) {
+                        throw new Error('Le numéro de classe est requis pour un élève');
+                    }
+                    
+                    email = `${fileNumber}@cslaval.qc.ca`;
+                    userData.role = 'eleve';
+                    userData.email = email;
+                    userData.fileNumber = fileNumber;
+                    userData.birthday = birthday;
+                    userData.classNumber = classNumber;
+                    userData.needsPasswordChange = true;
                     userData.permissions = getDefaultPermissionsByRole('eleve');
+                    
+                    // Créer aussi une entrée dans la collection celebrations
+                    await firebase.firestore().collection('celebrations').add({
+                        fullName: fullName,
+                        fileNumber: fileNumber,
+                        birthday: birthday,
+                        email: email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    // Utilisateur normal
+                    email = document.getElementById('createEmail').value;
+                    if (!email) {
+                        throw new Error('L\'email est requis');
+                    }
+                    
+                    const accountType = document.querySelector('input[name="accountType"]:checked').value;
+                    userData.email = email;
+                    userData.accountType = accountType;
+                    
+                    // Ajouter les options selon le type de compte
+                    if (accountType === 'standard') {
+                        const role = document.getElementById('createRole').value;
+                        userData.role = role;
+                        userData.permissions = getDefaultPermissionsByRole(role);
+                    } else if (accountType === 'guest') {
+                        userData.role = 'guest';
+                        userData.needsPasswordChange = !document.getElementById('guestNoPasswordChange').checked;
+                        userData.permissions = {};
+                    } else if (accountType === 'limited') {
+                        const maxLogins = parseInt(document.getElementById('maxLogins').value) || 10;
+                        const resetLoginCount = document.getElementById('resetLoginCount').checked;
+                        userData.role = 'eleve';
+                        userData.maxLogins = maxLogins;
+                        userData.loginCount = 0;
+                        userData.resetLoginCount = resetLoginCount;
+                        userData.permissions = getDefaultPermissionsByRole('eleve');
+                    } else if (accountType === 'temporary') {
+                        const expirationDate = document.getElementById('expirationDate').value;
+                        if (!expirationDate) {
+                            throw new Error('La date d\'expiration est requise pour un compte temporaire');
+                        }
+                        const autoExtend = document.getElementById('autoExtend').checked;
+                        userData.role = 'eleve';
+                        userData.expirationDate = firebase.firestore.Timestamp.fromDate(new Date(expirationDate));
+                        userData.autoExtend = autoExtend;
+                        userData.permissions = getDefaultPermissionsByRole('eleve');
+                    }
                 }
+                
+                // Créer l'utilisateur dans Firebase Auth
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
                 
                 // Créer le document dans Firestore
                 await firebase.firestore().collection('users').doc(uid).set(userData);
@@ -1651,12 +1762,13 @@
                 
                 // Logger l'action
                 await logActivity(currentUserId, 'create', {
-                    description: `Création d'un compte ${accountType}: ${fullName}`,
+                    description: `Création d'un compte ${userType === 'eleve' ? 'élève' : accountType}: ${fullName}`,
                     createdUserId: uid,
-                    accountType: accountType
+                    userType: userType,
+                    accountType: userType === 'eleve' ? 'eleve' : accountType
                 });
                 
-                successElement.textContent = `Compte ${accountType} créé avec succès !`;
+                successElement.textContent = `Compte ${userType === 'eleve' ? 'élève' : accountType} créé avec succès !`;
                 successElement.classList.remove('hidden');
                 
                 setTimeout(async () => {

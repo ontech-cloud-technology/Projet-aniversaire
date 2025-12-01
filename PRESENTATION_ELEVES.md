@@ -26,9 +26,7 @@ Aujourd'hui, je vais vous présenter un nouveau système super cool que nous avo
 
 2. **Envoyer un message**
    - Quand l'anniversaire d'un camarade approche (dans 1 semaine ou moins), vous pouvez lui envoyer un message
-   - Vous pouvez choisir entre :
-     - 📝 **Message secret** : Seule la personne le voit
-     - 🌍 **Message public** : Tout le monde peut le voir
+   - 📝 **Message secret** : Seule la personne le voit (tous les messages sont privés)
 
 3. **Règle importante** ⚠️
    - **Vous ne pouvez envoyer qu'UN SEUL message par personne**

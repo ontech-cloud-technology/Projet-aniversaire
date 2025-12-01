@@ -142,8 +142,8 @@ async function sendMessageNotification({ email, recipientName, senderName, messa
 
     try {
         const senderInitial = (senderName || 'A')[0].toUpperCase();
-        const messageType = isPublic ? 'Public' : 'Secret';
-        const badgeClass = isPublic ? 'badge-public' : 'badge-secret';
+        const messageType = 'Secret'; // Tous les messages sont privés maintenant
+        const badgeClass = 'badge-secret';
         
         // Générer la section du message d'anniversaire si présent
         let birthdayMessageSection = '';

@@ -292,10 +292,6 @@
                 ></textarea>
             </div>
 
-            <div class="checkbox-group">
-                <input type="checkbox" id="isPublic" name="isPublic">
-                <label for="isPublic">Message public (visible par tous)</label>
-            </div>
 
             <button type="submit" class="btn" id="submitBtn">
                 📤 Envoyer l'email
@@ -315,46 +311,87 @@
         // Détection automatique : localhost en développement, URL de production sinon
         const EMAIL_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3001/api'
-            : 'https://votre-serveur-email.com/api'; // À configurer pour la production
+            : (window.location.origin.includes('github.io') 
+                ? 'https://projet-aniversaire-email-api.onrender.com/api' // URL Render par défaut
+                : `${window.location.origin}/api`); // Utiliser l'origine actuelle si déployé ailleurs
 
         // Vérification de l'authentification admin
         async function checkAdminAuth() {
             const loadingScreen = document.getElementById('loadingScreen');
             const mainContent = document.getElementById('mainContent');
             
-            loadingScreen.classList.remove('hidden');
-            
-            // Attendre que l'état d'authentification soit établi
-            const user = await new Promise(resolve => {
-                const unsubscribe = firebase.auth().onAuthStateChanged(u => {
-                    unsubscribe();
-                    resolve(u);
+            try {
+                loadingScreen.classList.remove('hidden');
+                
+                // Vérifier que Firebase est initialisé
+                if (typeof firebase === 'undefined' || !firebase.auth) {
+                    throw new Error('Firebase n\'est pas initialisé. Veuillez rafraîchir la page.');
+                }
+
+                // Attendre que l'état d'authentification soit établi
+                const user = await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Timeout lors de la vérification de l\'authentification'));
+                    }, 10000); // Timeout de 10 secondes
+                    
+                    const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                        clearTimeout(timeout);
+                        unsubscribe();
+                        resolve(u);
+                    }, error => {
+                        clearTimeout(timeout);
+                        unsubscribe();
+                        reject(error);
+                    });
                 });
-            });
 
-            if (!user) {
-                // Pas connecté, rediriger vers login
-                window.location.href = 'login.html';
-                return;
+                if (!user) {
+                    // Pas connecté, rediriger vers login
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Vérifier le rôle de l'utilisateur
+                if (typeof getUserRole !== 'function') {
+                    throw new Error('La fonction getUserRole n\'est pas disponible. Veuillez rafraîchir la page.');
+                }
+
+                const userData = await getUserRole(user.uid);
+                
+                if (!userData) {
+                    throw new Error('Impossible de récupérer les données utilisateur.');
+                }
+
+                const role = userData.role;
+
+                if (role !== 'admin' && role !== 'professeur' && role !== 'teacher') {
+                    alert(`Accès refusé. Cette page est réservée aux administrateurs. Rôle actuel: ${role}`);
+                    window.location.href = 'admin.html';
+                    return;
+                }
+
+                // Afficher le contenu
+                loadingScreen.classList.add('hidden');
+                mainContent.style.display = 'block';
+            } catch (error) {
+                console.error('Erreur lors de la vérification de l\'authentification:', error);
+                loadingScreen.classList.add('hidden');
+                alert(`Erreur lors de l'authentification: ${error.message}\n\nVeuillez rafraîchir la page.`);
+                // Afficher le contenu même en cas d'erreur pour permettre le débogage
+                mainContent.style.display = 'block';
             }
-
-            // Vérifier le rôle de l'utilisateur
-            const userData = await getUserRole(user.uid);
-            const role = userData.role;
-
-            if (role !== 'admin' && role !== 'professeur' && role !== 'teacher') {
-                alert(`Accès refusé. Cette page est réservée aux administrateurs. Rôle actuel: ${role}`);
-                window.location.href = 'admin.html';
-                return;
-            }
-
-            // Afficher le contenu
-            loadingScreen.classList.add('hidden');
-            mainContent.style.display = 'block';
         }
 
-        // Vérifier l'authentification au chargement
-        checkAdminAuth();
+        // Attendre que le DOM et Firebase soient prêts
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Attendre un peu pour s'assurer que Firebase est initialisé
+                setTimeout(checkAdminAuth, 100);
+            });
+        } else {
+            // Le DOM est déjà chargé
+            setTimeout(checkAdminAuth, 100);
+        }
 
         const form = document.getElementById('emailForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -388,7 +425,7 @@
             const recipientName = document.getElementById('recipientName').value;
             const senderName = document.getElementById('senderName').value;
             const message = document.getElementById('message').value;
-            const isPublic = document.getElementById('isPublic').checked;
+            const isPublic = false; // Tous les messages sont privés maintenant
 
             if (!recipientEmail || !recipientName || !senderName || !message) {
                 showMessage('❌ Veuillez remplir tous les champs obligatoires', false);
@@ -398,6 +435,13 @@
             setLoading(true);
 
             try {
+                // Vérifier que l'URL de l'API est valide
+                if (!EMAIL_API_URL || EMAIL_API_URL.includes('votre-serveur-email.com')) {
+                    showMessage('❌ Erreur : L\'API email n\'est pas configurée. Veuillez contacter l\'administrateur.', false);
+                    setLoading(false);
+                    return;
+                }
+
                 const response = await fetch(`${EMAIL_API_URL}/send-message-notification`, {
                     method: 'POST',
                     headers: {
@@ -414,6 +458,19 @@
                     })
                 });
 
+                // Vérifier si la réponse est OK
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMessage;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.error || errorJson.message || `Erreur HTTP ${response.status}`;
+                    } catch {
+                        errorMessage = `Erreur HTTP ${response.status}: ${errorText}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+
                 const result = await response.json();
 
                 if (result.success) {
@@ -424,7 +481,15 @@
                 }
             } catch (error) {
                 console.error('Erreur:', error);
-                showMessage(`❌ Erreur de connexion : ${error.message}`, false);
+                let errorMessage = 'Erreur de connexion';
+                
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMessage = 'Impossible de se connecter au serveur email. Vérifiez votre connexion internet ou contactez l\'administrateur.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showMessage(`❌ ${errorMessage}`, false);
             } finally {
                 setLoading(false);
             }

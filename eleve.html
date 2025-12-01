@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendrier — Fête Express</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>" />
+    <!-- Tailwind CSS CDN (development only - for production, use PostCSS plugin) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -504,7 +507,7 @@
         <!-- Sidebar -->
         <aside class="sidebar glass-strong p-6 rounded-2xl">
             <div class="mb-6">
-                <div class="flex items-center space-x-3 mb-6">
+                <a href="accueil-eleve.html" class="flex items-center space-x-3 mb-6 hover:opacity-80 transition">
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                         <i data-lucide="gift" class="w-5 h-5 text-white"></i>
                     </div>
@@ -514,8 +517,12 @@
                     </h2>
                         <p class="text-xs text-gray-400">Propulsé par ONTech-Cloud Technology</p>
                     </div>
-                </div>
+                </a>
                 <nav class="space-y-2">
+                    <a href="accueil-eleve.html" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 border border-indigo-500/30">
+                        <i data-lucide="home" class="w-5 h-5 text-indigo-400"></i>
+                        <span class="font-semibold">Accueil</span>
+                    </a>
                     <button onclick="showView('calendrier')" id="btnCalendrier" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3" style="display: none;">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                         <span>Calendrier</span>
@@ -523,7 +530,7 @@
                     <button onclick="showView('notifications')" id="btnNotifications" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 relative" style="display: none;">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span>Messages</span>
-                        <span id="notificationBadge" class="hidden ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                        <span id="notificationBadge" class="hidden ml-auto bg-red-500 w-2 h-2 rounded-full"></span>
                     </button>
                     <button onclick="showView('defis')" id="btnDefis" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3" style="display: none;">
                         <i data-lucide="target" class="w-5 h-5"></i>
@@ -576,6 +583,19 @@
                     </div>
                 </div>
             </header>
+
+            <!-- Message de bienvenue -->
+            <div class="card p-6 mb-6 fade-in">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold mb-2">Bienvenue sur ta page d'accueil ! 🎉</h2>
+                        <p class="text-gray-300">Ici, tu peux voir les prochains anniversaires, suivre ta progression et accéder rapidement à toutes les fonctionnalités.</p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Annonces -->
             <div id="announcementsBanner" class="mb-6 space-y-3"></div>
@@ -638,7 +658,7 @@
                             <i data-lucide="gift" class="w-5 h-5 mr-2"></i>
                             Anniversaires à venir (dans 1 semaine ou moins)
                         </h3>
-                        <p class="text-sm text-gray-300 mb-4">Tu peux envoyer un message secret ou public à ces personnes pour leur souhaiter un joyeux anniversaire !</p>
+                        <p class="text-sm text-gray-300 mb-4">Tu peux envoyer un message secret à ces personnes pour leur souhaiter un joyeux anniversaire !</p>
                         <div id="upcomingBirthdays" class="space-y-3"></div>
                     </div>
                 </div>
@@ -651,9 +671,8 @@
                     </h3>
                     <p class="text-sm">
                         <strong>Ton anniversaire approche !</strong> Quand ton anniversaire est dans 1 semaine ou moins, 
-                        tes camarades peuvent t'envoyer des messages secrets ou publics pour te souhaiter un joyeux anniversaire. 
-                        Tu recevras ces messages ici dans tes messages. Les messages secrets restent privés, 
-                        tandis que les messages publics peuvent être vus par tous. 🎉
+                        tes camarades peuvent t'envoyer des messages secrets pour te souhaiter un joyeux anniversaire. 
+                        Tu recevras ces messages ici dans tes messages. Les messages restent privés et confidentiels. 🎉
                     </p>
                 </div>
 
@@ -715,7 +734,6 @@
                     </div>
                 </div>
             </section>
-
 
             <!-- Vue Paramètres -->
             <section id="viewSettings" class="card p-6 rounded-xl hidden">
@@ -866,6 +884,42 @@
         </div>
     </main>
 
+    <!-- Modale Détails des Fêtes d'un Jour -->
+    <div id="dayCelebrationsModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold flex items-center">
+                    <i data-lucide="cake" class="w-6 h-6 mr-2 text-yellow-400"></i>
+                    <span id="dayCelebrationsDate"></span>
+                </h3>
+                <button onclick="closeModal('dayCelebrationsModal')" class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="dayCelebrationsContent" class="space-y-3">
+                <!-- Généré par JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Envoyer un Message -->
+    <div id="sendMessageModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold flex items-center">
+                    <i data-lucide="message-circle" class="w-6 h-6 mr-2 text-primary"></i>
+                    Envoyer un message
+                </h3>
+                <button onclick="closeModal('sendMessageModal')" class="text-gray-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="sendMessageModalContent">
+                <!-- Généré par JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- Modale Profil depuis Calendrier -->
     <div id="calendarProfileModal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 500px;">
@@ -960,6 +1014,8 @@
     <script src="js/wishlist-system.js"></script>
     <!-- Système Supabase Storage pour photos de profil -->
     <script src="js/supabase-storage.js"></script>
+    <!-- Système de statistiques -->
+    <script src="js/stats-system.js"></script>
 
     <script>
         const loadingScreen = document.getElementById('loadingScreen');
@@ -972,6 +1028,7 @@
         let allCelebrations = [];
         let currentUserId = null;
         let currentUserBirthday = null;
+        let statsSystem = null; // Système de statistiques
 
         // Configuration de l'API Email
         // Détection automatique : localhost en développement, URL de production sinon
@@ -991,6 +1048,12 @@
          */
         async function sendMessageNotification(email, recipientName, senderName, message, isPublic, birthdayMessage = '') {
             try {
+                // Vérifier que l'URL de l'API est valide
+                if (!EMAIL_API_URL || EMAIL_API_URL.includes('votre-serveur-email.com')) {
+                    console.warn('⚠️ API email non configurée. La notification email ne sera pas envoyée.');
+                    return false;
+                }
+
                 const response = await fetch(`${EMAIL_API_URL}/send-message-notification`, {
                     method: 'POST',
                     headers: {
@@ -1007,17 +1070,35 @@
                     })
                 });
                 
+                // Vérifier si la réponse est OK
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMessage;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.error || errorJson.message || `Erreur HTTP ${response.status}`;
+                    } catch {
+                        errorMessage = `Erreur HTTP ${response.status}: ${errorText}`;
+                    }
+                    console.warn('⚠️ Erreur lors de l\'envoi de la notification email:', errorMessage);
+                    return false;
+                }
+
                 const result = await response.json();
                 if (result.success) {
                     console.log('✅ Notification email envoyée à', email);
                     return true;
                 } else {
-                    console.error('❌ Erreur envoi notification:', result.error);
+                    console.warn('⚠️ Erreur envoi notification:', result.error);
                     return false;
                 }
             } catch (error) {
-                console.error('❌ Erreur lors de l\'envoi de la notification:', error);
                 // Ne pas bloquer l'envoi du message si la notification échoue
+                if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_REFUSED')) {
+                    console.warn('⚠️ Serveur email non disponible. La notification email ne sera pas envoyée, mais le message a été enregistré.');
+                } else {
+                    console.warn('⚠️ Erreur lors de l\'envoi de la notification:', error.message);
+                }
                 return false;
             }
         }
@@ -1027,10 +1108,24 @@
             try {
             loadingScreen.style.display = 'flex';
             
-            const user = await new Promise(resolve => {
+            // Vérifier que Firebase est initialisé
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                throw new Error('Firebase n\'est pas initialisé. Veuillez rafraîchir la page.');
+            }
+
+            const user = await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Timeout lors de la vérification de l\'authentification'));
+                }, 10000); // Timeout de 10 secondes
+                
                 const unsubscribe = firebase.auth().onAuthStateChanged(u => {
+                    clearTimeout(timeout);
                     unsubscribe();
                     resolve(u);
+                }, error => {
+                    clearTimeout(timeout);
+                    unsubscribe();
+                    reject(error);
                 });
             });
 
@@ -1050,12 +1145,30 @@
                 }
             }
 
+            // Vérifier que getUserRole est disponible
+            if (typeof getUserRole !== 'function') {
+                throw new Error('La fonction getUserRole n\'est pas disponible. Veuillez rafraîchir la page.');
+            }
+
             const userData = await getUserRole(user.uid);
+            
+            if (!userData) {
+                throw new Error('Impossible de récupérer les données utilisateur.');
+            }
             welcomeName.textContent = `Bienvenue, ${userData.name}`;
             currentUserId = user.uid;
 
             // Initialiser le système de permissions
             await permissionsSystem.init(user.uid);
+
+            // Initialiser le système de messagerie
+            if (typeof MessagingSystem !== 'undefined') {
+                messagingSystem = new MessagingSystem(user.uid);
+                setupMessagingListener();
+                updateMessagingBadge();
+            } else {
+                console.warn('MessagingSystem n\'est pas disponible. Le système de messagerie ne fonctionnera pas.');
+            }
 
             // Afficher/masquer les boutons selon les permissions
             const btnCalendrier = document.getElementById('btnCalendrier');
@@ -1127,7 +1240,10 @@
                 // S'assurer que l'écran de chargement est masqué même en cas d'erreur
                 loadingScreen.style.display = 'none';
                 mainContent.classList.remove('hidden');
-                alert('Une erreur est survenue lors du chargement. Veuillez rafraîchir la page.');
+                
+                // Afficher un message d'erreur plus détaillé
+                const errorMessage = error.message || 'Une erreur inconnue est survenue';
+                alert(`Erreur lors de l'authentification: ${errorMessage}\n\nVeuillez rafraîchir la page. Si le problème persiste, contactez l'administrateur.`);
             }
         }
 
@@ -1498,6 +1614,14 @@
                 // Afficher la photo
                 const profilePhoto = document.getElementById('profilePhoto');
                 const placeholder = document.getElementById('profilePhotoPlaceholder');
+                
+                // Gestionnaire d'erreur si l'image ne peut pas être chargée
+                profilePhoto.onerror = function() {
+                    console.warn('Impossible de charger la photo de profil, affichage du placeholder');
+                    profilePhoto.style.display = 'none';
+                    placeholder.style.display = 'flex';
+                };
+                
                 profilePhoto.src = photoUrl;
                 profilePhoto.style.display = 'block';
                 placeholder.style.display = 'none';
@@ -1545,9 +1669,50 @@
                 if (userData && userData.profilePhotoUrl) {
                     const profilePhoto = document.getElementById('profilePhoto');
                     const placeholder = document.getElementById('profilePhotoPlaceholder');
-                    profilePhoto.src = userData.profilePhotoUrl;
-                    profilePhoto.style.display = 'block';
-                    placeholder.style.display = 'none';
+                    
+                    // Vérifier si l'URL est accessible avant de l'assigner
+                    const isSupabaseUrl = userData.profilePhotoUrl.includes('supabase.co');
+                    
+                    // Gestionnaire d'erreur si l'image ne peut pas être chargée
+                    profilePhoto.onerror = function() {
+                        // Ne pas afficher d'erreur pour les problèmes réseau Supabase (DNS, etc.)
+                        if (isSupabaseUrl) {
+                            // Erreur réseau silencieuse pour Supabase
+                            profilePhoto.style.display = 'none';
+                            placeholder.style.display = 'flex';
+                        } else {
+                            console.warn('Impossible de charger la photo de profil, affichage du placeholder');
+                            profilePhoto.style.display = 'none';
+                            placeholder.style.display = 'flex';
+                        }
+                    };
+                    
+                    // Essayer de précharger l'image pour détecter les erreurs réseau
+                    if (isSupabaseUrl) {
+                        try {
+                            const img = new Image();
+                            img.onerror = () => {
+                                // Erreur réseau détectée, utiliser le placeholder directement
+                                profilePhoto.style.display = 'none';
+                                placeholder.style.display = 'flex';
+                            };
+                            img.onload = () => {
+                                // Image chargée avec succès
+                                profilePhoto.src = userData.profilePhotoUrl;
+                                profilePhoto.style.display = 'block';
+                                placeholder.style.display = 'none';
+                            };
+                            img.src = userData.profilePhotoUrl;
+                        } catch (networkError) {
+                            // Erreur réseau, utiliser le placeholder
+                            profilePhoto.style.display = 'none';
+                            placeholder.style.display = 'flex';
+                        }
+                    } else {
+                        profilePhoto.src = userData.profilePhotoUrl;
+                        profilePhoto.style.display = 'block';
+                        placeholder.style.display = 'none';
+                    }
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement de la photo:', error);
@@ -1566,9 +1731,44 @@
                 const headerPlaceholder = document.getElementById('headerProfilePhotoPlaceholder');
                 
                 if (userData && userData.profilePhotoUrl) {
-                    headerPhoto.src = userData.profilePhotoUrl;
-                    headerPhoto.style.display = 'block';
-                    headerPlaceholder.style.display = 'none';
+                    const isSupabaseUrl = userData.profilePhotoUrl.includes('supabase.co');
+                    
+                    // Gestionnaire d'erreur si l'image ne peut pas être chargée
+                    headerPhoto.onerror = function() {
+                        // Ne pas afficher d'erreur pour les problèmes réseau Supabase (DNS, etc.)
+                        if (!isSupabaseUrl) {
+                            console.warn('Impossible de charger la photo de profil dans l\'en-tête, affichage du placeholder');
+                        }
+                        headerPhoto.style.display = 'none';
+                        headerPlaceholder.style.display = 'flex';
+                    };
+                    
+                    // Essayer de précharger l'image pour détecter les erreurs réseau
+                    if (isSupabaseUrl) {
+                        try {
+                            const img = new Image();
+                            img.onerror = () => {
+                                // Erreur réseau détectée, utiliser le placeholder directement
+                                headerPhoto.style.display = 'none';
+                                headerPlaceholder.style.display = 'flex';
+                            };
+                            img.onload = () => {
+                                // Image chargée avec succès
+                                headerPhoto.src = userData.profilePhotoUrl;
+                                headerPhoto.style.display = 'block';
+                                headerPlaceholder.style.display = 'none';
+                            };
+                            img.src = userData.profilePhotoUrl;
+                        } catch (networkError) {
+                            // Erreur réseau, utiliser le placeholder
+                            headerPhoto.style.display = 'none';
+                            headerPlaceholder.style.display = 'flex';
+                        }
+                    } else {
+                        headerPhoto.src = userData.profilePhotoUrl;
+                        headerPhoto.style.display = 'block';
+                        headerPlaceholder.style.display = 'none';
+                    }
                 } else {
                     headerPhoto.style.display = 'none';
                     headerPlaceholder.style.display = 'flex';
@@ -1628,6 +1828,13 @@
                     const userData = userDoc.data();
                     
                     if (userData && userData.profilePhotoUrl) {
+                        // Gestionnaire d'erreur si l'image ne peut pas être chargée
+                        photoEl.onerror = function() {
+                            console.warn('Impossible de charger la photo de profil, affichage du placeholder');
+                            photoEl.style.display = 'none';
+                            placeholderEl.style.display = 'flex';
+                        };
+                        
                         photoEl.src = userData.profilePhotoUrl;
                         photoEl.style.display = 'block';
                         placeholderEl.style.display = 'none';
@@ -1656,6 +1863,149 @@
             } else {
                 alert('ID utilisateur non disponible');
             }
+        };
+
+        // Afficher la modal avec les détails des fêtes d'un jour
+        window.showDayCelebrationsModal = function(day, month, year, dayKey) {
+            const modal = document.getElementById('dayCelebrationsModal');
+            const dateEl = document.getElementById('dayCelebrationsDate');
+            const contentEl = document.getElementById('dayCelebrationsContent');
+            
+            if (!modal || !dateEl || !contentEl) return;
+            
+            // Formater la date
+            const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                              'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            dateEl.textContent = `${day} ${monthNames[month - 1]} ${year}`;
+            
+            // Récupérer les données des célébrations
+            const celebrations = (window.dayCelebrationsData && window.dayCelebrationsData[dayKey]) || [];
+            
+            if (celebrations.length === 0) {
+                contentEl.innerHTML = '<p class="text-gray-500 text-center py-8">Aucune fête ce jour</p>';
+            } else {
+                contentEl.innerHTML = celebrations.map((celeb, index) => {
+                    // Formater la date d'anniversaire
+                    let birthdayText = 'Date non disponible';
+                    if (celeb.birthday) {
+                        if (typeof celeb.birthday === 'string') {
+                            const dateParts = celeb.birthday.split('-');
+                            if (dateParts.length === 3) {
+                                birthdayText = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                            }
+                        } else if (celeb.birthday instanceof Date) {
+                            birthdayText = celeb.birthday.toLocaleDateString('fr-FR');
+                        }
+                    }
+                    
+                    // Calculer les jours jusqu'à l'anniversaire
+                    let daysUntil = null;
+                    if (celeb.birthday && typeof celeb.birthday === 'string') {
+                        daysUntil = daysUntilBirthday(celeb.birthday);
+                    }
+                    const canSendMessage = daysUntil !== null && daysUntil >= 0 && daysUntil <= 7;
+                    
+                    // Échapper les caractères spéciaux pour éviter les erreurs
+                    const safeFullName = (celeb.fullName || 'N/A').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                    const safeBirthday = (celeb.birthday || '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                    const safeEmail = (celeb.email || '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                    const safeCelebrationId = (celeb.celebrationId || '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                    
+                    return `
+                        <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-yellow-500 hover:bg-gray-700 transition">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1" onclick="showProfileModal('${celeb.userId}', '${safeFullName}', '${safeBirthday}', '${safeEmail}')" style="cursor: pointer;">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-2xl">🎂</span>
+                                        <h4 class="text-lg font-bold text-yellow-400">${safeFullName}</h4>
+                                    </div>
+                                    <div class="text-sm text-gray-400 space-y-1">
+                                        <div>📅 ${birthdayText}</div>
+                                        ${celeb.age ? `<div>🎈 ${celeb.age} ans</div>` : ''}
+                                        ${celeb.email ? `<div>✉️ ${celeb.email}</div>` : ''}
+                                        ${daysUntil !== null ? `<div class="text-primary font-semibold">${daysUntil === 0 ? "🎉 C'est aujourd'hui !" : daysUntil === 1 ? "🎂 C'est demain !" : `Dans ${daysUntil} jours`}</div>` : ''}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2 ml-4">
+                                    <button onclick="event.stopPropagation(); showProfileModal('${celeb.userId}', '${safeFullName}', '${safeBirthday}', '${safeEmail}')" 
+                                            class="px-4 py-2 rounded-lg bg-primary hover:bg-opacity-90 text-white transition text-sm">
+                                        Voir profil
+                                    </button>
+                                    ${canSendMessage ? `
+                                        <button onclick="event.stopPropagation(); openSendMessageModal('${safeCelebrationId}', '${safeFullName}', ${daysUntil})" 
+                                                class="px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 text-white transition text-sm font-semibold">
+                                            💌 Envoyer message
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Afficher la modal
+            modal.classList.add('show');
+            lucide.createIcons();
+        };
+
+        // Ouvrir la modal pour envoyer un message
+        window.openSendMessageModal = function(celebrationId, recipientName, daysUntil) {
+            const modal = document.getElementById('sendMessageModal');
+            const contentEl = document.getElementById('sendMessageModalContent');
+            
+            if (!modal || !contentEl) return;
+            
+            const daysText = daysUntil === 0 ? "C'est son anniversaire aujourd'hui ! 🎉" : 
+                           daysUntil === 1 ? "C'est son anniversaire demain ! 🎂" : 
+                           `Son anniversaire est dans ${daysUntil} jours !`;
+            
+            contentEl.innerHTML = `
+                <div class="mb-4">
+                    <p class="text-gray-300 mb-2">Destinataire : <span class="font-bold text-primary">${recipientName}</span></p>
+                    <p class="text-sm text-yellow-400 mb-4">${daysText}</p>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Ton message</label>
+                    <button onclick="generateBirthdayMessage('${celebrationId}')" class="flex items-center px-3 py-1.5 rounded-lg bg-secondary hover:bg-opacity-90 text-bg-dark text-xs font-semibold transition mb-2">
+                        <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>
+                        Générer un message
+                    </button>
+                    <textarea id="message_${celebrationId}" class="w-full p-3 rounded-lg bg-gray-800 text-white text-sm resize-none border border-gray-700 focus:border-primary focus:outline-none" 
+                              placeholder="Écris ton message ici..." rows="4"></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeModal('sendMessageModal')" class="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition">
+                        Annuler
+                    </button>
+                    <button onclick="sendMessageFromModal('${celebrationId}', '${recipientName}')" class="px-6 py-2 rounded-lg bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white transition font-semibold flex items-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        Envoyer
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+            lucide.createIcons();
+        };
+
+        // Envoyer un message depuis la modal
+        window.sendMessageFromModal = async function(celebrationId, recipientName) {
+            const messageText = document.getElementById(`message_${celebrationId}`).value.trim();
+            
+            if (!messageText) {
+                alert('Veuillez écrire un message !');
+                return;
+            }
+            
+            // Utiliser la fonction sendMessage existante
+            await sendMessage(celebrationId, recipientName);
+            
+            // Fermer la modal
+            closeModal('sendMessageModal');
+            
+            // Afficher un message de succès
+            alert('Message envoyé avec succès !');
         };
 
         // Permettre d'ajouter un souhait avec Enter
@@ -1796,6 +2146,9 @@
                 calendarContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Aucun anniversaire enregistré pour le moment.</p>';
                 return;
             }
+            
+            // Initialiser le stockage des données de célébrations par jour
+            window.dayCelebrationsData = {};
 
             // Charger tous les utilisateurs pour avoir accès aux IDs
             const allUsers = await getAllUsers();
@@ -1807,11 +2160,39 @@
             const celebrationsByDate = {};
             allCelebrations.forEach(celeb => {
                 if (!celeb.birthday) return;
-                const dateParts = celeb.birthday.split('-');
-                if (dateParts.length !== 3) return;
                 
-                const month = parseInt(dateParts[1]) - 1;
-                const day = parseInt(dateParts[2]);
+                let birthdayDate = null;
+                let month = -1;
+                let day = -1;
+                
+                // Gérer différents formats de date
+                if (typeof celeb.birthday === 'string') {
+                    const dateParts = celeb.birthday.split('-');
+                    if (dateParts.length === 3) {
+                        month = parseInt(dateParts[1]) - 1;
+                        day = parseInt(dateParts[2]);
+                        birthdayDate = new Date(parseInt(dateParts[0]), month, day);
+                    } else {
+                        return;
+                    }
+                } else if (celeb.birthday instanceof Date) {
+                    birthdayDate = celeb.birthday;
+                    month = birthdayDate.getMonth();
+                    day = birthdayDate.getDate();
+                } else if (celeb.birthday.toDate && typeof celeb.birthday.toDate === 'function') {
+                    birthdayDate = celeb.birthday.toDate();
+                    month = birthdayDate.getMonth();
+                    day = birthdayDate.getDate();
+                } else if (celeb.birthday.seconds) {
+                    birthdayDate = new Date(celeb.birthday.seconds * 1000);
+                    month = birthdayDate.getMonth();
+                    day = birthdayDate.getDate();
+                } else {
+                    return;
+                }
+                
+                if (month === -1 || day === -1) return;
+                
                 const key = `${month}-${day}`;
                 
                 if (!celebrationsByDate[key]) {
@@ -1822,7 +2203,8 @@
                     ...celeb,
                     day: day,
                     month: month,
-                    age: calculateAge(celeb.birthday)
+                    age: calculateAge(celeb.birthday),
+                    birthdayDate: birthdayDate
                 });
             });
 
@@ -1885,20 +2267,45 @@
                                    new Date().getMonth() === month && 
                                    new Date().getFullYear() === year;
                     
+                    const hasCelebrations = dayCelebrations.length > 0;
+                    const dayKey = `day_${day}_${month + 1}_${year}`;
+                    
+                    // Stocker les données des célébrations pour ce jour
+                    if (hasCelebrations) {
+                        window.dayCelebrationsData = window.dayCelebrationsData || {};
+                        window.dayCelebrationsData[dayKey] = dayCelebrations.map(celeb => {
+                            const userId = allUsers.find(u => u.email && u.email.split('@')[0] === celeb.fileNumber)?.id || '';
+                            return {
+                                fullName: celeb.fullName || 'N/A',
+                                birthday: celeb.birthday || '',
+                                email: celeb.email || '',
+                                age: celeb.age || 0,
+                                fileNumber: celeb.fileNumber || '',
+                                userId: userId,
+                                celebrationId: celeb.id || ''
+                            };
+                        });
+                    }
+                    
                     html += `
-                        <div class="aspect-square bg-bg-dark rounded-lg p-2 border-2 ${isToday ? 'border-primary' : 'border-transparent'} hover:border-primary transition">
-                            <div class="font-semibold ${isToday ? 'text-primary' : 'text-white'} mb-1">${day}</div>
+                        <div class="aspect-square bg-bg-dark rounded-lg p-2 border-2 ${isToday ? 'border-primary' : hasCelebrations ? 'border-yellow-500 border-opacity-60' : 'border-transparent'} hover:border-primary transition cursor-pointer ${hasCelebrations ? 'bg-gradient-to-br from-yellow-900/30 to-orange-900/30 ring-2 ring-yellow-500/20' : ''}" 
+                             onclick="showDayCelebrationsModal(${day}, ${month + 1}, ${year}, '${dayKey}')" data-day-key="${dayKey}">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="font-semibold ${isToday ? 'text-primary' : hasCelebrations ? 'text-yellow-400' : 'text-white'}">${day}</div>
+                                ${hasCelebrations ? '<span class="text-yellow-400 text-lg animate-pulse">🎂</span>' : ''}
+                            </div>
                             <div class="space-y-1 overflow-y-auto max-h-20">
-                                ${dayCelebrations.map(celeb => {
+                                ${dayCelebrations.slice(0, 2).map(celeb => {
                                     const userId = allUsers.find(u => u.email && u.email.split('@')[0] === celeb.fileNumber)?.id;
                                     return `
-                                        <div class="text-xs bg-primary bg-opacity-20 rounded px-1 py-0.5 cursor-pointer hover:bg-opacity-30 transition truncate" 
+                                        <div class="text-xs bg-primary bg-opacity-20 rounded px-1 py-0.5 cursor-pointer hover:bg-opacity-30 transition break-words" 
                                              onclick="event.stopPropagation(); showProfileModal('${userId || ''}', '${celeb.fullName || 'N/A'}', '${celeb.birthday || ''}', '${celeb.email || ''}')"
                                              title="${celeb.fullName || 'N/A'}">
-                                            ${(celeb.fullName || 'N/A').substring(0, 8)}
+                                            ${celeb.fullName || 'N/A'}
                                         </div>
                                     `;
                                 }).join('')}
+                                ${dayCelebrations.length > 2 ? `<div class="text-xs text-yellow-400 font-semibold">+${dayCelebrations.length - 2} autre(s)</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -2108,13 +2515,38 @@
         // Calculer les jours jusqu'à l'anniversaire
         function daysUntilBirthday(birthday) {
             if (!birthday) return null;
-            const dateParts = birthday.split('-');
-            if (dateParts.length !== 3) return null;
+            
+            let birthMonth = -1;
+            let birthDay = -1;
+            
+            // Gérer différents formats de date
+            if (typeof birthday === 'string') {
+                const dateParts = birthday.split('-');
+                if (dateParts.length === 3) {
+                    birthMonth = parseInt(dateParts[1]) - 1;
+                    birthDay = parseInt(dateParts[2]);
+                } else {
+                    return null;
+                }
+            } else if (birthday instanceof Date) {
+                birthMonth = birthday.getMonth();
+                birthDay = birthday.getDate();
+            } else if (birthday.toDate && typeof birthday.toDate === 'function') {
+                const date = birthday.toDate();
+                birthMonth = date.getMonth();
+                birthDay = date.getDate();
+            } else if (birthday.seconds) {
+                const date = new Date(birthday.seconds * 1000);
+                birthMonth = date.getMonth();
+                birthDay = date.getDate();
+            } else {
+                return null;
+            }
+            
+            if (birthMonth === -1 || birthDay === -1) return null;
             
             const today = new Date();
             const currentYear = today.getFullYear();
-            const birthMonth = parseInt(dateParts[1]) - 1;
-            const birthDay = parseInt(dateParts[2]);
             
             // Date d'anniversaire cette année
             let birthdayThisYear = new Date(currentYear, birthMonth, birthDay);
@@ -2210,11 +2642,7 @@
                             </div>
                             <textarea id="message_${person.id}" ${messageAlreadySent ? 'disabled' : ''} class="w-full p-3 rounded-lg text-white text-sm resize-none ${textareaDisabled}" placeholder="${textareaPlaceholder}" rows="3"></textarea>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <label class="flex items-center space-x-2 cursor-pointer group">
-                                <input type="checkbox" id="public_${person.id}" ${messageAlreadySent ? 'disabled' : ''} class="w-4 h-4 rounded border-gray-600 bg-bg-dark text-primary focus:ring-primary focus:ring-2 ${messageAlreadySent ? 'opacity-50 cursor-not-allowed' : ''}">
-                                <span class="text-sm text-gray-300 group-hover:text-white transition">Message public (visible par tous)</span>
-                            </label>
+                        <div class="flex items-center justify-end">
                             <button onclick="${messageAlreadySent ? '' : `sendMessage('${person.id}', '${person.fullName}')`}" ${messageAlreadySent ? 'disabled' : ''} class="send-button px-6 py-2 rounded-lg text-white text-sm font-semibold flex items-center space-x-2 ${buttonDisabled}">
                                 <i data-lucide="${messageAlreadySent ? 'check' : 'send'}" class="w-4 h-4"></i>
                                 <span>${buttonText}</span>
@@ -2237,16 +2665,11 @@
             }
 
             const messageText = document.getElementById(`message_${celebrationId}`).value.trim();
-            const isPublic = document.getElementById(`public_${celebrationId}`).checked;
+            const isPublic = false; // Tous les messages sont privés maintenant
 
-            // Vérifier les permissions spécifiques pour les types de messages
-            if (isPublic && !hasPermission('messages_public', true)) {
-                alert('⛔ Vous n\'avez pas la permission d\'envoyer des messages publics.');
-                return;
-            }
-
-            if (!isPublic && !hasPermission('messages_secret', true)) {
-                alert('⛔ Vous n\'avez pas la permission d\'envoyer des messages secrets.');
+            // Vérifier la permission d'envoyer des messages secrets
+            if (!hasPermission('messages_secret', true)) {
+                alert('⛔ Vous n\'avez pas la permission d\'envoyer des messages.');
                 return;
             }
 
@@ -2405,19 +2828,32 @@
                 );
 
                 // Mettre à jour les statistiques
-                if (!statsSystem) {
-                    statsSystem = new StatsSystem(currentUserId);
+                if (typeof StatsSystem !== 'undefined') {
+                    if (!statsSystem) {
+                        statsSystem = new StatsSystem(currentUserId);
+                    }
+                    try {
+                        await statsSystem.incrementMessagesSent();
+                        await statsSystem.addPoints(5); // 5 points par message envoyé
+                    } catch (statsError) {
+                        console.warn('Erreur lors de la mise à jour des statistiques:', statsError);
+                        // Ne pas bloquer l'envoi du message si les stats échouent
+                    }
+                    
+                    // Mettre à jour les stats du destinataire (messages reçus)
+                    try {
+                        const recipientStatsSystem = new StatsSystem(recipientUserId);
+                        await recipientStatsSystem.incrementMessagesReceived();
+                    } catch (statsError) {
+                        console.warn('Erreur lors de la mise à jour des stats du destinataire:', statsError);
+                        // Ne pas bloquer l'envoi du message si les stats échouent
+                    }
+                } else {
+                    console.warn('StatsSystem n\'est pas disponible. Les statistiques ne seront pas mises à jour.');
                 }
-                await statsSystem.incrementMessagesSent();
-                await statsSystem.addPoints(5); // 5 points par message envoyé
-                
-                // Mettre à jour les stats du destinataire (messages reçus)
-                const recipientStatsSystem = new StatsSystem(recipientUserId);
-                await recipientStatsSystem.incrementMessagesReceived();
 
                 // Réinitialiser le formulaire
                 document.getElementById(`message_${celebrationId}`).value = '';
-                document.getElementById(`public_${celebrationId}`).checked = false;
 
                 alert('Message envoyé avec succès ! 🎉');
                 
@@ -2440,7 +2876,22 @@
                 loadNotifications();
             } catch (error) {
                 console.error('Erreur lors de l\'envoi du message:', error);
-                alert('Erreur lors de l\'envoi du message');
+                let errorMessage = 'Erreur lors de l\'envoi du message';
+                
+                // Messages d'erreur plus spécifiques
+                if (error.message) {
+                    if (error.message.includes('permission') || error.message.includes('Permission')) {
+                        errorMessage = 'Vous n\'avez pas la permission d\'envoyer des messages.';
+                    } else if (error.message.includes('bloqué') || error.message.includes('blocked')) {
+                        errorMessage = 'Vous ne pouvez pas envoyer de messages (compte bloqué).';
+                    } else if (error.message.includes('réputation') || error.message.includes('reputation')) {
+                        errorMessage = 'Votre réputation est trop faible pour envoyer des messages.';
+                    } else {
+                        errorMessage = `Erreur: ${error.message}`;
+                    }
+                }
+                
+                alert(errorMessage);
             }
         }
 
@@ -2466,7 +2917,7 @@
                 const unreadCount = messages.filter(msg => !msg.read).length;
                 
                 if (unreadCount > 0) {
-                    notificationBadge.textContent = unreadCount;
+                    // Afficher le badge sans nombre (juste un indicateur visuel)
                     notificationBadge.classList.remove('hidden');
                 } else {
                     notificationBadge.classList.add('hidden');
@@ -2561,7 +3012,10 @@
                             <div class="flex-1">
                                 <div class="flex items-center space-x-3 mb-3">
                                     ${senderPhotoUrl ? `
-                                        <img src="${senderPhotoUrl}" alt="${message.senderName || 'Anonyme'}" class="w-10 h-10 rounded-full object-cover border-2 border-primary">
+                                        <img data-sender-photo src="${senderPhotoUrl}" alt="${message.senderName || 'Anonyme'}" class="w-10 h-10 rounded-full object-cover border-2 border-primary" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-lg font-bold" style="display: none;">
+                                            ${(message.senderName || 'A')[0].toUpperCase()}
+                                        </div>
                                     ` : `
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-lg font-bold">
                                             ${(message.senderName || 'A')[0].toUpperCase()}
@@ -2570,10 +3024,7 @@
                                     <div class="flex-1">
                                         <div class="flex items-center space-x-2 mb-1">
                                             <span class="font-bold text-lg">${message.senderName || 'Anonyme'}</span>
-                                            ${message.isPublic ? 
-                                                '<span class="text-xs bg-blue-500 text-white px-3 py-1 rounded-full font-semibold">Public</span>' : 
-                                                '<span class="text-xs bg-purple-500 text-white px-3 py-1 rounded-full font-semibold">Secret</span>'
-                                            }
+                                            <span class="text-xs bg-purple-500 text-white px-3 py-1 rounded-full font-semibold">Secret</span>
                                             ${!message.read ? '<span class="text-xs bg-primary text-white px-2 py-1 rounded-full animate-pulse">Nouveau</span>' : ''}
                                         </div>
                                         <p class="text-xs text-gray-400">${formattedDate}</p>
@@ -3272,10 +3723,21 @@
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
 
-                const progression = await calculateProgression();
+                // Vérifier s'il y a des données fictives (mode démo admin)
+                let progression;
+                if (window.demoFakeData && window.demoFakeData.progression) {
+                    progression = window.demoFakeData.progression;
+                } else {
+                    progression = await calculateProgression();
+                }
+                
+                // Vérifier que progression est valide
+                if (!progression || typeof progression !== 'object') {
+                    throw new Error('Données de progression invalides');
+                }
                 
                 // Mettre à jour le compteur
-                const consecutiveCount = progression.consecutiveCount;
+                const consecutiveCount = progression.consecutiveCount || 0;
                 consecutiveCountEl.textContent = consecutiveCount;
                 
                 // Mettre à jour la barre de progression
@@ -3298,7 +3760,8 @@
                 }
                 
                 // Afficher les célébrations
-                displayProgressionCelebrations(progression.allCelebrations, consecutiveCount);
+                const celebrations = progression.allCelebrations || [];
+                displayProgressionCelebrations(celebrations, consecutiveCount);
                 
             } catch (error) {
                 console.error('Erreur lors du chargement de la progression:', error);
@@ -3339,12 +3802,35 @@
                 let formattedDate = 'Date inconnue';
                 let daysUntil = null;
                 if (celeb.birthday) {
-                    const dateParts = celeb.birthday.split('-');
-                    if (dateParts.length === 3) {
+                    let birthdayDate = null;
+                    
+                    // Gérer différents formats de date
+                    if (typeof celeb.birthday === 'string') {
+                        // Format string "YYYY-MM-DD"
+                        const dateParts = celeb.birthday.split('-');
+                        if (dateParts.length === 3) {
+                            birthdayDate = new Date(
+                                parseInt(dateParts[0]),
+                                parseInt(dateParts[1]) - 1,
+                                parseInt(dateParts[2])
+                            );
+                        }
+                    } else if (celeb.birthday instanceof Date) {
+                        // Objet Date
+                        birthdayDate = celeb.birthday;
+                    } else if (celeb.birthday.toDate && typeof celeb.birthday.toDate === 'function') {
+                        // Timestamp Firestore
+                        birthdayDate = celeb.birthday.toDate();
+                    } else if (celeb.birthday.seconds) {
+                        // Timestamp Firestore (format alternatif)
+                        birthdayDate = new Date(celeb.birthday.seconds * 1000);
+                    }
+                    
+                    if (birthdayDate && !isNaN(birthdayDate.getTime())) {
                         const today = new Date();
                         const currentYear = today.getFullYear();
-                        const birthMonth = parseInt(dateParts[1]) - 1;
-                        const birthDay = parseInt(dateParts[2]);
+                        const birthMonth = birthdayDate.getMonth();
+                        const birthDay = birthdayDate.getDate();
                         
                         let nextBirthday = new Date(currentYear, birthMonth, birthDay);
                         if (nextBirthday < today) {
@@ -3774,6 +4260,57 @@
                 console.error('Erreur lors du marquage comme lu:', error);
             }
         }
+
+        // Système de messagerie
+        let messagingSystem = null;
+        let currentConversationUserId = null;
+
+        async function loadMessagingView() {
+            if (!currentUserId) {
+                alert('Vous devez être connecté pour accéder à la messagerie.');
+                return;
+            }
+
+            if (!messagingSystem) {
+                if (typeof MessagingSystem !== 'undefined') {
+                    messagingSystem = new MessagingSystem(currentUserId);
+                } else {
+                    console.error('MessagingSystem n\'est pas disponible');
+                    alert('Le système de messagerie n\'est pas disponible. Veuillez rafraîchir la page.');
+                    return;
+                }
+            }
+
+            // Charger le badge de messages non lus
+            updateMessagingBadge();
+
+            // Afficher la vue des conversations par défaut
+            showMessagingView('conversations');
+        }
+
+        // Variable globale pour les données fictives (mode démo admin)
+        window.demoFakeData = {
+            progression: null
+        };
+
+        // Écouter les messages du panneau admin (mode démo)
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'DEMO_UPDATE_PROGRESSION') {
+                // Stocker les données fictives dans une variable globale
+                window.demoFakeData.progression = event.data.data;
+                // Recharger la vue progression si elle est visible
+                if (typeof loadProgressionView === 'function') {
+                    loadProgressionView();
+                }
+            } else if (event.data && event.data.type === 'DEMO_RESET_DATA') {
+                // Réinitialiser les données fictives
+                window.demoFakeData.progression = null;
+                // Recharger la vue progression si elle est visible
+                if (typeof loadProgressionView === 'function') {
+                    loadProgressionView();
+                }
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
