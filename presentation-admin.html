@@ -284,6 +284,7 @@
             height: 100vh;
             flex-direction: column;
             background: #000;
+            position: relative;
         }
 
         .presentation-header {
@@ -341,6 +342,27 @@
 
         .exit-btn:hover {
             background: rgba(239, 68, 68, 0.3);
+        }
+
+        .presentation-screen.fullscreen .presentation-header {
+            display: none;
+        }
+
+        .presentation-screen.fullscreen .keyboard-hint {
+            display: none;
+        }
+
+        .presentation-screen.fullscreen .presentation-content {
+            padding: 0;
+            height: 100vh;
+        }
+
+        .presentation-screen.fullscreen .slide-image {
+            max-height: 100vh;
+            width: 100vw;
+            object-fit: contain;
+            border-radius: 0;
+            cursor: pointer;
         }
 
         .presentation-content {
@@ -494,13 +516,10 @@
             <!-- Section Présentation -->
             <div class="section-card">
                 <h2>🎯 Lancer une Présentation</h2>
-                <div class="form-group">
-                    <label>Sélectionner une présentation</label>
-                    <select id="presentationSelect">
-                        <option value="">-- Choisir une présentation --</option>
-                    </select>
-                </div>
-                <button onclick="startPresentation()" id="startBtn" disabled class="btn-success">
+                <p style="color: var(--muted); margin-bottom: 20px;">
+                    Affiche les images du dossier <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">presentation-slides/Final/</code>
+                </p>
+                <button onclick="startPresentation()" id="startBtn" class="btn-success">
                     <i data-lucide="play"></i>
                     Lancer la Présentation
                 </button>
@@ -530,7 +549,7 @@
     </div>
 
     <!-- Écran de Présentation -->
-    <div id="presentationScreen">
+    <div id="presentationScreen" class="presentation-screen">
         <div class="presentation-header">
             <div class="slide-counter">
                 <span id="currentSlide">1</span> / <span id="totalSlides">0</span>
@@ -543,6 +562,10 @@
                 <button class="control-btn" onclick="nextSlide()" id="nextBtn">
                     Suivant
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+                <button class="control-btn" onclick="toggleFullscreen()" id="fullscreenBtn">
+                    <i data-lucide="maximize" class="w-4 h-4" id="fullscreenIcon"></i>
+                    <span id="fullscreenText">Plein écran</span>
                 </button>
                 <button class="control-btn exit-btn" onclick="exitPresentation()">
                     <i data-lucide="x" class="w-4 h-4"></i>
@@ -575,6 +598,11 @@
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', async function() {
+            // Afficher le code d'accès dans la console
+            console.log('%c🔐 CODE D\'ACCÈS PRÉSENTATION', 'color: #ff6f61; font-size: 20px; font-weight: bold;');
+            console.log('%c' + ADMIN_ACCESS_CODE, 'color: #f9c74f; font-size: 24px; font-weight: bold; padding: 10px; background: #1a0f30; border: 2px solid #ff6f61; border-radius: 8px;');
+            console.log('%cUtilisez ce code pour accéder à la présentation', 'color: #c8c8d4; font-size: 14px;');
+            
             presentationStorage = new PresentationStorage();
             lucide.createIcons();
             
@@ -903,7 +931,6 @@
             pres.converted = isConverted;
             
             document.getElementById('convertBtn').disabled = isConverted;
-            document.getElementById('startBtn').disabled = !isConverted;
             
             // Mettre à jour le statut
             const statusEl = document.getElementById(`status-${fileName}`);
@@ -958,42 +985,52 @@
         }
 
         function updatePresentationSelect() {
-            const select = document.getElementById('presentationSelect');
-            select.innerHTML = '<option value="">-- Choisir une présentation --</option>';
-            
-            presentations
-                .filter(p => p.converted)
-                .forEach(pres => {
-                    const option = document.createElement('option');
-                    option.value = pres.fileName;
-                    option.textContent = pres.presentationName;
-                    select.appendChild(option);
-                });
+            // Plus besoin de cette fonction, on charge directement depuis le dossier local
         }
 
         async function startPresentation() {
-            const select = document.getElementById('presentationSelect');
-            const fileName = select.value;
-            
-            if (!fileName) {
-                showMessage('convertStatus', 'Veuillez sélectionner une présentation', 'error');
-                return;
-            }
-
-            const pres = presentations.find(p => p.fileName === fileName);
-            if (!pres) return;
-
-            // Charger les slides depuis Supabase
-            slides = await presentationStorage.getPresentationSlides(pres.presentationName);
+            // Charger les slides directement depuis le dossier Final
+            slides = await loadSlidesFromLocal();
             
             if (slides.length === 0) {
-                showMessage('convertStatus', 'Aucune slide trouvée pour cette présentation', 'error');
+                showMessage('convertStatus', 'Aucune slide trouvée dans le dossier Final', 'error');
                 return;
             }
 
             // Afficher l'écran de login
             document.getElementById('managementScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
+        }
+
+        async function loadSlidesFromLocal() {
+            // Liste des images dans le dossier Final (triées par timestamp)
+            const imageFiles = [
+                'Screenshot 2025-12-01 213600.png',
+                'Screenshot 2025-12-01 213609.png',
+                'Screenshot 2025-12-01 213617.png',
+                'Screenshot 2025-12-01 213627.png',
+                'Screenshot 2025-12-01 213637.png',
+                'Screenshot 2025-12-01 213645.png',
+                'Screenshot 2025-12-01 213655.png',
+                'Screenshot 2025-12-01 213702.png',
+                'Screenshot 2025-12-01 213711.png',
+                'Screenshot 2025-12-01 213722.png',
+                'Screenshot 2025-12-01 213739.png',
+                'Screenshot 2025-12-01 213750.png',
+                'Screenshot 2025-12-01 213804.png',
+                'Screenshot 2025-12-01 213813.png',
+                'Screenshot 2025-12-01 213825.png',
+                'Screenshot 2025-12-01 213833.png',
+                'Screenshot 2025-12-01 213844.png',
+                'Screenshot 2025-12-01 213853.png'
+            ];
+
+            // Créer les URLs des slides
+            return imageFiles.map((fileName, index) => ({
+                name: fileName,
+                url: `presentation-slides/Final/${fileName}`,
+                index: index + 1
+            }));
         }
 
         function checkAccess() {
@@ -1018,7 +1055,7 @@
                 slideContainer.innerHTML = `
                     <div class="no-slides">
                         <h2>⚠️ Aucune slide trouvée</h2>
-                        <p>Veuillez convertir une présentation d'abord.</p>
+                        <p>Vérifiez que les images sont présentes dans le dossier <code>presentation-slides/Final/</code></p>
                     </div>
                 `;
                 document.getElementById('totalSlides').textContent = '0';
@@ -1036,9 +1073,22 @@
             currentSlideIndex = index;
             const slideContainer = document.getElementById('slideContainer');
             
-            slideContainer.innerHTML = `
-                <img src="${slides[index].url}" alt="Slide ${index + 1}" class="slide-image" />
-            `;
+            const img = document.createElement('img');
+            img.src = slides[index].url;
+            img.alt = `Slide ${index + 1}`;
+            img.className = 'slide-image';
+            
+            // Ajouter le clic pour naviguer en mode plein écran
+            img.addEventListener('click', () => {
+                const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
+                                       document.mozFullScreenElement || document.msFullscreenElement);
+                if (isFullscreen) {
+                    nextSlide();
+                }
+            });
+            
+            slideContainer.innerHTML = '';
+            slideContainer.appendChild(img);
             
             document.getElementById('currentSlide').textContent = index + 1;
             
@@ -1059,12 +1109,85 @@
         }
 
         function exitPresentation() {
+            // Sortir du mode plein écran si actif
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                exitFullscreen();
+            }
+            
             if (confirm('Êtes-vous sûr de vouloir quitter la présentation ?')) {
                 document.getElementById('presentationScreen').style.display = 'none';
                 document.getElementById('managementScreen').style.display = 'flex';
                 document.getElementById('accessCode').value = '';
             }
         }
+
+        function toggleFullscreen() {
+            const presentationScreen = document.getElementById('presentationScreen');
+            
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && !document.msFullscreenElement) {
+                // Entrer en mode plein écran
+                presentationScreen.classList.add('fullscreen');
+                
+                if (presentationScreen.requestFullscreen) {
+                    presentationScreen.requestFullscreen();
+                } else if (presentationScreen.webkitRequestFullscreen) {
+                    presentationScreen.webkitRequestFullscreen();
+                } else if (presentationScreen.mozRequestFullScreen) {
+                    presentationScreen.mozRequestFullScreen();
+                } else if (presentationScreen.msRequestFullscreen) {
+                    presentationScreen.msRequestFullscreen();
+                }
+            } else {
+                // Sortir du mode plein écran
+                exitFullscreen();
+            }
+        }
+
+        function exitFullscreen() {
+            const presentationScreen = document.getElementById('presentationScreen');
+            presentationScreen.classList.remove('fullscreen');
+            
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        function updateFullscreenButton() {
+            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || 
+                                   document.mozFullScreenElement || document.msFullscreenElement);
+            const presentationScreen = document.getElementById('presentationScreen');
+            
+            if (isFullscreen) {
+                presentationScreen.classList.add('fullscreen');
+            } else {
+                presentationScreen.classList.remove('fullscreen');
+            }
+            
+            const icon = document.getElementById('fullscreenIcon');
+            const text = document.getElementById('fullscreenText');
+            
+            if (isFullscreen) {
+                icon.setAttribute('data-lucide', 'minimize');
+                text.textContent = 'Quitter plein écran';
+            } else {
+                icon.setAttribute('data-lucide', 'maximize');
+                text.textContent = 'Plein écran';
+            }
+            lucide.createIcons();
+        }
+
+        // Écouter les changements de mode plein écran
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+        document.addEventListener('MSFullscreenChange', updateFullscreenButton);
 
         // Navigation au clavier
         document.addEventListener('keydown', (e) => {
@@ -1082,7 +1205,21 @@
                     break;
                 case 'Escape':
                     e.preventDefault();
-                    exitPresentation();
+                    // Si en plein écran, sortir du plein écran d'abord
+                    if (document.fullscreenElement || document.webkitFullscreenElement || 
+                        document.mozFullScreenElement || document.msFullscreenElement) {
+                        exitFullscreen();
+                    } else {
+                        exitPresentation();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    // Toggle plein écran avec la touche F
+                    if (e.target.tagName !== 'INPUT') {
+                        e.preventDefault();
+                        toggleFullscreen();
+                    }
                     break;
             }
         });
