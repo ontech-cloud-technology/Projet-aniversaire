@@ -647,7 +647,7 @@
             </button>
             <button onclick="changeSection('profiles')" id="tab-profiles" class="px-4 py-2 text-gray-400 hover:text-white border-b-2 border-transparent transition section-tab whitespace-nowrap">
                 <i data-lucide="user-circle" class="w-4 h-4 inline-block mr-2"></i>
-                Profils des Élèves
+                Tous les Profils
             </button>
             <button onclick="changeSection('reputation')" id="tab-reputation" class="px-4 py-2 text-gray-400 hover:text-white border-b-2 border-transparent transition section-tab whitespace-nowrap">
                 <i data-lucide="award" class="w-4 h-4 inline-block mr-2"></i>
@@ -844,12 +844,12 @@
             </div>
         </section>
 
-        <!-- Section 4: Profils des Élèves -->
+        <!-- Section 4: Profils des Utilisateurs -->
         <section id="section-profiles" class="card p-6 rounded-xl hidden">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <h2 class="text-2xl font-bold flex items-center">
                     <i data-lucide="user-circle" class="w-6 h-6 mr-2"></i>
-                    Profils des Élèves
+                    Tous les Profils
                 </h2>
                 <div class="mt-4 md:mt-0 flex items-center space-x-4">
                     <button onclick="viewMyProfile()" class="px-4 py-2 rounded-lg bg-primary hover:bg-opacity-90 text-white transition flex items-center">
@@ -869,7 +869,7 @@
 
             <div class="mb-4">
                 <p class="text-sm text-gray-400 mb-4">
-                    Cliquez sur un élève pour voir ses informations complètes. Les informations privées sont visibles uniquement pour les administrateurs.
+                    Cliquez sur un utilisateur pour voir ses informations complètes. Les informations privées sont visibles uniquement pour les administrateurs. Tous les utilisateurs sont affichés (élèves, invités, admins, etc.).
                 </p>
             </div>
 
@@ -879,12 +879,13 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nom</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rôle</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Profil Complété</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="profilesTableBody" class="divide-y divide-gray-800">
-                        <tr><td colspan="4" class="text-center py-4 text-gray-500">Chargement des profils...</td></tr>
+                        <tr><td colspan="5" class="text-center py-4 text-gray-500">Chargement des profils...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2172,29 +2173,64 @@
             }
         }
 
-        // --- Gestion des Profils des Élèves ---
+        // --- Gestion des Profils des Utilisateurs ---
 
-        // Charger les profils des élèves
+        // Charger tous les profils (élèves, invités, admins, etc.)
         async function loadProfiles() {
             const profilesTableBody = document.getElementById('profilesTableBody');
-            profilesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Chargement...</td></tr>';
+            profilesTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Chargement...</td></tr>';
 
             try {
                 const users = await getAllUsers();
-                const students = users.filter(u => u.role === 'eleve');
+                // Afficher tous les utilisateurs, pas seulement les élèves
+                const allUsers = users;
 
-                if (students.length === 0) {
-                    profilesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Aucun élève trouvé</td></tr>';
+                if (allUsers.length === 0) {
+                    profilesTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Aucun utilisateur trouvé</td></tr>';
                     return;
                 }
 
-                profilesTableBody.innerHTML = students.map(student => {
-                    const hasProfile = student.profileCompleted || false;
-                    const studentId = student.id || student.uid; // Utiliser id (document ID) ou uid en fallback
+                profilesTableBody.innerHTML = allUsers.map(user => {
+                    const hasProfile = user.profileCompleted || false;
+                    const userId = user.id || user.uid; // Utiliser id (document ID) ou uid en fallback
+                    const role = user.role || 'N/A';
+                    const accountType = user.accountType || '';
+                    
+                    // Déterminer la couleur du badge de rôle
+                    let roleClass = 'px-2 py-1 rounded text-sm font-semibold ';
+                    let roleText = role;
+                    if (role === 'admin') {
+                        roleClass += 'bg-red-500 bg-opacity-30 text-red-300';
+                    } else if (role === 'professeur') {
+                        roleClass += 'bg-green-500 bg-opacity-30 text-green-300';
+                    } else if (role === 'comite') {
+                        roleClass += 'bg-blue-500 bg-opacity-30 text-blue-300';
+                    } else if (role === 'eleve') {
+                        roleClass += 'bg-yellow-500 bg-opacity-30 text-yellow-300';
+                    } else if (role === 'guest' || accountType === 'guest') {
+                        roleClass += 'bg-purple-500 bg-opacity-30 text-purple-300';
+                        roleText = 'Invité';
+                    } else {
+                        roleClass += 'bg-gray-500 bg-opacity-30 text-gray-300';
+                    }
+                    
+                    // Afficher le type de compte si différent de standard
+                    let accountTypeBadge = '';
+                    if (accountType && accountType !== 'standard' && accountType !== 'eleve') {
+                        if (accountType === 'limited') {
+                            accountTypeBadge = `<span class="text-xs text-orange-400 ml-1">(Limité)</span>`;
+                        } else if (accountType === 'temporary') {
+                            accountTypeBadge = `<span class="text-xs text-orange-400 ml-1">(Temporaire)</span>`;
+                        }
+                    }
+                    
                     return `
                         <tr class="hover:bg-gray-800 transition">
-                            <td class="px-4 py-3 text-sm">${student.fullName || 'N/A'}</td>
-                            <td class="px-4 py-3 text-sm text-gray-400">${student.email || 'N/A'}</td>
+                            <td class="px-4 py-3 text-sm">${user.fullName || 'N/A'}</td>
+                            <td class="px-4 py-3 text-sm text-gray-400">${user.email || 'N/A'}</td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="${roleClass} capitalize">${roleText}</span>${accountTypeBadge}
+                            </td>
                             <td class="px-4 py-3 text-sm">
                                 ${hasProfile 
                                     ? '<span class="px-2 py-1 rounded bg-green-500 bg-opacity-30 text-green-300">Complété</span>' 
@@ -2202,7 +2238,7 @@
                             </td>
                             <td class="px-4 py-3 text-center">
                                 ${hasProfile 
-                                    ? `<button onclick="viewStudentProfile('${studentId}')" class="px-3 py-1 rounded bg-primary hover:bg-opacity-90 text-bg-dark text-sm transition">
+                                    ? `<button onclick="viewStudentProfile('${userId}')" class="px-3 py-1 rounded bg-primary hover:bg-opacity-90 text-bg-dark text-sm transition">
                                         <i data-lucide="eye" class="w-4 h-4 inline-block"></i> Voir
                                        </button>`
                                     : '<span class="text-gray-500 text-sm">-</span>'}
@@ -2214,7 +2250,7 @@
                 lucide.createIcons();
             } catch (error) {
                 console.error('Erreur lors du chargement des profils:', error);
-                profilesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-400">Erreur lors du chargement</td></tr>';
+                profilesTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-400">Erreur lors du chargement</td></tr>';
             }
         }
 
